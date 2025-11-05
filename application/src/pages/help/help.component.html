@@ -1,0 +1,38 @@
+<!--
+  File: src/pages/help/help.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Help page. Renders a user guide in an accordion format.
+-->
+<main class="flex-grow">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <h2 class="text-2xl font-bold text-gray-300 mb-6 flex items-center">
+      <i class="fa-solid fa-book-open mr-3 text-orange-400"></i>
+      Application Help
+    </h2>
+
+    <div class="space-y-2">
+      @for (topic of topics(); track topic.title) {
+        <div class="bg-gray-900/50 rounded-lg border border-gray-700 overflow-hidden">
+          <button (click)="toggleTopic(topic)" class="w-full flex justify-between items-center p-4 text-left hover:bg-gray-800/50 transition-colors duration-200">
+            <h3 class="font-bold text-gray-200 text-lg flex items-center">
+              <i [class]="topic.icon" class="w-6 mr-3 text-center text-orange-400"></i>
+              <span>{{ topic.title }}</span>
+            </h3>
+            <i class="fa-solid text-gray-400 transition-transform duration-300" [class]="topic.isOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </button>
+          
+          @if (topic.isOpen) {
+            <div class="p-4 border-t border-gray-700 text-gray-300">
+              <div class="markdown-content" [innerHTML]="topic.content"></div>
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
+</main>

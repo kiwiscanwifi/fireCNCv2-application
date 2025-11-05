@@ -1,0 +1,126 @@
+<!--
+  File: src/pages/firmware/firmware.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Firmware page. Displays detailed information about the
+  device and application firmware.
+-->
+<main class="flex-grow flex flex-col items-center p-4">
+  <div class="w-full max-w-5xl mb-8 flex justify-between items-center">
+    <h1 class="text-3xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-microchip mr-4 text-orange-400"></i>
+        Firmware
+    </h1>
+    <div class="flex items-center space-x-4">
+        <a routerLink="/dependencies" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md text-sm">
+          <i class="fa-solid fa-link mr-2"></i>
+          <span>View Dependencies</span>
+        </a>
+        <a routerLink="/firmware-browser" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md text-sm">
+          <i class="fa-solid fa-code mr-2"></i>
+          <span>Browse Firmware</span>
+        </a>
+    </div>
+  </div>
+
+  <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8">
+    <!-- Hardware Details Card -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 flex items-center mb-4">
+        <i class="fa-solid fa-desktop mr-3 text-orange-400"></i>
+        Hardware
+      </h2>
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">fireCNC Firmware:</span>
+          <span class="font-mono text-gray-200">{{ systemInfo().firmwareVersion }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="font-semibold text-gray-400">Firmware Source:</span>
+          <a href="https://github.com/kiwiscanwifi/fireCNCv2" target="_blank" rel="noopener noreferrer" class="font-mono text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-200 flex items-center">
+            <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
+            <span>View on GitHub</span>
+          </a>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Release Date:</span>
+          <span class="font-mono text-gray-200">{{ systemInfo().firmwareDate | date:'longDate' }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Board:</span>
+          <span class="font-mono text-gray-200">ESP32-S3-POE-ETH-8DI-8DO</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="font-semibold text-gray-400">Link:</span>
+          <a href="https://www.waveshare.com/wiki/ESP32-S3-POE-ETH-8DI-8DO" target="_blank" rel="noopener noreferrer" class="font-mono text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-200 flex items-center">
+            <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
+            <span>Product Wiki</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- UI Libraries Card -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-palette mr-3 text-orange-400"></i>
+        UI Libraries
+      </h2>
+      <div class="space-y-3 text-sm">
+        @for(lib of uiLibs; track lib.name) {
+          <a [href]="lib.url" target="_blank" rel="noopener noreferrer" class="flex justify-between items-start hover:bg-gray-900/50 p-2 rounded-md transition-colors duration-200 group">
+            <div>
+              <span class="font-semibold text-gray-300 group-hover:text-orange-300">{{ lib.name }}</span>
+              <p class="text-xs text-gray-500">{{ lib.description }}</p>
+            </div>
+            <span class="font-mono text-orange-300 ml-4 shrink-0">{{ lib.version }}</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <!-- Core Components Card -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-cogs mr-3 text-orange-400"></i>
+        Core Components
+      </h2>
+      <div class="space-y-3 text-sm">
+        @for(item of baseFirmware; track item.name) {
+          <a [href]="item.url || '#'" [target]="item.url ? '_blank' : '_self'" [rel]="item.url ? 'noopener noreferrer' : ''"
+             class="flex justify-between items-start bg-gray-900/50 p-3 rounded-md transition-colors duration-200 group"
+             [class]="item.url ? 'hover:border-orange-500/50 border border-gray-700 hover:bg-gray-800/80' : 'border border-gray-700'">
+            <div>
+              <span class="font-semibold text-gray-300 group-hover:text-orange-300">{{ item.name }}</span>
+              <p class="text-xs text-gray-500">{{ item.description }}</p>
+            </div>
+            <span class="font-mono text-orange-300 ml-4 shrink-0">{{ item.version }}</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <!-- Arduino Libraries Card -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-book mr-3 text-orange-400"></i>
+        Arduino Libraries
+      </h2>
+      <div class="space-y-3 text-sm">
+        @for(lib of arduinoLibs; track lib.name) {
+          <a [href]="lib.url" target="_blank" rel="noopener noreferrer" class="flex justify-between items-start hover:bg-gray-900/50 p-2 rounded-md transition-colors duration-200 group">
+            <div>
+              <span class="font-semibold text-gray-300 group-hover:text-orange-300">{{ lib.name }}</span>
+              <p class="text-xs text-gray-500">{{ lib.description }}</p>
+            </div>
+            <span class="font-mono text-orange-300 ml-4 shrink-0">{{ lib.version }}</span>
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+</main>

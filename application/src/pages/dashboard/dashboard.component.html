@@ -1,0 +1,107 @@
+<!--
+  File: src/pages/dashboard/dashboard.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Dashboard page. Defines the main content grid containing I/O and system info.
+-->
+<main class="flex-grow">
+  @if (isDashboardEmpty()) {
+    <div class="flex flex-col items-center justify-center text-center h-full min-h-[400px] bg-gray-800/50 p-6 rounded-lg border-2 border-dashed border-gray-700">
+      <i class="fa-solid fa-sliders text-5xl text-gray-600 mb-4"></i>
+      <h3 class="text-xl font-bold text-gray-400">Dashboard is Empty</h3>
+      <p class="text-gray-500 mt-2 max-w-sm">No widgets are enabled. Go to Dashboard Settings to add components to your view.</p>
+    </div>
+  } @else {
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4">
+      <!-- Column 1: Widgets -->
+      <div class="flex flex-col gap-2 lg:gap-4 drop-zone"
+           [class.drag-over]="dragOverColumn() === 'column1'"
+           (dragover)="onDragOver($event)"
+           (dragenter)="onDragEnter('column1')"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event, 'column1')">
+        @for (widget of column1Widgets(); track widget.id) {
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg h-full widget-item"
+               [class.dragging]="draggedWidget()?.id === widget.id"
+               [attr.data-widget-id]="widget.id">
+            <div class="p-6 flex flex-col h-full">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                  <i [class]="'fa-solid ' + widget.icon + ' mr-3 text-orange-400'"></i>
+                  {{ widget.title }}
+                </h2>
+                @if (isAdminMode()) {
+                  <i class="fa-solid fa-grip-vertical text-gray-500 cursor-move" 
+                    draggable="true"
+                    (dragstart)="onDragStart($event, widget)"
+                    (dragend)="onDragEnd()"></i>
+                }
+              </div>
+              <div class="flex-grow">
+                @if (isModuleWidget(widget.id)) {
+                  <app-module-widget [moduleId]="getModuleId(widget.id)"></app-module-widget>
+                } @else {
+                  @switch (widget.id) {
+                    @case ('digital-outputs') { <app-digital-outputs /> }
+                    @case ('digital-inputs') { <app-digital-inputs /> }
+                    @case ('system-details') { <app-system-details /> }
+                    @case ('storage-info') { <app-storage-info /> }
+                    @case ('sram-info') { <app-sram-info /> }
+                    @case ('analog-inputs') { <app-analog-inputs /> }
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+
+      <!-- Column 2: Widgets -->
+      <div class="flex flex-col gap-2 lg:gap-4 drop-zone"
+           [class.drag-over]="dragOverColumn() === 'column2'"
+           (dragover)="onDragOver($event)"
+           (dragenter)="onDragEnter('column2')"
+           (dragleave)="onDragLeave($event)"
+           (drop)="onDrop($event, 'column2')">
+        @for (widget of column2Widgets(); track widget.id) {
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg h-full widget-item"
+               [class.dragging]="draggedWidget()?.id === widget.id"
+               [attr.data-widget-id]="widget.id">
+            <div class="p-6 flex flex-col h-full">
+              <div class="flex items-center justify-between mb-6">
+                <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                  <i [class]="'fa-solid ' + widget.icon + ' mr-3 text-orange-400'"></i>
+                  {{ widget.title }}
+                </h2>
+                @if (isAdminMode()) {
+                  <i class="fa-solid fa-grip-vertical text-gray-500 cursor-move" 
+                    draggable="true"
+                    (dragstart)="onDragStart($event, widget)"
+                    (dragend)="onDragEnd()"></i>
+                }
+              </div>
+              <div class="flex-grow">
+                @if (isModuleWidget(widget.id)) {
+                  <app-module-widget [moduleId]="getModuleId(widget.id)"></app-module-widget>
+                } @else {
+                  @switch (widget.id) {
+                    @case ('digital-outputs') { <app-digital-outputs /> }
+                    @case ('digital-inputs') { <app-digital-inputs /> }
+                    @case ('system-details') { <app-system-details /> }
+                    @case ('storage-info') { <app-storage-info /> }
+                    @case ('sram-info') { <app-sram-info /> }
+                    @case ('analog-inputs') { <app-analog-inputs /> }
+                  }
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+</main>

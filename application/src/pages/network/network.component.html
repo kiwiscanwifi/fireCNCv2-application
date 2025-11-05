@@ -1,0 +1,226 @@
+<main class="flex-grow">
+  <form [formGroup]="networkSettingsForm" (ngSubmit)="saveNetworkSettings()">
+    <!-- Header for Save/Reset Actions -->
+    <div class="py-4 mb-4 border-b border-gray-700">
+      <div class="flex justify-between items-center">
+        <h2 class="text-2xl font-bold text-gray-200">Network</h2>
+        <div class="flex gap-4">
+          <button type="button" (click)="resetNetworkSettings()" [disabled]="!networkSettingsForm.dirty"
+            class="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+            Reset
+          </button>
+          <button type="submit" [disabled]="!networkSettingsForm.dirty || networkSettingsForm.invalid"
+            class="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 shadow-md">
+            Save Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Ethernet Interface Panel -->
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg">
+            <div class="p-6" formGroupName="network">
+              <h2 class="text-xl font-bold text-gray-300 flex items-center mb-3">
+                <i class="fa-solid fa-ethernet mr-3 text-orange-400"></i>
+                Ethernet Interface
+              </h2>
+              <div class="space-y-2">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="staticIp" class="font-semibold text-gray-300">Static IP Address</label>
+                  <input id="staticIp" formControlName="STATIC_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                    [class]="networkSettingsForm.get('network.STATIC_IP')?.invalid && networkSettingsForm.get('network.STATIC_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="subnet" class="font-semibold text-gray-300">Subnet Mask</label>
+                  <input id="subnet" formControlName="SUBNET" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                    [class]="networkSettingsForm.get('network.SUBNET')?.invalid && networkSettingsForm.get('network.SUBNET')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="gateway" class="font-semibold text-gray-300">Default Gateway</label>
+                  <input id="gateway" formControlName="GATEWAY_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                    [class]="networkSettingsForm.get('network.GATEWAY_IP')?.invalid && networkSettingsForm.get('network.GATEWAY_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+              </div>
+            </div>
+        </div>
+
+        <!-- Wireless Settings Panel -->
+        <div class="lg:row-span-2 bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg">
+          <div class="p-6" formGroupName="network">
+            <h2 class="text-xl font-bold text-gray-300 flex items-center mb-3">
+              <i class="fa-solid fa-wifi mr-3 text-orange-400"></i>
+              Wireless Settings
+            </h2>
+            <div class="space-y-2">
+              <!-- Mode Selection -->
+              <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                <label for="wifiMode" class="font-semibold text-gray-300">Mode</label>
+                <select id="wifiMode" formControlName="MODE"
+                        class="bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48">
+                  <option value="Disabled">Disabled</option>
+                  <option value="Station">Station</option>
+                  <option value="AP">Access Point (AP)</option>
+                </select>
+              </div>
+
+              @if (networkSettingsForm.get('network.MODE')?.value === 'Station') {
+                <!-- Station Mode Fields -->
+                <div class="space-y-2 mt-4 transition-opacity duration-200">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="wifiSsid" class="font-semibold text-gray-300">Wi-Fi SSID</label>
+                    <input id="wifiSsid" formControlName="SSID" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                      [class]="networkSettingsForm.get('network.SSID')?.invalid && networkSettingsForm.get('network.SSID')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="wifiPass" class="font-semibold text-gray-300">Wi-Fi Password</label>
+                    <input id="wifiPass" formControlName="PASSWORD" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                      [class]="networkSettingsForm.get('network.PASSWORD')?.invalid && networkSettingsForm.get('network.PASSWORD')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+
+                  <div class="my-4 border-t border-gray-700/50"></div>
+                  <h3 class="font-semibold text-gray-400 text-md mb-2 pl-1 flex items-center">
+                    <i class="fa-solid fa-dharmachakra mr-3 text-orange-400"></i>
+                    Wireless Interface
+                  </h3>
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                      <label for="dhcpClientEnabled" class="font-semibold text-gray-300">DHCP</label>
+                      <button type="button" id="dhcpClientEnabled" 
+                              (click)="networkSettingsForm.get('network.IP_ASSIGNMENT')?.setValue(networkSettingsForm.get('network.IP_ASSIGNMENT')?.value === 'DHCP' ? 'Static' : 'DHCP'); networkSettingsForm.get('network')?.markAsDirty()"
+                              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                              [class]="networkSettingsForm.get('network.IP_ASSIGNMENT')?.value === 'DHCP' ? 'bg-orange-500' : 'bg-gray-600'" 
+                              role="switch" 
+                              [attr.aria-checked]="networkSettingsForm.get('network.IP_ASSIGNMENT')?.value === 'DHCP'">
+                        <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                              [class]="networkSettingsForm.get('network.IP_ASSIGNMENT')?.value === 'DHCP' ? 'translate-x-5' : 'translate-x-0'">
+                        </span>
+                      </button>
+                    </div>
+
+                    @if (networkSettingsForm.get('network.IP_ASSIGNMENT')?.value === 'DHCP') {
+                      <div class="space-y-2">
+                          <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg opacity-50">
+                            <label class="font-semibold text-gray-300">Allocated IP</label>
+                            <span class="text-gray-400 font-mono text-right w-48">{{ arduinoService.wifiStatus().allocatedIp }}</span>
+                          </div>
+                      </div>
+                    } @else if (networkSettingsForm.get('network.IP_ASSIGNMENT')?.value === 'Static') {
+                      <div class="space-y-2">
+                        <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                          <label for="wifiStationStaticIp" class="font-semibold text-gray-300">Static IP Address</label>
+                          <input id="wifiStationStaticIp" formControlName="WIFI_STATION_STATIC_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                            [class]="networkSettingsForm.get('network.WIFI_STATION_STATIC_IP')?.invalid && networkSettingsForm.get('network.WIFI_STATION_STATIC_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                          <label for="wifiStationStaticSubnet" class="font-semibold text-gray-300">Subnet Mask</label>
+                          <input id="wifiStationStaticSubnet" formControlName="WIFI_STATION_STATIC_SUBNET" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                            [class]="networkSettingsForm.get('network.WIFI_STATION_STATIC_SUBNET')?.invalid && networkSettingsForm.get('network.WIFI_STATION_STATIC_SUBNET')?.touched ? 'border-red-500' : 'border-gray-600'">
+                        </div>
+                        <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                          <label for="wifiStationStaticGateway" class="font-semibold text-gray-300">Default Gateway</label>
+                          <input id="wifiStationStaticGateway" formControlName="WIFI_STATION_STATIC_GATEWAY" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                            [class]="networkSettingsForm.get('network.WIFI_STATION_STATIC_GATEWAY')?.invalid && networkSettingsForm.get('network.WIFI_STATION_STATIC_GATEWAY')?.touched ? 'border-red-500' : 'border-gray-600'">
+                        </div>
+                      </div>
+                    }
+                  </div>
+                </div>
+              } @else if (networkSettingsForm.get('network.MODE')?.value === 'AP') {
+                <!-- AP Mode Fields -->
+                <div class="space-y-2 mt-4 transition-opacity duration-200">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="wifiApSsid" class="font-semibold text-gray-300">AP SSID</label>
+                    <input id="wifiApSsid" formControlName="WIFI_AP_SSID" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                      [class]="networkSettingsForm.get('network.WIFI_AP_SSID')?.invalid && networkSettingsForm.get('network.WIFI_AP_SSID')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="wifiApKey" class="font-semibold text-gray-300">AP Password</label>
+                    <input id="wifiApKey" formControlName="WIFI_AP_KEY" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                      [class]="networkSettingsForm.get('network.WIFI_AP_KEY')?.invalid && networkSettingsForm.get('network.WIFI_AP_KEY')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+
+                  <div class="my-4 border-t border-gray-700/50"></div>
+                  <h3 class="font-semibold text-gray-400 text-md mb-2 pl-1 flex items-center">
+                    <i class="fa-solid fa-dharmachakra mr-3 text-orange-400"></i>
+                    AP Network Settings
+                  </h3>
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                      <label for="apIp" class="font-semibold text-gray-300">AP IP Address</label>
+                      <input id="apIp" formControlName="AP_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                        [class]="networkSettingsForm.get('network.AP_IP')?.invalid && networkSettingsForm.get('network.AP_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
+                    </div>
+                    <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                      <label for="apSubnet" class="font-semibold text-gray-300">AP Subnet Mask</label>
+                      <input id="apSubnet" formControlName="AP_SUBNET" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                        [class]="networkSettingsForm.get('network.AP_SUBNET')?.invalid && networkSettingsForm.get('network.AP_SUBNET')?.touched ? 'border-red-500' : 'border-gray-600'">
+                    </div>
+                  </div>
+
+                  <div class="my-4 border-t border-gray-700/50"></div>
+                  <h3 class="font-semibold text-gray-400 text-md mb-2 pl-1 flex items-center">
+                    <i class="fa-solid fa-server mr-3 text-orange-400"></i>
+                    DHCP Server
+                  </h3>
+                  <div class="space-y-2">
+                      <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                          <label for="dhcpServerEnabled" class="font-semibold text-gray-300">Enable DHCP Server</label>
+                          <button type="button" id="dhcpServerEnabled" (click)="networkSettingsForm.get('network.DHCP_SERVER_ENABLED')?.setValue(!networkSettingsForm.get('network.DHCP_SERVER_ENABLED')?.value); networkSettingsForm.get('network')?.markAsDirty()"
+                              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                              [class]="networkSettingsForm.get('network.DHCP_SERVER_ENABLED')?.value ? 'bg-orange-500' : 'bg-gray-600'" role="switch" [attr.aria-checked]="networkSettingsForm.get('network.DHCP_SERVER_ENABLED')?.value">
+                              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                                  [class]="networkSettingsForm.get('network.DHCP_SERVER_ENABLED')?.value ? 'translate-x-5' : 'translate-x-0'">
+                              </span>
+                          </button>
+                      </div>
+                      <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg"
+                           [class.opacity-50]="!networkSettingsForm.get('network.DHCP_SERVER_ENABLED')?.value">
+                          <label for="dhcpIpPoolStart" class="font-semibold text-gray-300">IP Pool Start</label>
+                          <input id="dhcpIpPoolStart" formControlName="DHCP_IP_POOL_START" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                              [class]="networkSettingsForm.get('network.DHCP_IP_POOL_START')?.invalid && networkSettingsForm.get('network.DHCP_IP_POOL_START')?.touched ? 'border-red-500' : 'border-gray-600'">
+                      </div>
+                      <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg"
+                           [class.opacity-50]="!networkSettingsForm.get('network.DHCP_SERVER_ENABLED')?.value">
+                          <label for="dhcpIpPoolEnd" class="font-semibold text-gray-300">IP Pool End</label>
+                          <input id="dhcpIpPoolEnd" formControlName="DHCP_IP_POOL_END" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                              [class]="networkSettingsForm.get('network.DHCP_IP_POOL_END')?.invalid && networkSettingsForm.get('network.DHCP_IP_POOL_END')?.touched ? 'border-red-500' : 'border-gray-600'">
+                      </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+      
+        <!-- Network Services Panel -->
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg">
+          <div class="p-6" formGroupName="network">
+            <h2 class="text-xl font-bold text-gray-300 flex items-center mb-3">
+              <i class="fa-solid fa-server mr-3 text-orange-400"></i>
+              Network Services
+            </h2>
+            <div class="space-y-2">
+              <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                <label for="dnsServer" class="font-semibold text-gray-300">DNS Server</label>
+                <input id="dnsServer" formControlName="DNS_SERVER" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                  [class]="networkSettingsForm.get('network.DNS_SERVER')?.invalid && networkSettingsForm.get('network.DNS_SERVER')?.touched ? 'border-red-500' : 'border-gray-600'">
+              </div>
+              <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                <label for="ntpServer" class="font-semibold text-gray-300">NTP Server</label>
+                <input id="ntpServer" formControlName="NTP_SERVER" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
+                  [class]="networkSettingsForm.get('network.NTP_SERVER')?.invalid && networkSettingsForm.get('network.NTP_SERVER')?.touched ? 'border-red-500' : 'border-gray-600'">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SNMP Settings Card -->
+        <div class="lg:col-span-2 bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg">
+          <div class="p-6" formGroupName="snmp">
+            <app-snmp-settings></app-snmp-settings>
+          </div>
+        </div>
+    </div>
+  </form>
+</main>

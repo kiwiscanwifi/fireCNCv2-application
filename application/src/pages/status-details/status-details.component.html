@@ -1,0 +1,70 @@
+<main class="flex-grow">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-circle-info mr-3 text-orange-400"></i>
+        {{ detailTitle() }}
+      </h2>
+      <a routerLink="/dashboard" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+        Back to Dashboard
+      </a>
+    </div>
+
+    <div class="space-y-6">
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-lg mb-2">Current Status</h3>
+        <div class="flex items-center space-x-4">
+          <div class="relative w-6 h-6 flex items-center justify-center">
+            @if (statusType() === 'esp32' || statusType() === 'linuxcnc') {
+              @if (currentStatusText() === 'Connecting...' || currentStatusText() === 'Restarting...') {
+                <div class="absolute w-full h-full rounded-full animate-ping" [class]="currentStatusColorClass()"></div>
+              }
+            }
+            <div class="relative w-4 h-4 rounded-full" [class]="currentStatusColorClass()"></div>
+          </div>
+          <span class="text-xl font-semibold text-gray-100">{{ currentStatusText() }}</span>
+        </div>
+        <p class="text-sm text-gray-400 mt-3">{{ detailDescription() }}</p>
+      </div>
+
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-lg mb-2">Connection History</h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="font-semibold text-gray-400">Last Successful Connection:</span>
+            @if (lastConnectedTimestamp(); as timestamp) {
+              <span class="font-mono text-orange-300">{{ timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</span>
+            } @else {
+              <span class="font-mono text-gray-500">Never connected</span>
+            }
+          </div>
+
+          @if (statusType() === 'internet') {
+            <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+              <span class="font-semibold text-gray-400">Ping Check Enabled:</span>
+              <span class="font-mono" [class]="pingEnabled() ? 'text-green-400' : 'text-gray-500'">{{ pingEnabled() ? 'Yes' : 'No' }}</span>
+            </div>
+            <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+              <span class="font-semibold text-gray-400">Ping Target:</span>
+              <a routerLink="/settings" 
+                 [queryParams]="{ panel: 'internetMonitoring' }"
+                 class="flex items-center gap-1 text-gray-500 hover:text-orange-400 transition-colors duration-200"
+                 title="Edit Internet Monitoring Settings">
+                <span class="font-mono text-orange-300">{{ pingTarget() || 'N/A' }}</span>
+                <i class="fa-solid fa-pen-to-square text-sm"></i>
+              </a>
+            </div>
+            <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+              <span class="font-semibold text-gray-400">Last Successful Ping:</span>
+              @if (lastPingSuccess(); as timestamp) {
+                <span class="font-mono text-orange-300">{{ timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</span>
+              } @else {
+                <span class="font-mono text-gray-500">N/A</span>
+              }
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

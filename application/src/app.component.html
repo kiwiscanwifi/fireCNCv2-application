@@ -1,0 +1,571 @@
+
+<div class="h-screen bg-gray-900 text-gray-200 flex flex-col">
+  <header class="sticky top-0 z-20 bg-gray-900/95 backdrop-blur-sm p-1 sm:p-2 lg:p-3 pb-[1em] border-b border-gray-700">
+    <div class="flex justify-between items-center">
+      <div class="flex items-center space-x-8">
+        <!-- Mobile Menu Toggle Button -->
+        <button (click)="toggleMobileMenu()" class="md:hidden p-2 text-gray-300 hover:text-orange-400 focus:outline-none">
+          <i class="fa-solid fa-bars text-xl"></i>
+        </button>
+        <a routerLink="/dashboard" class="flex items-center">
+          <h1 class="text-2xl sm:text-3xl font-bold text-orange-400 tracking-wider flex items-center">
+            <span class="mr-3 text-orange-500 text-2xl">🔥</span>
+            fireCNC
+          </h1>
+        </a>
+        <nav class="hidden md:flex items-center space-x-4">
+          <a routerLink="/dashboard"
+             routerLinkActive="text-orange-400 border-orange-400"
+             [routerLinkActiveOptions]="{exact: true}"
+             title="Dashboard"
+             class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center">
+            <i class="fa-solid fa-chart-line w-5 text-center"></i><span class="hidden lg:inline ml-2">Dashboard</span>
+          </a>
+          <a routerLink="/snmp"
+             routerLinkActive="text-orange-400 border-orange-400"
+             title="Status"
+             class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center">
+            <i class="fa-solid fa-network-wired w-5 text-center"></i><span class="hidden lg:inline ml-2">Status</span>
+          </a>
+          <a routerLink="/leds"
+             routerLinkActive="text-orange-400 border-orange-400"
+             title="Visuals"
+             class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center">
+            <i class="fa-solid fa-lightbulb w-5 text-center"></i><span class="hidden lg:inline ml-2">Visuals</span>
+          </a>
+          @if (showPendantLink()) {
+            <a [routerLink]="pendantLink()"
+              routerLinkActive="text-orange-400 border-orange-400"
+              title="Pendant"
+              class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center">
+              <i class="fa-solid fa-hand-pointer w-5 text-center"></i><span class="hidden lg:inline ml-2">Pendant</span>
+            </a>
+          }
+          @if (isAlexaEnabled()) {
+            <a routerLink="/alexa"
+              routerLinkActive="text-orange-400 border-orange-400"
+              title="Alexa"
+              class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center">
+              <i class="fa-brands fa-amazon w-5 text-center"></i><span class="hidden lg:inline ml-2">Alexa</span>
+            </a>
+          }
+          <!-- Settings Dropdown -->
+          <div class="relative group pb-1" routerLinkActive #rla="routerLinkActive">
+            <button
+                class="hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
+                [class.text-orange-400]="rla.isActive"
+                [class.text-gray-300]="!rla.isActive"
+                [class.border-orange-400]="rla.isActive"
+                [class.border-transparent]="!rla.isActive">
+              <i class="fa-solid fa-sliders w-5 text-center"></i><span class="hidden lg:inline ml-2">Settings</span>
+              <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
+            </button>
+            <div class="absolute left-0 top-full w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20 hidden group-hover:block focus-within:block">
+              <a routerLink="/settings"
+                 routerLinkActive="text-orange-400 bg-gray-700"
+                 [routerLinkActiveOptions]="{exact: true}"
+                 class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-sliders w-6 text-center"></i>
+                <span>General</span>
+              </a>
+               <a routerLink="/settings/dashboard"
+                 routerLinkActive="text-orange-400 bg-gray-700"
+                 class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-table-columns w-6 text-center"></i>
+                <span>Dashboard</span>
+              </a>
+              <a routerLink="/settings/onboard"
+                 routerLinkActive="text-orange-400 bg-gray-700"
+                 class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-microchip w-6 text-center"></i>
+                <span>Onboard I/O</span>
+              </a>
+              <a routerLink="/settings/expansion"
+                 routerLinkActive="text-orange-400 bg-gray-700"
+                 class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-puzzle-piece w-6 text-center"></i>
+                <span>Expansion</span>
+              </a>
+              <a routerLink="/network"
+                 routerLinkActive="text-orange-400 bg-gray-700"
+                 class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-ethernet w-6 text-center"></i>
+                <span>Network</span>
+              </a>
+              @if (isAdminMode()) {
+                <a routerLink="/settings/npoint"
+                  routerLinkActive="text-orange-400 bg-gray-700"
+                  class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                  <i class="fa-solid fa-cloud w-6 text-center"></i>
+                  <span>Cloud Sync</span>
+                </a>
+              }
+
+              @if (isAdminMode()) {
+                <a routerLink="/advanced"
+                   routerLinkActive="text-orange-400 bg-gray-700"
+                   class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                  <i class="fa-solid fa-file-code w-6 text-center"></i>
+                  <span>Advanced</span>
+                </a>
+              }
+            </div>
+          </div>
+          <!-- System Dropdown -->
+          <div class="relative group pb-1">
+            <button class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none">
+              <i class="fa-solid fa-gears w-5 text-center"></i><span class="hidden lg:inline ml-2">System</span>
+              <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
+            </button>
+            <div class="absolute left-0 top-full w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20 hidden group-hover:block focus-within:block">
+              @if (isAdminMode()) {
+                <a routerLink="/shell" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                  <i class="fa-solid fa-terminal w-6 text-center"></i>
+                  <span>Shell</span>
+                </a>
+              }
+              @if (isAdminMode()) {
+                <div class="my-1 border-t border-gray-700"></div>
+              }
+              <a routerLink="/about" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-circle-info w-6 text-center"></i>
+                <span>About</span>
+              </a>
+              <a routerLink="/firmware" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-save w-6 text-center"></i>
+                <span>Firmware</span>
+              </a>
+              @if (isAdminMode()) {
+               <a routerLink="/modules" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-puzzle-piece w-6 text-center"></i>
+                <span>Modules</span>
+              </a>
+              }
+              <div class="my-1 border-t border-gray-700"></div>
+              <a routerLink="/changelog" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-history w-6 text-center"></i>
+                <span>Change Log</span>
+              </a>
+              <div class="my-1 border-t border-gray-700"></div>
+              <button type="button" (click)="rebootDevice()" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-power-off w-6 text-center"></i>
+                <span>Reboot</span>
+              </button>
+            </div>
+          </div>
+        </nav>
+      </div>
+      <div class="flex items-center space-x-4">
+        <!-- Information Dropdown -->
+        <div class="relative group hidden md:flex pb-1">
+          <button class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none">
+            <i class="fa-solid fa-circle-info w-5 text-center"></i><span class="hidden lg:inline ml-2">Information</span>
+            <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
+          </button>
+          <div class="absolute right-0 top-full w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20 hidden group-hover:block focus-within:block">
+            <a routerLink="/hardware" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+              <i class="fa-solid fa-cubes w-6 text-center"></i>
+              <span>Hardware</span>
+            </a>
+            <a routerLink="/logic" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+              <i class="fa-solid fa-atom w-6 text-center"></i>
+              <span>Logic</span>
+            </a>
+            <a routerLink="/help" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+              <i class="fa-solid fa-book-open w-6 text-center"></i>
+              <span>Help</span>
+            </a>
+            @if (isAdminMode()) {
+              <a routerLink="/recipe" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-receipt w-6 text-center"></i>
+                <span>Recipe</span>
+              </a>
+            }
+          </div>
+        </div>
+        <!-- Activity Dropdown -->
+        <div class="relative group hidden md:flex pb-1">
+          <button class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none">
+            <i class="fa-solid fa-chart-area w-5 text-center"></i><span class="hidden lg:inline ml-2">Activity</span>
+            <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
+          </button>
+          <div class="absolute right-0 top-full w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20 hidden group-hover:block focus-within:block">
+            <a routerLink="/console" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+              <i class="fa-solid fa-greater-than w-6 text-center"></i>
+              <span>Console Output</span>
+            </a>
+            <a routerLink="/system-log" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+              <i class="fa-solid fa-file-lines w-6 text-center"></i>
+              <span>System Log</span>
+            </a>
+            @if (trapsEnabled()) {
+              <a routerLink="/snmp-traps" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
+                <i class="fa-solid fa-clipboard-list w-6 text-center"></i>
+                <span>SNMP Traps Sent</span>
+              </a>
+            }
+          </div>
+        </div>
+
+        <!-- Hardware Status Indicators -->
+        <div class="hidden md:flex items-center space-x-4 bg-gray-800/50 px-3 py-1.5 rounded-lg shadow-inner border border-gray-700/50">
+          <!-- Network Indicators Group -->
+          <div class="flex items-center space-x-2">
+            <!-- Ethernet Port Indicator -->
+            <div class="relative group flex items-center justify-center w-8 h-6" title="Ethernet Activity">
+              <!-- RJ45 Port Shape -->
+              <div class="w-6 h-5 bg-gray-700 border-2 border-gray-500 rounded-sm relative shadow-inner">
+                <!-- Link Status Indicator (Green Fill) -->
+                @if (connectionStatus() === 'connected') {
+                  <div class="absolute inset-0 bg-green-500/20 rounded-sm"
+                       style="box-shadow: inset 0 0 5px rgba(74, 222, 128, 0.5);"></div>
+                }
+
+                <!-- Traffic LED (Square) -->
+                <div class="absolute top-[2px] right-[2px] w-1.5 h-1.5 transition-colors duration-100"
+                     [class]="ethernetActivity() ? 'bg-yellow-400' : 'bg-gray-900/50'"
+                     [style.boxShadow]="ethernetActivity() ? '0 0 4px #facc15' : 'none'">
+                </div>
+
+                <!-- Pins -->
+                <div class="absolute bottom-[2px] left-[2px] right-[2px] h-1 flex justify-around items-center">
+                  @for (_ of [0,1,2,3,4,5,6,7]; track $index) {
+                    <div class="w-px h-full bg-yellow-600/60"></div>
+                  }
+                </div>
+              </div>
+            </div>
+
+            <!-- Wireless Status Indicator -->
+            @if (wifiConfig().MODE !== 'Disabled') {
+              <div class="relative group flex items-center justify-center w-6 h-6" 
+                [title]="wifiConfig().MODE === 'AP' ? 'Wireless Status: Access Point Active' : 'Wireless Status: ' + wifiStatus().status + (wifiStatus().status === 'connected' ? ' (' + wifiStatus().signalStrength + '%)' : '')">
+                <svg class="w-5 h-5" [class]="getWifiSignalColorClass()" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  @if (wifiConfig().MODE === 'AP') {
+                    <!-- AP mode icon - often represented as a larger wifi symbol or specific "hotspot" icon if available -->
+                    <!-- Re-using existing WiFi paths, but with AP-specific title and color handling in getWifiSignalColorClass -->
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0" class="opacity-100"></path>
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0" class="opacity-100"></path>
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0" class="opacity-100"></path>
+                    <line x1="12" y1="20" x2="12.01" y2="20" class="opacity-100"></line>
+                    <title>Wireless AP Active</title>
+                  } @else {
+                    <!-- Bar 3 (furthest) -->
+                    <path d="M1.42 9a16 16 0 0 1 21.16 0" [class.opacity-100]="wifiSignalBars() >= 4" class="opacity-25 transition-opacity duration-300"></path>
+                    <!-- Bar 2 -->
+                    <path d="M5 12.55a11 11 0 0 1 14.08 0" [class.opacity-100]="wifiSignalBars() >= 3" class="opacity-25 transition-opacity duration-300"></path>
+                    <!-- Bar 1 (closest) -->
+                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0" [class.opacity-100]="wifiSignalBars() >= 2" class="opacity-25 transition-opacity duration-300"></path>
+                    <!-- Dot -->
+                    <line x1="12" y1="20" x2="12.01" y2="20" [class.opacity-100]="wifiSignalBars() >= 1" class="opacity-25 transition-opacity duration-300"></line>
+                    <title>Wireless Station {{ wifiStatus().status }}</title>
+                  }
+                </svg>
+              </div>
+            }
+          </div>
+
+          <!-- Separator -->
+          <div class="w-px h-6 bg-gray-700"></div>
+
+          <!-- Onboard LED Indicator -->
+          <div class="relative group flex items-center cursor-pointer" title="Onboard LED (GPIO38)" (click)="flashOnboardLed()">
+              <div class="w-6 h-6 rounded-full flex items-center justify-center"
+                  [style.backgroundColor]="onboardLed().color !== 'off' ? hexToRgba(onboardLed().color, 0.15) : '#374151'">
+                  <div class="w-3 h-3 rounded-full transition-colors duration-300"
+                      [class.animate-pulse]="onboardLed().flashing"
+                      [style.backgroundColor]="onboardLed().color !== 'off' ? onboardLed().color : '#6b7280'"
+                      [style.boxShadow]="onboardLed().color !== 'off' ? '0 0 6px ' + hexToRgba(onboardLed().color, 0.7) : 'none'"
+                      [style.filter]="'brightness(' + onboardLed().brightness / 255 + ')'">
+                  </div>
+              </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- Mobile nav -->
+    @if (showMobileMenu()) {
+      <nav class="md:hidden mt-4">
+        <div class="flex items-center space-x-2 bg-gray-800/50 p-2 rounded-lg justify-around flex-wrap">
+          <a routerLink="/dashboard"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             [routerLinkActiveOptions]="{exact: true}"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Dashboard
+          </a>
+          <a routerLink="/snmp"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Status
+          </a>
+          <a routerLink="/network"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Network
+          </a>
+          <a routerLink="/hardware"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Hardware
+          </a>
+          <a routerLink="/leds"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Visuals
+          </a>
+          @if (showPendantLink()) {
+            <a [routerLink]="pendantLink()"
+              routerLinkActive="text-orange-400 bg-gray-700"
+              (click)="toggleMobileMenu()"
+              class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+              Pendant
+            </a>
+          }
+          @if (isAlexaEnabled()) {
+            <a routerLink="/alexa"
+              routerLinkActive="text-orange-400 bg-gray-700"
+              (click)="toggleMobileMenu()"
+              class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+              Alexa
+            </a>
+          }
+          <a routerLink="/console"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Console Output
+          </a>
+          @if (isAdminMode()) {
+            <a routerLink="/shell"
+              routerLinkActive="text-orange-400 bg-gray-700"
+              (click)="toggleMobileMenu()"
+              class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+              Shell
+            </a>
+          }
+           <a routerLink="/system-log"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             System Log
+          </a>
+          @if (trapsEnabled()) {
+            <a routerLink="/snmp-traps"
+               routerLinkActive="text-orange-400 bg-gray-700"
+               (click)="toggleMobileMenu()"
+               class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+               SNMP Traps Sent
+            </a>
+          }
+          <a routerLink="/about"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             About
+          </a>
+          <a routerLink="/firmware"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Firmware
+          </a>
+          <a routerLink="/dependencies"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Dependencies
+          </a>
+          <a routerLink="/logic"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Logic
+          </a>
+          <a routerLink="/help"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Help
+          </a>
+          @if (isAdminMode()) {
+            <a routerLink="/recipe"
+              routerLinkActive="text-orange-400 bg-gray-700"
+              (click)="toggleMobileMenu()"
+              class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+              Recipe
+            </a>
+          }
+           <a routerLink="/settings"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             General Settings
+          </a>
+          <a routerLink="/settings/dashboard"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Dashboard Settings
+          </a>
+          <a routerLink="/settings/onboard"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Onboard I/O
+          </a>
+
+          <a routerLink="/settings/expansion"
+             routerLinkActive="text-orange-400 bg-gray-700"
+             (click)="toggleMobileMenu()"
+             class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+             Expansion
+          </a>
+          @if (isAdminMode()) {
+            <a routerLink="/advanced"
+               routerLinkActive="text-orange-400 bg-gray-700"
+               (click)="toggleMobileMenu()"
+               class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md">
+               Advanced
+            </a>
+          }
+          <button type="button" (click)="rebootDevice()" class="flex-1 text-center text-gray-300 hover:text-orange-400 transition-colors duration-200 px-3 py-2 text-sm font-medium rounded-md cursor-pointer">
+             Reboot
+          </button>
+        </div>
+      </nav>
+    }
+  </header>
+
+  <div class="flex-grow overflow-y-auto flex flex-col px-4 sm:px-6 lg:px-8 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4">
+    <router-outlet></router-outlet>
+
+    <!-- SNMP Toast Notification -->
+    @if (lastSnmpNotification(); as notification) {
+      <div class="fixed bottom-5 right-5 bg-blue-600 border border-blue-400 text-white py-3 px-5 rounded-lg shadow-2xl flex items-center animate-fade-in-out z-50">
+        <i class="fa-solid fa-satellite-dish text-2xl mr-4"></i>
+        <div>
+          <div class="font-bold">{{ notification.title }}</div>
+          <div class="text-sm text-blue-200">{{ notification.message }}</div>
+        </div>
+      </div>
+    }
+
+    <!-- Alexa Toast Notification -->
+    @if (lastAlexaNotification(); as notification) {
+      <div class="fixed bottom-24 right-5 bg-cyan-600 border border-cyan-400 text-white py-3 px-5 rounded-lg shadow-2xl flex items-center animate-fade-in-out z-50">
+        <i class="fa-brands fa-amazon text-2xl mr-4"></i>
+        <div>
+          <div class="font-bold">{{ notification.title }}</div>
+          <div class="text-sm text-cyan-200">{{ notification.message }}</div>
+        </div>
+      </div>
+    }
+
+    <!-- Reboot Confirmation Modal -->
+    @if (showRebootConfirmation()) {
+      <app-confirmation-modal
+        title="Confirm Reboot"
+        message="Are you sure you want to reboot the fireCNC device? This action is irreversible."
+        confirmText="Reboot"
+        (confirm)="handleRebootConfirm()"
+        (cancel)="handleRebootCancel()">
+      </app-confirmation-modal>
+    }
+
+    <footer class="mt-auto pt-2 text-xs text-gray-500">
+      <div class="border-t border-gray-700 pt-2 flex justify-between items-center">
+        <div class="flex items-center">
+          <!-- Admin Mode Indicator -->
+          @if (isAdminMode()) {
+            <span class="text-green-400 font-semibold px-2 py-1 rounded-md bg-green-900/20 flex items-center mr-3">
+              <i class="fa-solid fa-shield-alt mr-2"></i>
+              Admin Mode Enabled
+            </span>
+          }
+          <!-- Login/Logout Icon Button -->
+          @if (isAdminMode()) {
+            <button (click)="handleLogout()" class="text-gray-400 hover:text-orange-400 transition-colors cursor-pointer mr-2" title="Logout">
+              <i class="fa-solid fa-sign-out-alt text-base"></i>
+            </button>
+          } @else {
+            <button (click)="openAccessCodeModal()" class="text-gray-400 hover:text-orange-400 transition-colors cursor-pointer mr-2" title="Login">
+              <i class="fa-solid fa-arrow-right-to-bracket text-base"></i>
+            </button>
+          }
+          <!-- fireCNC Application Version -->
+          <span>fireCNC Application v{{ appVersion }} (Released on {{ appReleaseDate | date:'longDate' }})</span>
+        </div>
+        <!-- Connection Statuses -->
+        <div class="flex items-center space-x-6">
+          <!-- Internet Status -->
+          @if (internetConnectivityService.pingEnabled()) {
+            <a routerLink="/status-details/internet" class="flex items-center space-x-1 bg-gray-800/50 px-3 py-1.5 rounded-lg shadow-inner border border-gray-700/50 hover:bg-gray-700/50 transition-colors cursor-pointer">
+              <span class="text-sm font-medium text-gray-400 hidden lg:block">Internet</span>
+              <div class="relative flex items-center justify-center w-4 h-4">
+                <div class="relative w-3 h-3 rounded-full" [class]="internetConnectivityService.getInternetStatusColorClass()"></div>
+              </div>
+            </a>
+          }
+          <!-- ESP32 Status -->
+          <a routerLink="/status-details/esp32" class="flex items-center space-x-1 bg-gray-800/50 px-3 py-1.5 rounded-lg shadow-inner border border-gray-700/50 hover:bg-gray-700/50 transition-colors cursor-pointer">
+            <span class="text-sm font-medium text-gray-400 hidden lg:block">ESP32</span>
+            <div class="relative flex items-center justify-center w-4 h-4">
+              @if(connectionStatus() === 'connecting' || connectionStatus() === 'restarting') {
+                <div class="absolute w-full h-full rounded-full animate-ping" [class]="arduinoService.getStatusColorClass()"></div>
+              }
+              <div class="relative w-3 h-3 rounded-full" [class]="arduinoService.getStatusColorClass()"></div>
+            </div>
+          </a>
+          <!-- LinuxCNC Status -->
+          <a routerLink="/status-details/linuxcnc" class="flex items-center space-x-1 bg-gray-800/50 px-3 py-1.5 rounded-lg shadow-inner border border-gray-700/50 hover:bg-gray-700/50 transition-colors cursor-pointer">
+            <span class="text-sm font-medium text-gray-400 hidden lg:block">LinuxCNC</span>
+            <div class="relative flex items-center justify-center w-4 h-4">
+              @if(linuxCncConnectionStatus() === 'connecting' || linuxCncConnectionStatus() === 'restarting') {
+                <div class="absolute w-full h-full rounded-full animate-ping" [class]="arduinoService.getLinuxCncStatusColorClass()"></div>
+              }
+              <div class="relative w-3 h-3 rounded-full" [class]="arduinoService.getLinuxCncStatusColorClass()"></div>
+            </div>
+          </a>
+        </div>
+      </div>
+
+      <!-- Firmware Update Notification -->
+      @if (firmwareUpdate(); as update) {
+        <div class="mt-4 max-w-2xl mx-auto p-3 bg-blue-900/50 border border-blue-700 text-blue-200 rounded-lg text-sm shadow-lg flex items-center justify-center space-x-3">
+          <i class="fa-solid fa-rocket text-blue-400 animate-pulse"></i>
+          <span>
+            Firmware update available:
+            <strong class="font-bold text-white">v{{ update.version }}</strong>
+            (Released on {{ update.releaseDate | date:'longDate' }})
+          </span>
+          <a href="https://github.com/kiwiscanwifi/fireCNCv2" target="_blank" rel="noopener noreferrer" class="font-semibold text-blue-300 hover:text-blue-100 hover:underline">
+            View on GitHub
+          </a>
+        </div>
+      }
+    </footer>
+  </div>
+
+</div>
+
+<!-- Reboot Overlay -->
+@if (showRebootOverlay()) {
+  <div class="fixed inset-0 bg-gray-900/90 flex flex-col items-center justify-center z-50 text-white animate-fade-in">
+    <div class="relative flex items-center justify-center">
+      <div class="absolute w-24 h-24 rounded-full border-4 border-orange-500 border-t-transparent animate-spin"></div>
+      <i class="fa-solid fa-power-off text-5xl text-orange-400"></i>
+    </div>
+    <p class="mt-8 text-xl font-semibold text-gray-200">Rebooting fireCNC...</p>
+    <p class="mt-2 text-sm text-gray-400">Please wait, this may take a few moments.</p>
+  </div>
+}
+
+<!-- Kept for now, but will likely be removed -->
+@if (showAccessCodeModal()) {
+  <app-access-code-modal (login)="handleLogin($event)" (close)="showAccessCodeModal.set(false)" [loginError]="loginError()"></app-access-code-modal>
+}

@@ -1,0 +1,33 @@
+<!--
+  File: src/components/confirmation-modal/confirmation-modal.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the reusable confirmation modal component.
+-->
+<div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm">
+  <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-2xl p-6 w-full max-w-md m-4">
+    <div class="flex items-start">
+      <div class="flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-orange-900/50 sm:mx-0 sm:h-10 sm:w-10">
+        <i class="fas fa-exclamation-triangle text-orange-400"></i>
+      </div>
+      <div class="ml-4 text-left">
+        <h3 class="text-lg font-bold leading-6 text-gray-100">{{ title() }}</h3>
+        <div class="mt-2">
+          <p class="text-sm text-gray-400">{{ message() }}</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 flex justify-end space-x-4">
+      <button (click)="onCancel()" type="button" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors duration-200">
+        {{ cancelText() }}
+      </button>
+      <button (click)="onConfirm()" type="button" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200">
+        {{ confirmText() }}
+      </button>
+    </div>
+  </div>
+</div>

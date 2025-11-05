@@ -1,0 +1,36 @@
+<!--
+  File: src/components/light-controller/light-controller.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Digital Outputs component. Renders the UI with toggle
+  switches for each of the 8 digital outputs.
+-->
+<div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+  <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
+    <i class="fa-solid fa-toggle-on mr-3 text-orange-400"></i>
+    Digital Outputs (8-DO)
+  </h2>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-8">
+    @for(outputState of digitalOutputs(); track $index) {
+      <div class="flex flex-col items-center space-y-2">
+        <span class="font-semibold text-gray-400">DO {{ $index }}</span>
+        <button 
+          (click)="toggleOutput($index)"
+          class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+          [class]="outputState ? 'bg-orange-500' : 'bg-gray-600'"
+          type="button"
+          role="switch"
+          [attr.aria-checked]="outputState">
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            [class]="outputState ? 'translate-x-5' : 'translate-x-0'">
+          </span>
+        </button>
+      </div>
+    }
+  </div>
+</div>

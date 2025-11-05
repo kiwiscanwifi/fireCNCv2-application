@@ -1,0 +1,123 @@
+<!--
+  File: src/components/system-info/system-info.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the System Info component. Renders various panels for system
+  details, SD card usage, and system controls.
+-->
+<div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full flex flex-col">
+  <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+    <i class="fa-solid fa-microchip mr-3 text-orange-400"></i>
+    System
+  </h2>
+
+  <!-- System Information -->
+  <div class="space-y-3 text-sm">
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-400">Firmware:</span>
+      <span class="font-mono text-gray-200">{{ systemInfo().firmwareVersion }}</span>
+    </div>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-400">Uptime:</span>
+      <span class="font-mono text-gray-200">{{ systemInfo().uptime }}</span>
+    </div>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-400">IP Address:</span>
+      <span class="font-mono text-gray-200">{{ systemInfo().ipAddress }}</span>
+    </div>
+     <div class="flex justify-between">
+      <span class="font-semibold text-gray-400">SSH Server:</span>
+      <span class="font-mono" [class]="systemInfo().sshEnabled ? 'text-green-400' : 'text-gray-500'">
+        {{ systemInfo().sshEnabled ? 'Enabled' : 'Disabled' }}
+      </span>
+    </div>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-400">SNMP Agent:</span>
+      <span class="font-mono" [class]="isAgentEnabled() ? 'text-green-400' : 'text-gray-500'">
+        {{ isAgentEnabled() ? 'Enabled' : 'Disabled' }}
+      </span>
+    </div>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-400">SNMP Traps:</span>
+      <span class="font-mono" [class]="isTrapsEnabled() ? 'text-green-400' : 'text-gray-500'">
+        {{ isTrapsEnabled() ? 'Enabled' : 'Disabled' }}
+      </span>
+    </div>
+    <div class="flex justify-between">
+      <span class="font-semibold text-gray-400">Alexa Integration:</span>
+      <span class="font-mono" [class]="isAlexaEnabled() ? 'text-green-400' : 'text-gray-500'">
+        {{ isAlexaEnabled() ? 'Enabled' : 'Disabled' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Storage Information -->
+  <div class="mt-6 pt-6 border-t border-gray-700">
+     <h3 class="text-lg font-bold text-gray-300 mb-3 flex items-center">
+      <i class="fas fa-database mr-2"></i>
+      Storage
+    </h3>
+    <div class="space-y-3 text-sm">
+      <!-- Local Storage -->
+      <div>
+        <span class="font-semibold text-gray-400">Local Storage:</span>
+        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-1">
+          <div class="bg-blue-500 h-2.5 rounded-full" [style.width]="localStorageUsagePercent() + '%'"></div>
+        </div>
+        <div class="text-right font-mono text-xs text-gray-400">
+          {{ localStorageUsedKb() }} KB / {{ localStorageTotalMb() }} MB
+        </div>
+      </div>
+
+      <!-- EEPROM -->
+      <div class="pt-3 border-t border-gray-700/50">
+        <span class="font-semibold text-gray-400">EEPROM:</span>
+        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-1">
+          <div class="bg-teal-500 h-2.5 rounded-full" [style.width]="eepromUsedPercent() + '%'"></div>
+        </div>
+        <div class="text-right font-mono text-xs text-gray-400">
+          {{ eepromInfo().usedBytes }} B / {{ eepromInfo().totalBytes }} B
+        </div>
+      </div>
+
+      <!-- SD Card -->
+      <div class="pt-3 border-t border-gray-700/50">
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">SD Card:</span>
+          <span class="font-mono" [class]="sdCardInfo().status === 'Mounted' ? 'text-green-400' : 'text-red-400'">
+            {{ sdCardInfo().status }}
+          </span>
+        </div>
+        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-1">
+          <div class="bg-orange-500 h-2.5 rounded-full" [style.width]="sdCardUsagePercent() + '%'"></div>
+        </div>
+        <div class="text-right font-mono text-gray-400">
+          {{ sdCardInfo().usedGb }} GB / {{ sdCardInfo().totalGb }} GB
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Memory Information -->
+  <div class="mt-6 pt-6 border-t border-gray-700">
+    <h3 class="text-lg font-bold text-gray-300 mb-3 flex items-center">
+      <i class="fas fa-memory mr-2"></i>
+      SRAM
+    </h3>
+    <div class="space-y-3 text-sm">
+      <div>
+        <div class="w-full bg-gray-700 rounded-full h-2.5 mt-1">
+          <div class="bg-purple-500 h-2.5 rounded-full" [style.width]="sramUsedPercent() + '%'"></div>
+        </div>
+        <div class="text-right font-mono text-gray-400">
+          {{ sramInfo().usedKb.toFixed(1) }} KB / {{ sramInfo().totalKb.toFixed(1) }} KB
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

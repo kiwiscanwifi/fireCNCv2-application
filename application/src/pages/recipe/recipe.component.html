@@ -1,0 +1,21 @@
+<main class="flex-grow">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full flex flex-col">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-receipt mr-3 text-orange-400"></i>
+        Application Recipe (Rebuild Prompt)
+      </h2>
+    </div>
+
+    <div class="flex-grow overflow-y-auto min-h-0">
+      <div class="bg-black/50 p-4 rounded-lg font-mono text-sm text-gray-300">
+        <p class="text-sm text-gray-500 mb-4">
+          This document contains the complete prompt that would be required to rebuild this application from scratch.
+          <br>
+          <span class="font-semibold">Last Updated:</span> {{ lastUpdated() | date:'yyyy-MM-dd HH:mm:ss' }}
+        </p>
+        <pre class="whitespace-pre-wrap">{{ rebuildPrompt() }}</pre>
+      </div>
+    </div>
+  </div>
+</main>

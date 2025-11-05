@@ -1,0 +1,46 @@
+<!--
+  File: src/components/access-code-modal/access-code-modal.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the access code input modal.
+-->
+<div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm" (click)="onClose()">
+  <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-2xl p-6 w-full max-w-sm m-4" (click)="$event.stopPropagation()">
+    <div class="flex justify-center items-center mb-4">
+      <h3 class="text-lg font-bold leading-6 text-gray-100">{{ title() }}</h3>
+      <!-- Removed close button (X) -->
+    </div>
+    <div class="mt-2 mb-4">
+      <p class="text-sm text-gray-400">{{ message() }}</p>
+    </div>
+
+    <form [formGroup]="accessCodeForm" (ngSubmit)="onLogin()" class="space-y-4">
+      <div class="flex justify-center space-x-2">
+        @for (i of [0, 1, 2, 3]; track i) {
+          <input #codeInputs
+                 [formControlName]="'code' + (i + 1)"
+                 type="tel"
+                 inputmode="numeric"
+                 maxlength="1"
+                 (input)="handleInput($event, i)"
+                 (keydown)="handleKeydown($event, i)"
+                 (focus)="clearDisplayError()"
+                 class="w-12 h-12 text-center text-xl bg-gray-700 border text-gray-200 rounded-lg focus:ring-orange-500 focus:border-orange-500"
+                 [class]="accessCodeForm.get('code' + (i + 1))?.invalid && accessCodeForm.get('code' + (i + 1))?.touched ? 'border-red-500' : 'border-gray-600'">
+        }
+      </div>
+      @if (displayError(); as error) {
+        <p class="mt-2 text-sm text-red-400 text-center">{{ error }}</p>
+      }
+      <div class="flex justify-center mt-4">
+        <button (click)="onClose()" type="button" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white font-semibold rounded-lg transition-colors duration-200">
+          Cancel
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

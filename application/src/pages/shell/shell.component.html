@@ -1,0 +1,42 @@
+<!--
+  File: src/pages/shell/shell.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the interactive Shell page. Renders a terminal-like UI
+  for command execution.
+-->
+<main class="flex-grow flex flex-col" (click)="focusInput()">
+  <div class="bg-black/80 border border-gray-700 rounded-lg p-4 shadow-lg flex-1 font-mono text-sm text-gray-300 overflow-y-auto min-h-0 relative" #terminalContainer>
+    
+    <!-- Welcome Message or History -->
+    @for(entry of history(); track $index) {
+      @if (entry.prompt) {
+        <div>
+          <span class="text-green-400">{{ entry.prompt }}</span>
+          <span class="text-gray-100">{{ entry.command }}</span>
+        </div>
+      }
+      @if(entry.output) {
+        <pre class="whitespace-pre-wrap text-gray-300">{{ entry.output }}</pre>
+      }
+    }
+
+    <!-- Live Input Line -->
+    <div class="flex items-center">
+      <span class="text-green-400 shrink-0">{{ prompt() }}</span>
+      <input #commandInput
+             type="text"
+             [formControl]="commandControl"
+             (keydown.enter)="onCommandSubmit()"
+             class="bg-transparent border-none text-gray-100 focus:outline-none focus:ring-0 flex-1 pl-2 caret-green-400 w-full"
+             autocomplete="off"
+             autocorrect="off"
+             autocapitalize="off"
+             spellcheck="false" />
+    </div>
+  </div>
+</main>

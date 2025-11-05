@@ -1,0 +1,36 @@
+<!--
+  File: src/components/digital-outputs/digital-outputs.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Digital Outputs component. Renders the UI with toggle
+  switches for each of the 8 digital outputs.
+-->
+@if (visibleOutputs().length > 0) {
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-8">
+    @for(output of visibleOutputs(); track output.id) {
+      <div class="flex flex-col items-center space-y-2">
+        <span class="font-semibold text-gray-400">{{ output.name }}</span>
+        <button 
+          (click)="toggleOutput(output.id)"
+          class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+          [class]="output.state ? 'bg-orange-500' : 'bg-gray-600'"
+          type="button"
+          role="switch"
+          [attr.aria-checked]="output.state">
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            [class]="output.state ? 'translate-x-5' : 'translate-x-0'">
+          </span>
+        </button>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="text-center text-gray-500 text-sm">
+    No digital outputs are enabled.
+  </div>
+}

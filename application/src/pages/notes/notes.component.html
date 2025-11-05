@@ -1,0 +1,37 @@
+<!--
+  File: src/pages/notes/notes.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Notes page. Provides a textarea for editing user notes.
+-->
+<main class="flex-grow flex flex-col">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg flex flex-col">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+      <h3 class="text-xl font-bold text-gray-300 flex items-center">
+        <i class="fas fa-note-sticky mr-3 text-orange-400"></i>
+        Notes
+      </h3>
+      <div class="flex items-center gap-4">
+        @if(lastSaved(); as savedTime) {
+          <span class="text-sm text-gray-500 italic">Last saved: {{ savedTime }}</span>
+        }
+        <button (click)="onSave()"
+                [disabled]="!notesControl.dirty"
+                class="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 shadow-md">
+          Save Notes
+        </button>
+      </div>
+    </div>
+    
+    <textarea #notesTextarea
+              [formControl]="notesControl"
+              (input)="adjustTextareaHeight()"
+              class="bg-black/50 rounded p-3 font-mono text-sm text-gray-300 w-full border border-gray-600 focus:ring-orange-500 focus:border-orange-500 resize-none overflow-y-hidden min-h-[1000px]"
+              placeholder="Start typing your notes here..."
+              rows="1"></textarea>
+  </div>
+</main>

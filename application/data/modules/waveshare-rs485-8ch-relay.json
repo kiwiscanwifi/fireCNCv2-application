@@ -1,0 +1,20 @@
+{
+  "moduleName": "Waveshare RS485 8ch Relay",
+  "author": "Mark Dyer",
+  "version": "1.0.0",
+  "function": "IO",
+  "protocol": "MODBUS RTU",
+  "infoUrl": "https://www.waveshare.com/wiki/RS485_Relay_Board",
+  "imageUrl": "https://www.waveshare.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/r/s/rs485-relay-board-3.jpg",
+  "description": "An 8-channel relay module controlled via the RS485 bus, supporting Modbus RTU protocol.",
+  "ports": [
+    { "name": "Relay 1", "type": "output", "signal": "digital" },
+    { "name": "Relay 2", "type": "output", "signal": "digital" },
+    { "name": "Relay 3", "type": "output", "signal": "digital" },
+    { "name": "Relay 4", "type": "output", "signal": "digital" },
+    { "name": "Relay 5", "type": "output", "signal": "digital" },
+    { "name": "Relay 6", "type": "output", "signal": "digital" },
+    { "name": "Relay 7", "type": "output", "signal": "digital" },
+    { "name": "Relay 8", "type": "output", "signal": "digital" }
+  ]
+}

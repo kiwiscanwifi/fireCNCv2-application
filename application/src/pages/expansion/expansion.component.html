@@ -1,0 +1,105 @@
+<!--
+  File: src/pages/expansion/expansion.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Expansion Modules page. Allows users to add and manage
+  hardware expansion modules.
+-->
+<main class="flex-grow">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+      <h2 class="text-2xl font-bold text-gray-200 flex items-center">
+          <i class="fa-solid fa-puzzle-piece mr-3 text-orange-400"></i>
+          Expansion Modules
+      </h2>
+      <div class="flex items-center gap-4">
+        <a routerLink="/settings/expansion/create" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md">
+          <i class="fa-solid fa-file-circle-plus mr-2"></i>
+          Create Module
+        </a>
+        <button (click)="openAddModuleModal()" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md">
+          <i class="fa-solid fa-plus mr-2"></i>
+          Add Module
+        </button>
+      </div>
+    </div>
+
+    @if (installedModules().length > 0) {
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        @for (module of installedModules(); track module.id) {
+          <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+            <div class="flex justify-between items-start mb-3">
+              <div>
+                <h3 class="font-bold text-gray-200 text-lg">{{ module.moduleName }}</h3>
+                <p class="text-xs text-gray-500">v{{ module.version }} by {{ module.author }}</p>
+                <div class="flex items-center gap-2 mt-2 text-xs">
+                  <span class="bg-gray-700 text-gray-300 px-2 py-0.5 rounded-full font-semibold">{{ module.function }}</span>
+                  <span class="bg-blue-900/50 text-blue-300 px-2 py-0.5 rounded-full font-semibold">{{ module.protocol }}</span>
+                </div>
+              </div>
+              <button (click)="promptUninstallModule(module)" class="text-gray-500 hover:text-red-400 transition-colors duration-200">
+                <i class="fa-solid fa-trash"></i>
+              </button>
+            </div>
+            <div class="bg-black/30 p-3 rounded-md space-y-2 text-sm overflow-y-auto">
+              @for(port of module.ports; track $index) {
+                <div class="flex items-center justify-between">
+                  <span class="text-gray-300">{{ port.alias || port.name }}</span>
+                  <div class="flex items-center gap-4 text-gray-400">
+                    @if (module.function === 'Relay') {
+                       <div class="flex items-center gap-3">
+                         <span class="text-xs font-semibold px-2 py-0.5 rounded-full" [class]="port.enabled ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'">
+                           {{ port.enabled ? 'Enabled' : 'Disabled' }}
+                         </span>
+                       </div>
+                    } @else if (module.function === 'IO') {
+                      <div class="flex items-center gap-3">
+                        <i [class]="getTypeIcon(port.type!)" [title]="port.type"></i>
+                        <i [class]="getSignalIcon(port.signal!)" [title]="port.signal"></i>
+                      </div>
+                    } @else if (module.function === 'MPG') {
+                       <div class="flex items-center gap-3">
+                         <span class="text-xs font-semibold px-2 py-0.5 rounded-full" [class]="port.enabled ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'">
+                           {{ port.enabled ? 'Enabled' : 'Disabled' }}
+                         </span>
+                       </div>
+                    }
+                    <a [routerLink]="['/settings/expansion', module.id, 'port', $index, 'edit']"
+                       class="text-gray-500 hover:text-orange-400 transition-colors duration-200"
+                       title="Edit Port">
+                      <i class="fa-solid fa-pen-to-square"></i>
+                    </a>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    } @else {
+      <div class="text-center text-gray-500 py-16 border-2 border-dashed border-gray-700 rounded-lg">
+          <i class="fa-solid fa-box-open text-5xl mb-4"></i>
+          <p class="font-semibold">No expansion modules have been added yet.</p>
+          <p class="text-sm mt-1">Click "Add Module" to get started.</p>
+      </div>
+    }
+  </div>
+</main>
+
+@if (showAddModuleModal()) {
+  <app-add-module-modal (close)="closeAddModuleModal()" (moduleInstalled)="closeAddModuleModal()"></app-add-module-modal>
+}
+
+@if (showDeleteConfirmation()) {
+  <app-confirmation-modal
+    title="Confirm Uninstall"
+    [message]="deleteMessage()"
+    confirmText="Uninstall"
+    (confirm)="handleUninstallConfirm()"
+    (cancel)="handleUninstallCancel()">
+  </app-confirmation-modal>
+}

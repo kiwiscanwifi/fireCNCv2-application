@@ -1,0 +1,61 @@
+<!--
+  File: src/pages/waveshare-rs485-hub-4p/waveshare-rs485-hub-4p.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Waveshare RS485-HUB-4P module page.
+-->
+<main class="flex-grow">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+    <h2 class="text-2xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-sitemap mr-3 text-orange-400"></i>
+        Waveshare RS485-HUB-4P
+    </h2>
+    <a routerLink="/hardware" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+      Back
+    </a>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+    <!-- Left Column: Diagram -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-image mr-3 text-orange-400"></i>
+        Module Diagram
+      </h2>
+      <div class="bg-gray-900/50 p-4 rounded-md border border-gray-700">
+         <img ngSrc="https://www.waveshare.com/w/upload/b/b8/RS485-HUB-4P-details-13.png" 
+             width="800" 
+             height="800" 
+             priority
+             alt="Waveshare RS485-HUB-4P diagram"
+             class="rounded-md w-full h-auto">
+      </div>
+    </div>
+
+    <!-- Right Column: Notes -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-book-open mr-3 text-orange-400"></i>
+        Module Notes
+      </h2>
+      <div class="text-gray-300 space-y-4">
+        <p>
+          This is an industrial rail-mount RS485 hub that provides 4-ch RS485 slave ports through 1-ch RS485 master port. In the fireCNC system, it acts as a signal repeater and amplifier, extending the communication distance and allowing more slave devices (like servo motors) to be connected to the RS485 bus reliably.
+        </p>
+        <h3 class="text-lg font-semibold text-gray-200 pt-2 border-t border-gray-700">Key Features</h3>
+        <ul class="list-disc list-inside space-y-2">
+            <li><strong>Signal Isolation:</strong> Provides photoelectric isolation for the master and slave ports to suppress interference.</li>
+            <li><strong>Power Isolation:</strong> Features un-isolated power for the master port and isolated power for the slave ports.</li>
+            <li><strong>Protection:</strong> Onboard TVS (Transient Voltage Suppressor) for lightning protection and anti-surge, plus resettable fuses and protection diodes for current/voltage stability.</li>
+            <li><strong>Wide Voltage Range:</strong> Supports a power supply range of 9 ~ 24V DC.</li>
+            <li><strong>Casing:</strong> Industrial rail-mount ABS case for easy installation and durability.</li>
+        </ul>
+      </div>
+    </div>
+    
+  </div>
+</main>

@@ -1,0 +1,54 @@
+<!--
+  File: src/pages/gpio-page/gpio-page.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the GPIO Reference page. Hosts the GpioInfoComponent.
+-->
+<main class="flex-grow">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+    <h2 class="text-2xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-desktop mr-3 text-orange-400"></i>
+        waveshare ESP32-S3-POE-ETH-8DI-8DO
+    </h2>
+    <a routerLink="/hardware" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+      Back
+    </a>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+    <!-- Left Column: Diagram and Pinout -->
+    <div class="flex flex-col gap-6 lg:gap-8">
+      <!-- Board Diagram -->
+      <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+        <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+          <i class="fa-solid fa-image mr-3 text-orange-400"></i>
+          Board Diagram
+        </h2>
+        <div class="bg-gray-900/50 p-4 rounded-md border border-gray-700">
+           <img ngSrc="https://raw.githubusercontent.com/kiwiscanwifi/firecnc/refs/heads/main/Images/ESP32-S3-POE-ETH-8DI-8DO.jpg" 
+               width="800" 
+               height="600" 
+               priority
+               alt="fireCNC board diagram"
+               class="rounded-md w-full h-auto">
+        </div>
+      </div>
+
+      <app-gpio-info></app-gpio-info>
+    </div>
+
+    <!-- Right Column: Notes -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-book-open mr-3 text-orange-400"></i>
+        Board Notes
+      </h2>
+      <div class="text-gray-300 markdown-content" [innerHTML]="parseMarkdown(referenceContent())"></div>
+    </div>
+    
+  </div>
+</main>

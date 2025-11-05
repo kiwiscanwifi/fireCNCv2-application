@@ -1,0 +1,729 @@
+<!--
+  File: src/pages/snmp-page/snmp-page.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the SNMP Agent status page. Displays various system metrics
+  exposed via simulated SNMP OIDs.
+
+  Changelog:
+  2024-08-06:
+  - Removed SRAM usage bar graph.
+  - Updated SNMP OIDs to display full enterprise value.
+-->
+<main class="flex-grow">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+      <h2 class="text-xl font-bold text-gray-300 flex items-center">
+        <i class="fa-solid fa-network-wired mr-3 text-orange-400"></i>
+        System Status
+      </h2>
+      <!-- Toggle for OID visibility -->
+      <div class="flex items-center gap-3">
+        <span class="text-sm font-semibold text-gray-400">Show OIDs:</span>
+        <button
+          type="button"
+          (click)="toggleDisplayOid()"
+          class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+          [class]="displayOid() ? 'bg-orange-500' : 'bg-gray-600'"
+          role="switch"
+          [attr.aria-checked]="displayOid()">
+          <span
+            class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            [class]="displayOid() ? 'translate-x-5' : 'translate-x-0'">
+          </span>
+        </button>
+      </div>
+    </div>
+    
+    @if (isAgentEnabled()) {
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- System Health Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+          <div>
+            <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+              <i class="fa-solid fa-heart-pulse w-4 mr-2 text-center text-orange-400"></i>
+              <span>System Health</span>
+            </h3>
+            <div class="space-y-2 font-mono text-sm">
+              <div class="flex justify-between items-center">
+                <div class="text-gray-400">
+                  ADC Voltage
+                  @if (displayOid()) {
+                    <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                         title="Click to copy OID"
+                         (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.1.1.0')">
+                      <span>1.3.6.1.4.1.55555.1.1.1.0</span>
+                      @if (copiedOid() === '1.3.6.1.4.1.55555.1.1.1.0') {
+                        <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="font-bold text-orange-300">{{ adcVoltage() }} V</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <div class="text-gray-400">
+                  Temperature
+                  @if (displayOid()) {
+                    <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                         title="Click to copy OID"
+                         (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.1.2.0')">
+                      <span>1.3.6.1.4.1.55555.1.1.2.0</span>
+                      @if (copiedOid() === '1.3.6.1.4.1.55555.1.1.2.0') {
+                        <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="font-bold text-orange-300">{{ temperature() }} °C</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <div class="text-gray-400">
+                  Uptime
+                  @if (displayOid()) {
+                    <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                         title="Click to copy OID"
+                         (click)="copyOidToClipboard($event, '1.3.6.1.2.1.1.3.0')">
+                      <span>1.3.6.1.2.1.1.3.0</span>
+                      @if (copiedOid() === '1.3.6.1.2.1.1.3.0') {
+                        <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="font-bold text-orange-300">{{ uptime() }}</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <div class="text-gray-400">
+                  Startups
+                  @if (displayOid()) {
+                    <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                         title="Click to copy OID"
+                         (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.4.1.0')">
+                      <span>1.3.6.1.4.1.55555.1.4.1.0</span>
+                      @if (copiedOid() === '1.3.6.1.4.1.55555.1.4.1.0') {
+                        <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="font-bold text-orange-300">{{ healthStats().startups }}</span>
+              </div>
+              <div class="flex justify-between items-center">
+                <div class="text-gray-400">
+                  Watchdog Reboots
+                  @if (displayOid()) {
+                    <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                         title="Click to copy OID"
+                         (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.4.2.0')">
+                      <span>1.3.6.1.4.1.55555.1.4.2.0</span>
+                      @if (copiedOid() === '1.3.6.1.4.1.55555.1.4.2.0') {
+                        <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="font-bold text-orange-300">{{ healthStats().watchdogReboots }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Servos Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i class="fa-solid fa-robot w-4 mr-2 text-center text-orange-400"></i>
+            <span>Servo Positions & Limits</span>
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            <!-- SERVO X -->
+            <div class="flex justify-between items-center">
+              <div class="text-gray-400">
+                SERVOX Position
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.1.0')">
+                    <span>1.3.6.1.4.1.55555.1.3.1.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.1.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ servoPositions().x }}°</span>
+            </div>
+            <div class="flex justify-between items-center pl-4">
+              <div class="text-gray-400">
+                LIMIT_MIN
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.1.1')">
+                    <span>1.3.6.1.4.1.55555.1.3.1.1</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.1.1') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold" [class]="servoLimits().x_min ? 'text-green-400' : 'text-gray-500'">
+                {{ servoLimits().x_min ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <div class="flex justify-between items-center pl-4">
+              <div class="text-gray-400">
+                LIMIT_MAX
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.1.2')">
+                    <span>1.3.6.1.4.1.55555.1.3.1.2</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.1.2') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold" [class]="servoLimits().x_max ? 'text-green-400' : 'text-gray-500'">
+                {{ servoLimits().x_max ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+
+            <!-- SERVO Y -->
+            <div class="flex justify-between items-center pt-2 border-t border-gray-800">
+              <div class="text-gray-400">
+                SERVOY Position
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.2.0')">
+                    <span>1.3.6.1.4.1.55555.1.3.2.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.2.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ servoPositions().y }}°</span>
+            </div>
+            <div class="flex justify-between items-center pl-4">
+              <div class="text-gray-400">
+                LIMIT_MIN
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.2.1')">
+                    <span>1.3.6.1.4.1.55555.1.3.2.1</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.2.1') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold" [class]="servoLimits().y_min ? 'text-green-400' : 'text-gray-500'">
+                {{ servoLimits().y_min ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <div class="flex justify-between items-center pl-4">
+              <div class="text-gray-400">
+                LIMIT_MAX
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.2.2')">
+                    <span>1.3.6.1.4.1.55555.1.3.2.2</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.2.2') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold" [class]="servoLimits().y_max ? 'text-green-400' : 'text-gray-500'">
+                {{ servoLimits().y_max ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+
+            <!-- SERVO YY -->
+            <div class="flex justify-between items-center pt-2 border-t border-gray-800">
+              <div class="text-gray-400">
+                SERVOYY Position
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.3.0')">
+                    <span>1.3.6.1.4.1.55555.1.3.3.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.3.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ servoPositions().yy }}°</span>
+            </div>
+             <div class="flex justify-between items-center pl-4">
+              <div class="text-gray-400">
+                LIMIT_MIN
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.3.1')">
+                    <span>1.3.6.1.4.1.55555.1.3.3.1</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.3.1') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold" [class]="servoLimits().yy_min ? 'text-green-400' : 'text-gray-500'">
+                {{ servoLimits().yy_min ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+            <div class="flex justify-between items-center pl-4">
+              <div class="text-gray-400">
+                LIMIT_MAX
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.3.3.2')">
+                    <span>1.3.6.1.4.1.55555.1.3.3.2</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.3.3.2') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold" [class]="servoLimits().yy_max ? 'text-green-400' : 'text-gray-500'">
+                {{ servoLimits().yy_max ? 'Active' : 'Inactive' }}
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Waveshare ESP32 Onboard IO Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 md:col-start-2 md:row-span-3 lg:col-start-3 lg:row-span-3 flex flex-col">
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i class="fa-solid fa-toggle-on w-4 mr-2 text-center text-orange-400"></i>
+            <span>Waveshare ESP32 Onboard IO</span>
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            @for(output of visibleDigitalOutputs(); track output.id) {
+              <div class="flex justify-between items-center group">
+                <div class="text-gray-400">
+                  {{ output.name }}
+                  @if(displayOid()) {
+                    <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                         title="Click to copy OID"
+                         (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.8.1.' + (output.id + 1))">
+                      <span>1.3.6.1.4.1.55555.1.8.1.{{ output.id + 1 }}</span>
+                      @if (copiedOid() === '1.3.6.1.4.1.55555.1.8.1.' + (output.id + 1)) {
+                        <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="font-bold" [class]="output.state ? 'text-green-400' : 'text-red-400'">{{ output.state ? 'ON' : 'OFF' }}</span>
+              </div>
+            }
+            @if (visibleDigitalOutputs().length > 0 && visibleDigitalInputs().length > 0) {
+              <div class="pt-2 my-1 border-t border-gray-800"></div>
+            }
+            @for(input of visibleDigitalInputs(); track input.id) {
+              <div class="flex justify-between items-center group">
+                <div class="text-gray-400">
+                  {{ input.name }}
+                  @if(displayOid()) {
+                    <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                         title="Click to copy OID"
+                         (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.8.2.' + (input.id + 1))">
+                      <span>1.3.6.1.4.1.55555.1.8.2.{{ input.id + 1 }}</span>
+                      @if (copiedOid() === '1.3.6.1.4.1.55555.1.8.2.' + (input.id + 1)) {
+                        <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                      }
+                    </div>
+                  }
+                </div>
+                <span class="font-bold" [class]="input.state ? 'text-green-400' : 'text-gray-500'">{{ input.state ? 'HIGH' : 'LOW' }}</span>
+              </div>
+            }
+            @if (visibleDigitalOutputs().length === 0 && visibleDigitalInputs().length === 0) {
+              <div class="text-center text-gray-500 py-4">
+                  (No digital I/O enabled)
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- SD Card Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i class="fa-solid fa-sd-card w-4 mr-2 text-center text-orange-400"></i>
+            <span>SD Card Storage</span>
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Disk Available
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.2.1.0')">
+                    <span>1.3.6.1.4.1.55555.1.2.1.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.2.1.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ sdCardAvailableGb() }} GB</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Disk Used
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.2.2.0')">
+                    <span>1.3.6.1.4.1.55555.1.2.2.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.2.2.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ sdCardInfo().usedGb }} GB</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                % Free
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.2.3.0')">
+                    <span>1.3.6.1.4.1.55555.1.2.3.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.2.3.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                  }
+                </div>
+                <span class="font-bold text-orange-300">{{ sdCardPercentFree() }} %</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Local Storage Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i class="fa-solid fa-database w-4 mr-2 text-center text-orange-400"></i>
+            <span>Local Storage</span>
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Storage Available
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.5.1.0')">
+                    <span>1.3.6.1.4.1.55555.1.5.1.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.5.1.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ localStorageAvailableMb() }} MB</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Storage Used
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.5.2.0')">
+                    <span>1.3.6.1.4.1.55555.1.5.2.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.5.2.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ localStorageUsedMb() }} MB</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                % Free
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.5.3.0')">
+                    <span>1.3.6.1.4.1.55555.1.5.3.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.5.3.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ localStoragePercentFree() }} %</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SRAM Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i class="fa-solid fa-memory w-4 mr-2 text-center text-orange-400"></i>
+            <span>SRAM</span>
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Total SRAM
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.6.1.0')">
+                    <span>1.3.6.1.4.1.55555.1.6.1.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.6.1.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ sramInfo().totalKb.toFixed(1) }} KB</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Used SRAM
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.6.2.0')">
+                    <span>1.3.6.1.4.1.55555.1.6.2.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.6.2.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ sramInfo().usedKb.toFixed(1) }} KB</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Free SRAM
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.6.3.0')">
+                    <span>1.3.6.1.4.1.55555.1.6.3.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.6.3.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ sramInfo().freeKb.toFixed(1) }} KB</span>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-gray-700/50 group">
+              <div class="text-gray-400">
+                Largest Free Block
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.6.4.0')">
+                    <span>1.3.6.1.4.1.55555.1.6.4.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.6.4.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ sramInfo().largestFreeBlockKb.toFixed(1) }} KB</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Fragmentation
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.6.5.0')">
+                    <span>1.3.6.1.4.1.55555.1.6.5.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.6.5.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ sramFragmentationPercent() }} %</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- EEPROM Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i class="fa-solid fa-database w-4 mr-2 text-center text-orange-400"></i>
+            <span>EEPROM Storage</span>
+          </h3>
+          <div class="space-y-2 font-mono text-sm">
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Total Size
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.7.1.0')">
+                    <span>1.3.6.1.4.1.55555.1.7.1.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.7.1.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ eepromInfo().totalBytes }} B</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Used
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.7.2.0')">
+                    <span>1.3.6.1.4.1.55555.1.7.2.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.7.2.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ eepromInfo().usedBytes }} B</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                Available
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.7.3.0')">
+                    <span>1.3.6.1.4.1.55555.1.7.3.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.7.3.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ eepromAvailableBytes() }} B</span>
+            </div>
+            <div class="flex justify-between items-center group">
+              <div class="text-gray-400">
+                % Free
+                @if (displayOid()) {
+                  <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                       title="Click to copy OID"
+                       (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.7.4.0')">
+                    <span>1.3.6.1.4.1.55555.1.7.4.0</span>
+                    @if (copiedOid() === '1.3.6.1.4.1.55555.1.7.4.0') {
+                      <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                    }
+                  </div>
+                }
+              </div>
+              <span class="font-bold text-orange-300">{{ eepromPercentFree() }} %</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Waveshare RS485 Analog Input Card -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex flex-col">
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i class="fa-solid fa-wave-square w-4 mr-2 text-center text-orange-400"></i>
+            <span>Waveshare RS485 Analog Input</span>
+          </h3>
+          @if (visibleAnalogInputs().length > 0) {
+            <div class="space-y-2 font-mono text-sm">
+              @for (input of visibleAnalogInputs(); track input.id) {
+                <div class="flex justify-between items-center group">
+                  <div class="text-gray-400">
+                    {{ input.name }}
+                    @if (displayOid()) {
+                      <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                           title="Click to copy OID"
+                           (click)="copyOidToClipboard($event, '1.3.6.1.4.1.55555.1.9.1.' + (input.id + 1))">
+                        <span>1.3.6.1.4.1.55555.1.9.1.{{ input.id + 1 }}</span>
+                        @if (copiedOid() === '1.3.6.1.4.1.55555.1.9.1.' + (input.id + 1)) {
+                          <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  <span class="font-bold text-orange-300">{{ input.value }} ({{ input.percent.toFixed(1) }}%)</span>
+                </div>
+              }
+            </div>
+          } @else {
+            <div class="space-y-2 font-mono text-sm text-center text-gray-500 py-4">
+                (No analog inputs currently enabled)
+            </div>
+          }
+        </div>
+        
+        <!-- Dynamically Added Module Cards -->
+        @for (module of statusPageModules(); track module.id) {
+          <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 md:col-span-1 flex flex-col">
+            <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+              <i class="fa-solid fa-puzzle-piece w-4 mr-2 text-center text-orange-400"></i>
+              <span>{{ module.moduleName }}</span>
+            </h3>
+            <div class="space-y-2 font-mono text-sm">
+              @for (port of module.enabledPorts; track port.name) {
+                <div class="flex justify-between items-center group">
+                  <div class="text-gray-400">
+                    {{ port.name }}
+                    @if (displayOid() && port.oid) {
+                      <div class="text-xs text-gray-500 flex items-center group-hover:text-gray-300 cursor-pointer" 
+                           title="Click to copy OID"
+                           (click)="copyOidToClipboard($event, port.oid)">
+                        <span>{{ port.oid }}</span>
+                        @if (copiedOid() === port.oid) {
+                          <span class="ml-2 text-green-400 text-xs">(Copied)</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                  @if (module.function === 'Relay') {
+                    <span class="font-bold text-gray-500">
+                      {{ port.enabled ? 'Enabled' : 'Disabled' }}
+                    </span>
+                  } @else if (module.function === 'IO') {
+                    <span class="font-bold text-gray-500">
+                      {{ port.type }} / {{ port.signal }}
+                    </span>
+                  }
+                </div>
+              }
+              @if (module.enabledPorts.length === 0) {
+                <div class="text-center text-gray-500 py-4">(No enabled ports)</div>
+              }
+            </div>
+          </div>
+        }
+
+      </div>
+    } @else {
+       <div class="flex flex-col items-center justify-center text-center h-full min-h-[400px] bg-gray-900/50 p-6 rounded-lg border-2 border-dashed border-gray-700">
+        <i class="fa-solid fa-power-off text-5xl text-gray-600 mb-4"></i>
+        <h3 class="text-xl font-bold text-gray-400">SNMP Agent Disabled</h3>
+        <p class="text-gray-500 mt-2 max-w-sm">The SNMP agent service is currently turned off to save memory. To view SNMP data, please enable it in the settings.</p>
+        <a routerLink="/settings" class="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md">
+          Go to Settings
+        </a>
+      </div>
+    }
+  </div>
+</main>

@@ -1,0 +1,48 @@
+<!--
+  File: src/pages/config-editor/config-editor.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the config.json editor page. Provides a textarea for editing
+  the configuration file and actions to save or cancel.
+-->
+<main class="flex-grow flex flex-col">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+    <h3 class="text-xl font-bold text-gray-300 flex items-center">
+      <i class="fas fa-file-code mr-3 text-orange-400"></i>
+      Edit config.json
+    </h3>
+    <div class="flex gap-4">
+      <button (click)="onBack()"
+              class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+        Back
+      </button>
+      <button (click)="resetFile()" [disabled]="!isDirty()"
+              class="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center">
+        <i class="fa-solid fa-history mr-2"></i>
+        Reset
+      </button>
+      <button (click)="onSave()" [disabled]="!isDirty()"
+              class="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 shadow-md">
+        <i class="fa-solid fa-save mr-2"></i>
+        Save Changes
+      </button>
+    </div>
+  </div>
+  <div class="flex-grow bg-gray-900 border border-gray-700 rounded-lg shadow-lg flex flex-col overflow-hidden">
+    <div class="p-4 border-b border-gray-700 text-gray-400 font-mono bg-gray-800/50">/etc/firecnc.conf</div>
+    <div class="flex-grow relative">
+      <div #editorHost class="absolute inset-0">
+        <!-- CodeMirror will be attached here -->
+      </div>
+    </div>
+    @if (errorMessage(); as error) {
+      <div class="p-3 bg-red-900/50 border-t border-red-700 text-red-300 text-sm font-mono">
+        <strong>Error:</strong> {{ error }}
+      </div>
+    }
+  </div>
+</main>

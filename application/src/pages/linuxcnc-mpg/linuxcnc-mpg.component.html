@@ -1,0 +1,148 @@
+<main class="flex-grow flex flex-col bg-gray-900 text-gray-200">
+  <div class="flex justify-between items-center mb-4">
+    <h1 class="text-2xl font-bold text-orange-400 flex items-center">
+      <i class="fa-solid fa-hand-pointer mr-3"></i>
+      LinuxCNC Pendant
+    </h1>
+    <button (click)="estop()" class="px-10 py-2 bg-red-600 hover:bg-red-700 text-white font-bold rounded-lg shadow-lg text-xl uppercase tracking-wider">
+      E-Stop
+    </button>
+  </div>
+
+  @if (enabledAxes().length > 0) {
+    <div class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-4">
+      <!-- Left Panel: Main Controls -->
+      <div class="lg:col-span-1 bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex flex-col space-y-4">
+        <!-- Jog Dial -->
+        <div class="flex-grow flex items-center justify-center">
+          <div class="flex items-center justify-center space-x-4">
+            <!-- Minus Button -->
+            <button (click)="jog(-1)" type="button" class="w-16 h-16 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-4xl text-gray-200 font-light transition-colors active:bg-gray-500">
+              -
+            </button>
+            <!-- The Dial -->
+            <div #jogDial 
+                class="relative w-64 h-64 select-none"
+                [class.cursor-grabbing]="isDragging()"
+                [class.cursor-grab]="!isDragging()"
+                (mousedown)="onDialMouseDown($event)"
+                (mousemove)="onDialMouseMove($event)">
+              <div class="absolute inset-0 border-4 border-gray-600 rounded-full"></div>
+              <div class="absolute inset-2 border-2 border-gray-700 rounded-full"></div>
+              <!-- Tick marks -->
+              @for (_ of [0,1,2,3,4,5,6,7,8,9,10,11]; track $index) {
+                <div class="absolute w-full h-full" [style.transform]="'rotate(' + $index * 30 + 'deg)'">
+                    <div class="absolute top-1 left-1/2 -ml-px w-0.5 h-2" [class]="$index % 3 === 0 ? 'bg-gray-400' : 'bg-gray-600'"></div>
+                </div>
+              }
+              <div class="absolute inset-8 bg-gray-800 rounded-full flex items-center justify-center text-center shadow-inner"
+                  [style.transform]="'rotate(' + dialRotation() + 'deg)'"
+                  style="transition: transform 0.1s linear;">
+                  <div class="w-2 h-2 bg-orange-400 rounded-full absolute top-2"></div>
+              </div>
+            </div>
+            <!-- Plus Button -->
+            <button (click)="jog(1)" type="button" class="w-16 h-16 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-4xl text-gray-200 font-light transition-colors active:bg-gray-500">
+              +
+            </button>
+          </div>
+        </div>
+
+        <!-- Axis & Mode -->
+        <div class="grid grid-cols-2 gap-2">
+          <!-- Axis Selection -->
+          <div class="flex flex-col space-y-1 bg-gray-700/50 p-2 rounded-lg">
+            @for(axis of enabledAxisData(); track axis.key) {
+              <button (click)="selectAxis(axis.key)" [class]="selectedAxis() === axis.key ? 'bg-orange-500 text-white' : 'bg-gray-600 hover:bg-gray-500 text-gray-200'" class="w-full py-2 rounded-md font-bold transition-colors">
+                {{ axis.displayName }}
+              </button>
+            }
+          </div>
+          <!-- Mode/Step Selection -->
+          <div class="flex flex-col space-y-1 bg-gray-700/50 p-2 rounded-lg">
+            <button (click)="selectMode('STEP')" [class]="selectedMode() === 'STEP' ? 'bg-cyan-600 text-white' : 'bg-gray-600 hover:bg-gray-500 text-gray-200'" class="w-full py-2 rounded-md font-semibold transition-colors">Step</button>
+            <button (click)="selectMode('VELOCITY')" [class]="selectedMode() === 'VELOCITY' ? 'bg-cyan-600 text-white' : 'bg-gray-600 hover:bg-gray-500 text-gray-200'" class="w-full py-2 rounded-md font-semibold transition-colors">Velocity</button>
+            <div class="pt-2 mt-2 border-t border-gray-600">
+              @for (step of stepSizes; track step) {
+                <button (click)="selectStepSize(step)" [disabled]="selectedMode() !== 'STEP'" [class]="stepSize() === step && selectedMode() === 'STEP' ? 'bg-purple-600 text-white' : 'bg-gray-600 hover:bg-gray-500 text-gray-200 disabled:opacity-50'" class="w-full py-1.5 my-0.5 text-sm font-mono rounded-md transition-colors">x{{ step }}</button>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Readouts and Overrides -->
+      <div class="lg:col-span-2 bg-gray-800/50 border border-gray-700 rounded-lg p-4 flex flex-col space-y-4">
+        <!-- Coordinate Readouts -->
+        <div class="grid grid-cols-2 gap-4">
+          <!-- Machine Coords -->
+          <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+            <h3 class="font-semibold text-gray-400 mb-2">Machine Coords</h3>
+            <div class="font-mono text-xl space-y-1">
+              @for (coord of displayCoords(); track coord.key) {
+                <div class="flex justify-between" [class.text-orange-300]="selectedAxis() === coord.key">
+                  <span class="text-gray-500">{{ coord.displayName }}</span>
+                  <span>{{ coord.machineValue.toFixed(3) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+          <!-- Work Coords -->
+          <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+            <h3 class="font-semibold text-gray-400 mb-2">Work Coords</h3>
+            <div class="font-mono text-xl space-y-1">
+              @for (coord of displayCoords(); track coord.key) {
+                <div class="flex justify-between" [class.text-orange-300]="selectedAxis() === coord.key">
+                  <span class="text-gray-500">{{ coord.displayName }}</span>
+                  <span>{{ coord.workValue.toFixed(3) }}</span>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Overrides -->
+        <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700 flex-grow flex flex-col">
+          <h3 class="font-semibold text-gray-400 mb-3">Overrides</h3>
+          <div class="flex-grow grid grid-cols-2 gap-4">
+            <!-- Feed Override -->
+            <div class="space-y-2">
+              <label for="feed-override" class="font-semibold text-sm">Feed Rate</label>
+              <div class="flex items-center space-x-3">
+                <input id="feed-override" type="range" min="0" max="150" [value]="feedOverride()" (input)="updateFeedOverride($event)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
+                <span class="font-mono text-orange-300 w-12 text-center">{{ feedOverride() }}%</span>
+              </div>
+            </div>
+            <!-- Spindle Override -->
+            <div class="space-y-2">
+              <label for="spindle-override" class="font-semibold text-sm">Spindle Speed</label>
+              <div class="flex items-center space-x-3">
+                <input id="spindle-override" type="range" min="0" max="150" [value]="spindleOverride()" (input)="updateSpindleOverride($event)" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-cyan-500">
+                <span class="font-mono text-cyan-300 w-12 text-center">{{ spindleOverride() }}%</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Spindle Control -->
+        <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+          <h3 class="font-semibold text-gray-400 mb-2">Spindle</h3>
+          <div class="flex space-x-2">
+            <button (click)="setSpindle('FWD')" [class]="spindleState() === 'FWD' ? 'bg-green-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-200'" class="flex-1 py-2 rounded-md font-semibold transition-colors">FWD</button>
+            <button (click)="setSpindle('OFF')" [class]="spindleState() === 'OFF' ? 'bg-red-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-200'" class="flex-1 py-2 rounded-md font-semibold transition-colors">OFF</button>
+            <button (click)="setSpindle('REV')" [class]="spindleState() === 'REV' ? 'bg-yellow-600 text-white' : 'bg-gray-700 hover:bg-gray-600 text-gray-200'" class="flex-1 py-2 rounded-md font-semibold transition-colors">REV</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  } @else {
+    <div class="flex-grow flex items-center justify-center text-center bg-gray-800/50 border-2 border-dashed border-gray-700 rounded-lg p-12">
+      <div>
+        <i class="fa-solid fa-sliders text-5xl text-gray-600 mb-4"></i>
+        <h2 class="text-xl font-bold text-gray-300">No Axes Enabled</h2>
+        <p class="text-gray-500 mt-2">Please enable at least one axis in the MPG module's configuration.</p>
+      </div>
+    </div>
+  }
+</main>

@@ -1,0 +1,559 @@
+<main class="flex-grow">
+  <form [formGroup]="mainSettingsForm" (ngSubmit)="saveAllSettings()">
+    <!-- Sticky Header for Save/Reset Actions -->
+    <div class="sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10 py-4 mb-4 border-b border-gray-700">
+      <div class="flex justify-between items-center gap-4">
+        <div class="flex items-center gap-4">
+          <h2 class="text-2xl font-bold text-gray-200">Settings</h2>
+          <button type="button" (click)="toggleAllSections()" class="bg-gray-700 hover:bg-gray-600 text-gray-300 font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center text-sm">
+              @if (allSectionsOpen()) {
+                <i class="fa-solid fa-compress mr-2"></i>
+                <span>Collapse All</span>
+              } @else {
+                <i class="fa-solid fa-expand mr-2"></i>
+                <span>Expand All</span>
+              }
+            </button>
+        </div>
+        <div class="flex items-center gap-4">
+          <button type="button" (click)="resetAllSettings()" [disabled]="!mainSettingsForm.dirty"
+            class="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+            Reset All
+          </button>
+          <button type="submit" [disabled]="!mainSettingsForm.dirty || mainSettingsForm.invalid"
+            class="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 shadow-md">
+            Save All Changes
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <!-- Column 1 -->
+      <div class="space-y-4">
+        <!-- System Settings Forms -->
+        <div formGroupName="system" class="space-y-4">
+          <!-- SSH Settings Card -->
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+            <button (click)="toggleSection('ssh')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+              <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                <i class="fa-solid fa-terminal mr-3 text-orange-400"></i>
+                SSH Settings
+              </h2>
+              <i class="fa-solid transition-transform duration-300" [class]="sections.ssh() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+            @if (sections.ssh()) {
+              <div class="p-4 border-t border-gray-700">
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="sshEnabled" class="font-semibold text-gray-300">SSH Server</label>
+                    <button type="button" id="sshEnabled" (click)="mainSettingsForm.get('system.ENABLED')?.setValue(!mainSettingsForm.get('system.ENABLED')?.value); mainSettingsForm.get('system')?.markAsDirty()"
+                      class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                      [class]="mainSettingsForm.get('system.ENABLED')?.value ? 'bg-orange-500' : 'bg-gray-600'" role="switch" [attr.aria-checked]="mainSettingsForm.get('system.ENABLED')?.value">
+                      <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        [class]="mainSettingsForm.get('system.ENABLED')?.value ? 'translate-x-5' : 'translate-x-0'">
+                      </span>
+                    </button>
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="sshUser" class="font-semibold text-gray-300">SSH Username</label>
+                    <input id="sshUser" formControlName="USERNAME" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-48"
+                      [class]="mainSettingsForm.get('system.USERNAME')?.invalid && mainSettingsForm.get('system.USERNAME')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="sshPass" class="font-semibold text-gray-300">SSH Password</label>
+                    <input id="sshPass" formControlName="PASSWORD" type="password" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-48"
+                      [class]="mainSettingsForm.get('system.PASSWORD')?.invalid && mainSettingsForm.get('system.PASSWORD')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Watchdog Settings Card -->
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+            <button (click)="toggleSection('watchdog')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+              <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                <i class="fa-solid fa-dog mr-3 text-orange-400"></i>
+                Watchdog Settings
+              </h2>
+              <i class="fa-solid transition-transform duration-300" [class]="sections.watchdog() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+            @if (sections.watchdog()) {
+              <div class="p-4 border-t border-gray-700 space-y-3">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="watchdogEnabled" class="font-semibold text-gray-300">System Watchdog</label>
+                  <button type="button" id="watchdogEnabled" (click)="mainSettingsForm.get('system.WATCHDOG')?.setValue(!mainSettingsForm.get('system.WATCHDOG')?.value); mainSettingsForm.get('system')?.markAsDirty()"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                    [class]="mainSettingsForm.get('system.WATCHDOG')?.value ? 'bg-orange-500' : 'bg-gray-600'" role="switch" [attr.aria-checked]="mainSettingsForm.get('system.WATCHDOG')?.value">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      [class]="mainSettingsForm.get('system.WATCHDOG')?.value ? 'translate-x-5' : 'translate-x-0'">
+                    </span>
+                  </button>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="watchdogTimeout" class="font-semibold text-gray-300">Watchdog Timeout (sec)</label>
+                  <input id="watchdogTimeout" formControlName="WATCHDOG_TIMEOUT" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                    [class]="mainSettingsForm.get('system.WATCHDOG_TIMEOUT')?.invalid && mainSettingsForm.get('system.WATCHDOG_TIMEOUT')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+                <div class="my-4 border-t border-gray-700/50"></div>
+                <h4 class="text-md font-semibold text-gray-400 mb-2 pl-1 flex items-center">
+                  <i class="fa-solid fa-network-wired mr-3 text-orange-400"></i>
+                  ICMP Watchdog (Ping)
+                </h4>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="watchdogIp" class="font-semibold text-gray-300">Target IP Address</label>
+                    <input id="watchdogIp" formControlName="WATCHDOG_IP" type="text" placeholder="e.g. 192.168.1.1" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-48"
+                      [class]="mainSettingsForm.get('system.WATCHDOG_IP')?.invalid && mainSettingsForm.get('system.WATCHDOG_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <p class="text-xs text-gray-500 px-3 -mt-3">Leave blank to disable this feature.</p>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="watchdogIcmpInterval" class="font-semibold text-gray-300">Ping Interval (sec)</label>
+                    <input id="watchdogIcmpInterval" formControlName="WATCHDOG_ICMP_INTERVAL" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('system.WATCHDOG_ICMP_INTERVAL')?.invalid && mainSettingsForm.get('system.WATCHDOG_ICMP_INTERVAL')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="watchdogIcmpFailCount" class="font-semibold text-gray-300">Failure Count</label>
+                    <input id="watchdogIcmpFailCount" formControlName="WATCHDOG_ICMP_FAIL_COUNT" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('system.WATCHDOG_ICMP_FAIL_COUNT')?.invalid && mainSettingsForm.get('system.WATCHDOG_ICMP_FAIL_COUNT')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="watchdogIcmpDelay" class="font-semibold text-gray-300">Startup Delay (sec)</label>
+                    <input id="watchdogIcmpDelay" formControlName="WATCHDOG_ICMP_DELAY" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('system.WATCHDOG_ICMP_DELAY')?.invalid && mainSettingsForm.get('system.WATCHDOG_ICMP_DELAY')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- SD Card Failure Settings Card -->
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+            <button (click)="toggleSection('sdCard')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+              <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                <i class="fa-solid fa-sd-card mr-3 text-orange-400"></i>
+                SD Card Failure Settings
+              </h2>
+              <i class="fa-solid transition-transform duration-300" [class]="sections.sdCard() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+            @if (sections.sdCard()) {
+              <div class="p-4 border-t border-gray-700 space-y-3">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="sdRebootEnabled" class="font-semibold text-gray-300">Reboot on SD Failure</label>
+                  <button type="button" id="sdRebootEnabled" (click)="mainSettingsForm.get('system.FAILURE_SD_REBOOT')?.setValue(!mainSettingsForm.get('system.FAILURE_SD_REBOOT')?.value); mainSettingsForm.get('system')?.markAsDirty()"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                    [class]="mainSettingsForm.get('system.FAILURE_SD_REBOOT')?.value ? 'bg-orange-500' : 'bg-gray-600'" role="switch" [attr.aria-checked]="mainSettingsForm.get('system.FAILURE_SD_REBOOT')?.value">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      [class]="mainSettingsForm.get('system.FAILURE_SD_REBOOT')?.value ? 'translate-x-5' : 'translate-x-0'">
+                    </span>
+                  </button>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="sdRebootTimeout" class="font-semibold text-gray-300">SD Failure Reboot Timeout (sec)</label>
+                  <input id="sdRebootTimeout" formControlName="FAILURE_SD_REBOOT_TIMEOUT" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                    [class]="mainSettingsForm.get('system.FAILURE_SD_REBOOT_TIMEOUT')?.invalid && mainSettingsForm.get('system.FAILURE_SD_REBOOT_TIMEOUT')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Firmware Update Settings Card -->
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+            <button (click)="toggleSection('firmware')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+              <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                <i class="fa-solid fa-rocket mr-3 text-orange-400"></i>
+                Firmware Update Settings
+              </h2>
+              <i class="fa-solid transition-transform duration-300" [class]="sections.firmware() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+            @if (sections.firmware()) {
+              <div class="p-4 border-t border-gray-700 space-y-3">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="firmwareCheckEnabled" class="font-semibold text-gray-300">Firmware Update Check</label>
+                  <button type="button" id="firmwareCheckEnabled" (click)="mainSettingsForm.get('system.FIRMWARE')?.setValue(!mainSettingsForm.get('system.FIRMWARE')?.value); mainSettingsForm.get('system')?.markAsDirty()"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                    [class]="mainSettingsForm.get('system.FIRMWARE')?.value ? 'bg-orange-500' : 'bg-gray-600'" role="switch" [attr.aria-checked]="mainSettingsForm.get('system.FIRMWARE')?.value">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      [class]="mainSettingsForm.get('system.FIRMWARE')?.value ? 'translate-x-5' : 'translate-x-0'">
+                    </span>
+                  </button>
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="firmwareCheckTime" class="font-semibold text-gray-300">Check Interval (min)</label>
+                  <input id="firmwareCheckTime" formControlName="FIRMWARE_TIME" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                    [class]="mainSettingsForm.get('system.FIRMWARE_TIME')?.invalid && mainSettingsForm.get('system.FIRMWARE_TIME')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- General System Settings Card -->
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+            <button (click)="toggleSection('generalSystem')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+              <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                <i class="fa-solid fa-server mr-3 text-orange-400"></i>
+                General System Settings
+              </h2>
+              <i class="fa-solid transition-transform duration-300" [class]="sections.generalSystem() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+            </button>
+            @if (sections.generalSystem()) {
+              <div class="p-4 border-t border-gray-700 space-y-3">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="voltagePin" class="font-semibold text-gray-300">Voltage Monitor Pin (GPIO)</label>
+                  <input id="voltagePin" formControlName="VOLTAGE_MONITORING_PIN" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                    [class]="mainSettingsForm.get('system.VOLTAGE_MONITORING_PIN')?.invalid && mainSettingsForm.get('system.VOLTAGE_MONITORING_PIN')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="shutdownPin" class="font-semibold text-gray-300">Shutdown Pin (GPIO)</label>
+                  <input id="shutdownPin" formControlName="PIN_SHUTDOWN" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                    [class]="mainSettingsForm.get('system.PIN_SHUTDOWN')?.invalid && mainSettingsForm.get('system.PIN_SHUTDOWN')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="websocketPort" class="font-semibold text-gray-300">WebSocket Port</label>
+                  <input id="websocketPort" formControlName="WEBSOCKET_PORT" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24"
+                    [class]="mainSettingsForm.get('system.WEBSOCKET_PORT')?.invalid && mainSettingsForm.get('system.WEBSOCKET_PORT')?.touched ? 'border-red-500' : 'border-gray-600'">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label class="font-semibold text-gray-300">Audible Feedback</label>
+                  <button (click)="toggleBuzzer()" class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                    [class]="buzzerEnabled() ? 'bg-orange-500' : 'bg-gray-600'" type="button" role="switch" [attr.aria-checked]="buzzerEnabled()">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      [class]="buzzerEnabled() ? 'translate-x-5' : 'translate-x-0'">
+                    </span>
+                  </button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- NEW: Security Settings Card - Directly within the system form group -->
+          @if (adminService.isAdminMode()) {
+            <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+              <button (click)="toggleSection('security')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+                <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                  <i class="fa-solid fa-shield-alt mr-3 text-orange-400"></i>
+                  Security Settings
+                </h2>
+                <i class="fa-solid transition-transform duration-300" [class]="sections.security() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+              </button>
+              @if (sections.security()) {
+                <div class="p-4 border-t border-gray-700">
+                  <div class="space-y-3">
+                    <div class="flex flex-col p-2 bg-gray-900/50 rounded-lg">
+                      <label for="securityCode" class="font-semibold text-gray-300 mb-2">Access Code</label>
+                      <input id="securityCode" formControlName="ACCESS_CODE" type="password" placeholder="Leave blank to remove"
+                            class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono"
+                            [class]="mainSettingsForm.get('system.ACCESS_CODE')?.invalid && mainSettingsForm.get('system.ACCESS_CODE')?.touched ? 'border-red-500' : 'border-gray-600'">
+                      <p class="mt-2 text-xs text-gray-500">
+                        This code enables administration mode. Changing it here will require a re-login.
+                        <br>
+                        Leaving it blank will remove the code and disable administrator mode.
+                      </p>
+                      @if (mainSettingsForm.get('system.ACCESS_CODE')?.invalid && mainSettingsForm.get('system.ACCESS_CODE')?.touched && mainSettingsForm.get('system.ACCESS_CODE')?.errors?.['minLength']) {
+                        <p class="mt-2 text-sm text-red-400">Access code cannot be empty if setting one.</p>
+                      }
+                    </div>
+                    <div class="flex flex-col p-2 bg-gray-900/50 rounded-lg">
+                      <label for="confirmSecurityCode" class="font-semibold text-gray-300 mb-2">Confirm Access Code</label>
+                      <input id="confirmSecurityCode" formControlName="CONFIRM_ACCESS_CODE" type="password" placeholder="Re-enter access code"
+                            class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block w-full p-2.5 font-mono"
+                            [class]="mainSettingsForm.get('system.CONFIRM_ACCESS_CODE')?.invalid && mainSettingsForm.get('system.CONFIRM_ACCESS_CODE')?.touched ? 'border-red-500' : 'border-gray-600'">
+                      @if (mainSettingsForm.get('system.CONFIRM_ACCESS_CODE')?.errors?.['mismatch'] && mainSettingsForm.get('system.CONFIRM_ACCESS_CODE')?.touched) {
+                        <p class="mt-2 text-sm text-red-400">Access codes do not match.</p>
+                      }
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Column 2 -->
+      <div class="space-y-4">
+        <!-- NEW: Internet Monitoring Settings Card -->
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+          <button (click)="toggleSection('internetMonitoring')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+            <h2 class="text-xl font-bold text-gray-300 flex items-center">
+              <i class="fa-solid fa-earth-americas mr-3 text-orange-400"></i>
+              Internet Monitoring
+            </h2>
+            <i class="fa-solid transition-transform duration-300" [class]="sections.internetMonitoring() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </button>
+          @if (sections.internetMonitoring()) {
+            <div class="p-4 border-t border-gray-700" formGroupName="internetMonitoring">
+              <p class="text-sm text-gray-400 mb-4">Configure how the device monitors internet connectivity. When Ping is enabled, the device will periodically attempt to reach the specified IP address.</p>
+              <div class="space-y-3">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="pingEnabled" class="font-semibold text-gray-300">Enable Ping Check</label>
+                  <button type="button" id="pingEnabled" (click)="mainSettingsForm.get('internetMonitoring.PING_ENABLED')?.setValue(!mainSettingsForm.get('internetMonitoring.PING_ENABLED')?.value); mainSettingsForm.get('internetMonitoring')?.markAsDirty()"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                    [class]="mainSettingsForm.get('internetMonitoring.PING_ENABLED')?.value ? 'bg-orange-500' : 'bg-gray-600'" role="switch" [attr.aria-checked]="mainSettingsForm.get('internetMonitoring.PING_ENABLED')?.value">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      [class]="mainSettingsForm.get('internetMonitoring.PING_ENABLED')?.value ? 'translate-x-5' : 'translate-x-0'">
+                    </span>
+                  </button>
+                </div>
+                <div class="flex flex-col p-2 bg-gray-900/50 rounded-lg" [class.opacity-50]="!mainSettingsForm.get('internetMonitoring.PING_ENABLED')?.value">
+                  <label for="pingTarget" class="font-semibold text-gray-300 mb-2">Ping Target IP</label>
+                  <input id="pingTarget" formControlName="PING_TARGET" type="text" placeholder="e.g. 8.8.8.8"
+                         class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-full"
+                         [class]="(mainSettingsForm.get('internetMonitoring.PING_TARGET')?.invalid && mainSettingsForm.get('internetMonitoring.PING_TARGET')?.touched) ? 'border-red-500' : 'border-gray-600'">
+                  @if (mainSettingsForm.get('internetMonitoring.PING_ENABLED')?.value === false) {
+                    <p class="text-xs text-gray-500 mt-2">This field is optional when ping check is disabled.</p>
+                  } @else if (mainSettingsForm.get('internetMonitoring.PING_TARGET')?.invalid && mainSettingsForm.get('internetMonitoring.PING_TARGET')?.touched) {
+                    <p class="mt-2 text-sm text-red-400">
+                      @if (mainSettingsForm.get('internetMonitoring.PING_TARGET')?.hasError('required')) {
+                        Ping target is required when ping check is enabled.
+                      } @else if (mainSettingsForm.get('internetMonitoring.PING_TARGET')?.hasError('pattern')) {
+                        Please enter a valid IP address (e.8.8.8.8) or 'localhost'.
+                      }
+                    </p>
+                  }
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <!-- Storage Monitoring Card -->
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+          <button (click)="toggleSection('storage')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+            <h2 class="text-xl font-bold text-gray-300 flex items-center">
+              <i class="fa-solid fa-hdd mr-3 text-orange-400"></i>
+              Storage Monitoring
+            </h2>
+            <i class="fa-solid transition-transform duration-300" [class]="sections.storage() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </button>
+          @if (sections.storage()) {
+            <div class="p-4 border-t border-gray-700" formGroupName="storage">
+              <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+                <p class="text-sm text-gray-400 flex-1">Configure usage percentage thresholds to trigger SNMP traps.</p>
+                <button type="button" (click)="simulateSdWriteFailure()" class="bg-red-800/50 hover:bg-red-700/50 border border-red-700 text-red-300 font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md">
+                  <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+                  Simulate SD Write Fail
+                </button>
+              </div>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="sdThreshold" class="font-semibold text-gray-300">SD Card Threshold (%)</label>
+                  <input id="sdThreshold" formControlName="SD_CARD_THRESHOLD" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="localStorageThreshold" class="font-semibold text-gray-300">Local Storage Threshold (%)</label>
+                  <input id="localStorageThreshold" formControlName="LOCAL_STORAGE_THRESHOLD" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="sramThreshold" class="font-semibold text-gray-300">SRAM Threshold (%)</label>
+                  <input id="sramThreshold" formControlName="SRAM_THRESHOLD" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                </div>
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="eepromThreshold" class="font-semibold text-gray-300">EEPROM Threshold (%)</label>
+                  <input id="eepromThreshold" formControlName="EEPROM_THRESHOLD" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+        <!-- Servo & Table Settings Card -->
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+          <button (click)="toggleSection('servos')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+            <h2 class="text-xl font-bold text-gray-300 flex items-center">
+              <i class="fa-solid fa-robot mr-3 text-orange-400"></i>
+              Servo & Table Settings
+            </h2>
+            <i class="fa-solid transition-transform duration-300" [class]="sections.servos() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </button>
+          @if (sections.servos()) {
+            <div class="p-4 border-t border-gray-700" formGroupName="servosAndTable">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="slaveIdX" class="font-semibold text-gray-300">SERVOX SLAVE_ID</label>
+                    <input id="slaveIdX" formControlName="SLAVE_ID_X" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="slaveIdY" class="font-semibold text-gray-300">SERVOY SLAVE_ID</label>
+                    <input id="slaveIdY" formControlName="SLAVE_ID_Y" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="slaveIdYY" class="font-semibold text-gray-300">SERVOYY SLAVE_ID</label>
+                    <input id="slaveIdYY" formControlName="SLAVE_ID_YY" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="railX" class="font-semibold text-gray-300">Table Rail X (mm)</label>
+                    <input id="railX" formControlName="RAIL_X" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="railY" class="font-semibold text-gray-300">Table Rail Y (mm)</label>
+                    <input id="railY" formControlName="RAIL_Y" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- LED Settings Card -->
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+          <button (click)="toggleSection('leds')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+            <h2 class="text-xl font-bold text-gray-300 flex items-center">
+              <i class="fa-solid fa-lightbulb mr-3 text-orange-400"></i>
+              LED Settings
+            </h2>
+            <i class="fa-solid transition-transform duration-300" [class]="sections.leds() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </button>
+          @if (sections.leds()) {
+            <div class="p-4 border-t border-gray-700" formGroupName="leds">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-3">
+                <!-- Counts & Config -->
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsCountX" class="font-semibold text-gray-300">Strip X Count</label>
+                    <input id="ledsCountX" formControlName="COUNT_X" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('leds.COUNT_X')?.invalid && mainSettingsForm.get('leds.COUNT_X')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsCountY" class="font-semibold text-gray-300">Strip Y Count</label>
+                    <input id="ledsCountY" formControlName="COUNT_Y" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('leds.COUNT_Y')?.invalid && mainSettingsForm.get('leds.COUNT_Y')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsCountYY" class="font-semibold text-gray-300">Strip YY Count</label>
+                    <input id="ledsCountYY" formControlName="COUNT_YY" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('leds.COUNT_YY')?.invalid && mainSettingsForm.get('leds.COUNT_YY')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsAxisDisplay" class="font-semibold text-gray-300">Axis Position Display</label>
+                    <input id="ledsAxisDisplay" formControlName="AXIS_POSITION_DISPLAY" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="chaseTimeout" class="font-semibold text-gray-300">Chase Timeout (sec)</label>
+                    <input id="chaseTimeout" formControlName="LED_CHASE_TIMEOUT" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                </div>
+                <!-- Brightness & Idle -->
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsBrightnessX" class="font-semibold text-gray-300">Default Brightness X</label>
+                    <input id="ledsBrightnessX" formControlName="DEFAULT_BRIGHTNESS_X" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('leds.DEFAULT_BRIGHTNESS_X')?.invalid && mainSettingsForm.get('leds.DEFAULT_BRIGHTNESS_X')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsBrightnessY" class="font-semibold text-gray-300">Default Brightness Y</label>
+                    <input id="ledsBrightnessY" formControlName="DEFAULT_BRIGHTNESS_Y" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('leds.DEFAULT_BRIGHTNESS_Y')?.invalid && mainSettingsForm.get('leds.DEFAULT_BRIGHTNESS_Y')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsBrightnessYY" class="font-semibold text-gray-300">Default Brightness YY</label>
+                    <input id="ledsBrightnessYY" formControlName="DEFAULT_BRIGHTNESS_YY" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24"
+                      [class]="mainSettingsForm.get('leds.DEFAULT_BRIGHTNESS_YY')?.invalid && mainSettingsForm.get('leds.DEFAULT_BRIGHTNESS_YY')?.touched ? 'border-red-500' : 'border-gray-600'">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsIdleSecs" class="font-semibold text-gray-300">Idle Servo Seconds</label>
+                    <input id="ledsIdleSecs" formControlName="IDLE_SERVO_SECONDS" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledsIdleDim" class="font-semibold text-gray-300">Idle Servo Dim %</label>
+                    <input id="ledsIdleDim" formControlName="IDLE_SERVO_DIM" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="chaseEnabled" class="font-semibold text-gray-300">Enable Chase Effect</label>
+                    <button type="button" id="chaseEnabled" (click)="mainSettingsForm.get('leds.LED_CHASE')?.setValue(!mainSettingsForm.get('leds.LED_CHASE')?.value); mainSettingsForm.get('leds')?.markAsDirty()"
+                      class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent" [class]="mainSettingsForm.get('leds.LED_CHASE')?.value ? 'bg-orange-500' : 'bg-gray-600'">
+                      <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                        [class]="mainSettingsForm.get('leds.LED_CHASE')?.value ? 'translate-x-5' : 'translate-x-0'"></span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+
+        <!-- Alexa Settings Card -->
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+          <button (click)="toggleSection('alexa')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+            <h2 class="text-xl font-bold text-gray-300 flex items-center">
+              <i class="fa-brands fa-amazon mr-3 text-orange-400"></i>
+              Alexa Settings
+            </h2>
+            <i class="fa-solid transition-transform duration-300" [class]="sections.alexa() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+          </button>
+          @if (sections.alexa()) {
+            <div class="p-4 border-t border-gray-700" formGroupName="alexa">
+              <div class="space-y-3">
+                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                  <label for="alexaEnabled" class="font-semibold text-gray-300">Enable Alexa:</label>
+                  <button type="button" id="alexaEnabled" (click)="mainSettingsForm.get('alexa.ENABLED')?.setValue(!mainSettingsForm.get('alexa.ENABLED')?.value); mainSettingsForm.get('alexa')?.markAsDirty()"
+                    class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none"
+                    [class]="mainSettingsForm.get('alexa.ENABLED')?.value ? 'bg-orange-500' : 'bg-gray-600'">
+                    <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                      [class]="mainSettingsForm.get('alexa.ENABLED')?.value ? 'translate-x-5' : 'translate-x-0'"></span>
+                  </button>
+                </div>
+                <div class="my-4 border-t border-gray-700/50"></div>
+                <h4 class="text-md font-semibold text-gray-400 mb-2 pl-1 flex items-center">
+                  <i class="fa-solid fa-microphone-alt mr-3 text-orange-400"></i>
+                  Discoverable Function
+                </h4>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="announceDevice" class="font-semibold text-gray-300">Announce</label>
+                    <input id="announceDevice" formControlName="ANNOUNCE_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="onboardLedDevice" class="font-semibold text-gray-300">Onboard LED</label>
+                    <input id="onboardLedDevice" formControlName="ONBOARD_LED_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="buzzerDevice" class="font-semibold text-gray-300">System Buzzer</label>
+                    <input id="buzzerDevice" formControlName="SYSTEM_BUZZER_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="shutdownDevice" class="font-semibold text-gray-300">Shutdown</label>
+                    <input id="shutdownDevice" formControlName="SHUTDOWN_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledxDevice" class="font-semibold text-gray-300">LEDX Brightness</label>
+                    <input id="ledxDevice" formControlName="LEDX_BRIGHTNESS_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledyDevice" class="font-semibold text-gray-300">LEDY Brightness</label>
+                    <input id="ledyDevice" formControlName="LEDY_BRIGHTNESS_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="ledyyDevice" class="font-semibold text-gray-300">LEDYY Brightness</label>
+                    <input id="ledyyDevice" formControlName="LEDYY_BRIGHTNESS_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="chaseDevice" class="font-semibold text-gray-300">Chase Effect</label>
+                    <input id="chaseDevice" formControlName="CHASE_EFFECT_DEVICE" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg p-2 font-mono text-right w-40">
+                  </div>
+                </div>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+    
+    <!-- No separate Security Settings Section anymore, moved into system form group -->
+  </form>
+</main>
+
+<!-- NEW: Saved Confirmation Ribbon -->
+@if (savedConfirmation()) {
+  <div class="fixed bottom-5 left-1/2 -translate-x-1/2 bg-green-600 border border-green-400 text-white py-3 px-5 rounded-lg shadow-2xl flex items-center animate-fade-in-out z-50">
+    <i class="fa-solid fa-check text-2xl mr-4"></i>
+    <div>
+      <div class="font-bold">Changes Saved!</div>
+      <div class="text-sm text-green-200">Your settings have been updated.</div>
+    </div>
+  </div>
+}

@@ -1,0 +1,39 @@
+<!--
+  File: src/pages/changelog-editor/changelog-editor.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the changelog editor page. Provides a textarea for editing
+  the changelog entries and actions to save or cancel.
+-->
+<main class="flex-grow flex flex-col">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg flex flex-col">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+      <h3 class="text-xl font-bold text-gray-300 flex items-center">
+        <i class="fas fa-history mr-3 text-orange-400"></i>
+        Edit Changelog
+      </h3>
+      <div class="flex gap-4">
+        <button (click)="onBack()"
+                class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+          Back
+        </button>
+        <button (click)="onSave()"
+                [disabled]="!changelogContent.dirty"
+                class="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 shadow-md">
+          Save
+        </button>
+      </div>
+    </div>
+    
+    <textarea #changelogTextarea
+              [formControl]="changelogContent"
+              (input)="adjustTextareaHeight()"
+              class="bg-black/50 rounded p-3 font-mono text-sm text-gray-300 w-full border border-gray-600 focus:ring-orange-500 focus:border-orange-500 resize-none overflow-y-hidden min-h-[1000px]"
+              placeholder="Enter Markdown content for changelog entries..."
+              rows="1"></textarea>
+  </div>
+</main>

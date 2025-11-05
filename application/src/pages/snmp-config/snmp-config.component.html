@@ -1,0 +1,77 @@
+<!--
+  File: src/pages/snmp-config/snmp-config.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the SNMP Configuration page. Displays settings for the SNMP agent
+  and trap configurations, and provides a test button.
+-->
+<main class="flex-grow">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+      <h2 class="text-xl font-bold text-gray-300 flex items-center">
+        <i class="fa-solid fa-cogs mr-3 text-orange-400"></i>
+        SNMP Configuration
+      </h2>
+      <button (click)="sendTestTrap()" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md">
+        <i class="fa-solid fa-paper-plane mr-2"></i>
+        Send Test Trap
+      </button>
+    </div>
+    
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      
+      <!-- Agent Settings Card -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-server mr-2 w-4 text-center text-orange-400"></i>
+          <span>Agent Settings</span>
+        </h3>
+        <div class="space-y-3 font-mono text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="text-gray-400">Community:</span>
+            <span class="font-bold text-orange-300">{{ config().COMMUNITY }}</span>
+          </div>
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="text-gray-400">Port:</span>
+            <span class="font-bold text-orange-300">{{ config().PORT }}</span>
+          </div>
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="text-gray-400">Protocol:</span>
+            <span class="font-bold text-orange-300">{{ config().PROTOCOL }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trap Settings Card -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-broadcast-tower mr-2 w-4 text-center text-orange-400"></i>
+          <span>Trap Settings</span>
+        </h3>
+        <div class="space-y-3 font-mono text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="text-gray-400">Trap Target:</span>
+            <span class="font-bold text-orange-300">{{ config().TRAP_TARGET }}</span>
+          </div>
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="text-gray-400">Trap Port:</span>
+            <span class="font-bold text-orange-300">{{ config().TRAP_PORT }}</span>
+          </div>
+           <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="text-gray-400">Trap Community:</span>
+            <span class="font-bold text-orange-300">{{ config().TRAP_COMMUNITY }}</span>
+          </div>
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded">
+            <span class="text-gray-400">Trap Protocol:</span>
+            <span class="font-bold text-orange-300">{{ config().TRAP_PROTOCOL }}</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>

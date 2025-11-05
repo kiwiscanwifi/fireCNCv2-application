@@ -1,0 +1,86 @@
+<!--
+  File: src/components/module-widget/module-widget.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Module Widget component for the dashboard.
+-->
+@if (module(); as mod) {
+  @switch (mod.function) {
+    @case ('IO') {
+      <div class="space-y-2 text-sm">
+        @for(port of enabledPorts(); track port.name) {
+          <div class="flex items-center justify-between bg-gray-700/50 p-2 rounded-md">
+            <span class="text-gray-300 font-semibold">{{ port.name }}</span>
+            <div class="flex items-center gap-3 text-gray-400">
+              <i [class]="getTypeIcon(port.type)" [title]="port.type"></i>
+              <i [class]="getSignalIcon(port.signal)" [title]="port.signal"></i>
+            </div>
+          </div>
+        }
+        @if (enabledPorts().length === 0) {
+          <p class="text-xs text-gray-500 text-center">No enabled ports in this module.</p>
+        }
+      </div>
+    }
+    @case ('Relay') {
+      <div class="space-y-2 text-sm">
+        @for(port of enabledPorts(); track port.name) {
+          <div class="flex items-center justify-between bg-gray-700/50 p-2 rounded-md">
+            <span class="text-gray-300 font-semibold">{{ port.name }}</span>
+            <div class="flex items-center gap-3">
+               <span class="text-xs font-semibold px-2 py-0.5 rounded-full" [class]="port.enabled ? 'bg-green-900/50 text-green-300' : 'bg-red-900/50 text-red-300'">
+                  {{ port.enabled ? 'ON' : 'OFF' }}
+               </span>
+             </div>
+          </div>
+        }
+        @if (enabledPorts().length === 0) {
+          <p class="text-xs text-gray-500 text-center">No enabled ports in this module.</p>
+        }
+      </div>
+    }
+    @case ('MPG') {
+      <div class="space-y-4">
+        <!-- Axis Selection -->
+        <div class="flex justify-around bg-gray-700/50 p-1 rounded-lg">
+          @for (axis of ['X', 'Y', 'Z']; track axis) {
+            <button (click)="selectAxis(axis)" type="button" class="w-1/3 py-2 text-center font-bold rounded-md transition-colors"
+              [class]="selectedAxis() === axis ? 'bg-orange-500 text-white shadow' : 'text-gray-300 hover:bg-gray-600/50'">
+              {{ axis }}
+            </button>
+          }
+        </div>
+        <!-- Step Selection -->
+        <div class="flex justify-between bg-gray-700/50 p-1 rounded-lg">
+          @for (step of steps; track step) {
+            <button (click)="selectStep(step)" type="button" class="flex-1 px-1 py-1.5 text-xs text-center font-mono rounded-md transition-colors"
+              [class]="selectedStep() === step ? 'bg-cyan-600 text-white shadow' : 'text-gray-300 hover:bg-gray-600/50'">
+              {{ step }}
+            </button>
+          }
+        </div>
+        <!-- Jog Controls -->
+        <div class="flex items-center justify-center gap-4">
+          <button (click)="jog(-1)" type="button"
+            class="w-20 h-20 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-4xl text-gray-200 font-light transition-colors active:bg-gray-500">
+            -
+          </button>
+          <div class="text-center">
+            <p class="font-bold text-4xl text-orange-400">{{ selectedAxis() }}</p>
+            <p class="font-mono text-sm text-gray-400">{{ selectedStep() }}</p>
+          </div>
+          <button (click)="jog(1)" type="button"
+            class="w-20 h-20 bg-gray-700 hover:bg-gray-600 rounded-full flex items-center justify-center text-4xl text-gray-200 font-light transition-colors active:bg-gray-500">
+            +
+          </button>
+        </div>
+      </div>
+    }
+  }
+} @else {
+  <p class="text-xs text-red-400">Module data not found.</p>
+}

@@ -1,0 +1,53 @@
+<!--
+  File: src/pages/system-log/system-log.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the System Log page. Renders a full-page live log viewer
+  with color-coded log levels.
+-->
+<main class="flex-grow flex flex-col">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg flex flex-col flex-grow">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+      <h3 class="text-xl font-bold text-gray-300 flex items-center">
+        <i class="fa-solid fa-file-lines mr-3 text-orange-400"></i>
+        System Log Viewer
+      </h3>
+      <div class="flex items-center gap-6">
+        <!-- Filter Checkboxes -->
+        <div class="flex items-center space-x-4 text-sm flex-wrap gap-y-2">
+          <span class="font-semibold text-gray-400">Show:</span>
+          @for(level of logLevels; track level) {
+            <label class="flex items-center space-x-2 cursor-pointer">
+              <input type="checkbox" 
+                     [checked]="filters()[level]"
+                     (change)="updateFilter(level, $event)"
+                     class="form-checkbox h-4 w-4 rounded bg-gray-700 border-gray-600 text-orange-500 focus:ring-orange-500/50 focus:ring-offset-gray-800">
+              <span class="font-bold" [class]="getLogLevelClass(level)">{{ level }}</span>
+            </label>
+          }
+        </div>
+        <!-- Clear Log Button -->
+        <button (click)="clearLogs()" class="bg-red-800 hover:bg-red-700 border border-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md text-sm shrink-0">
+          <i class="fa-solid fa-trash mr-2"></i>
+          Clear Log
+        </button>
+      </div>
+    </div>
+    
+    <div #logContainer class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-gray-400 overflow-y-auto min-h-0">
+      @for(log of filteredLogs(); track log.timestamp + log.message) {
+        <div class="flex items-start">
+          <span class="text-gray-500 mr-4">{{ log.timestamp | date:'HH:mm:ss' }}</span>
+          <span class="font-bold w-14" [class]="getLogLevelClass(log.level)">[{{ log.level }}]</span>
+          <p class="whitespace-pre-wrap flex-1">{{ log.message }}</p>
+        </div>
+      } @empty {
+        <p class="text-gray-500">No matching log entries found...</p>
+      }
+    </div>
+  </div>
+</main>

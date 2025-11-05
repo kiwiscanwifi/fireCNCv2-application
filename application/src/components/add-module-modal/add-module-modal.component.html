@@ -1,0 +1,37 @@
+<!--
+  File: src/components/add-module-modal/add-module-modal.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the modal dialog to add new expansion modules.
+-->
+<div class="fixed inset-0 bg-black/60 flex items-center justify-center z-50 backdrop-blur-sm" (click)="onClose()">
+  <div class="bg-gray-800 border border-gray-700 rounded-lg shadow-2xl p-6 w-full max-w-2xl m-4" (click)="$event.stopPropagation()">
+    <div class="flex justify-between items-center mb-4">
+        <h3 class="text-lg font-bold text-gray-100">Add Expansion Module</h3>
+        <button (click)="onClose()" type="button" class="text-gray-400 hover:text-white">
+            <i class="fa-solid fa-times"></i>
+        </button>
+    </div>
+    
+    <div class="max-h-[60vh] overflow-y-auto pr-2 space-y-3">
+        @for (module of availableModules(); track module.fileName) {
+            <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 flex justify-between items-center">
+                <div>
+                    <h4 class="font-semibold text-gray-200">{{ module.moduleName }}</h4>
+                    <p class="text-sm text-gray-500">Version: {{ module.version }}</p>
+                </div>
+                <button (click)="install(module)" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md text-sm">
+                    <i class="fa-solid fa-download mr-2"></i>
+                    Install
+                </button>
+            </div>
+        } @empty {
+            <p class="text-center text-gray-500 py-8">No available modules found.</p>
+        }
+    </div>
+  </div>
+</div>

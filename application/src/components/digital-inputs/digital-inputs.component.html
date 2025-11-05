@@ -1,0 +1,29 @@
+<!--
+  File: src/components/digital-inputs/digital-inputs.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Digital Inputs component. Renders the UI with status
+  indicators for each of the 8 digital inputs.
+-->
+@if (visibleInputs().length > 0) {
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-8">
+    @for(input of visibleInputs(); track input.id) {
+      <div class="flex flex-col items-center space-y-2">
+        <span class="font-semibold text-gray-400">{{ input.name }}</span>
+        <div class="w-8 h-8 rounded-full flex items-center justify-center" [class]="input.state ? 'bg-green-500/20' : 'bg-gray-700'">
+          <div class="w-4 h-4 rounded-full transition-colors duration-300" 
+               [class]="input.state ? 'bg-green-400 shadow-[0_0_8px_#34d399]' : 'bg-gray-500'">
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+} @else {
+  <div class="text-center text-gray-500 text-sm">
+    No digital inputs are enabled.
+  </div>
+}

@@ -1,0 +1,29 @@
+<!--
+  File: src/components/servo-monitor/servo-monitor.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Digital Inputs component. Renders the UI with status
+  indicators for each of the 8 digital inputs.
+-->
+<div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+  <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
+    <i class="fa-solid fa-eye mr-3 text-orange-400"></i>
+    Digital Inputs (8-DI)
+  </h2>
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-8">
+    @for(inputState of digitalInputs(); track $index) {
+      <div class="flex flex-col items-center space-y-2">
+        <span class="font-semibold text-gray-400">DI {{ $index }}</span>
+        <div class="w-8 h-8 rounded-full flex items-center justify-center" [class]="inputState ? 'bg-green-500/20' : 'bg-gray-700'">
+          <div class="w-4 h-4 rounded-full transition-colors duration-300" 
+               [class]="inputState ? 'bg-green-400 shadow-[0_0_8px_#34d399]' : 'bg-gray-500'">
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

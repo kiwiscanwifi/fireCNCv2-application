@@ -1,0 +1,38 @@
+<!--
+  File: src/pages/console/console.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Console page. Renders a full-page live log viewer.
+-->
+<main class="flex-grow flex flex-col">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg flex flex-col flex-grow">
+    <div class="flex justify-between items-center mb-4">
+      <h3 class="text-xl font-bold text-gray-300 flex items-center">
+        <i class="fa-solid fa-terminal mr-3 text-orange-400"></i>
+        Live Console Log
+      </h3>
+      <button (click)="clearLogs()" class="bg-red-800 hover:bg-red-700 border border-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md text-sm">
+        <i class="fa-solid fa-trash mr-2"></i>
+        Clear Log
+      </button>
+    </div>
+    
+    <div #logContainer class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-gray-400 overflow-y-auto min-h-0">
+      @for(log of logs(); track $index) {
+        <p class="whitespace-pre-wrap text-lime-400">
+          <span>{{ log }}</span>
+        </p>
+      } @empty {
+        @if (webSocketService.connectionStatus() === 'connecting') {
+           <p class="text-gray-500">Connecting to device log...</p>
+        } @else {
+           <p class="text-gray-500">Awaiting device logs...</p>
+        }
+      }
+    </div>
+  </div>
+</main>

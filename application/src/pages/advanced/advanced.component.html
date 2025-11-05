@@ -1,0 +1,60 @@
+<!--
+  File: src/pages/advanced/advanced.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the Advanced page. Provides access to raw file editors.
+-->
+<main class="flex-grow">
+  <div class="space-y-4">
+    <!-- Advanced Management Card -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+      <button (click)="toggleAdvanced()" type="button" class="w-full text-left p-4 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+        <h2 class="text-xl font-bold text-gray-300 flex items-center">
+          <i class="fa-solid fa-file-code mr-3 text-orange-400"></i>
+          Advanced Management
+        </h2>
+        <i class="fa-solid transition-transform duration-300" [class]="isAdvancedOpen() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+      </button>
+      @if (isAdvancedOpen()) {
+        <div class="p-6 border-t border-gray-700 space-y-4">
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-gray-300">Raw Configuration File</h3>
+              <p class="text-sm text-gray-400 mt-1">Edit the raw JSON configuration file directly. Changes will be applied after saving.</p>
+            </div>
+            <a routerLink="/settings/config-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
+              <i class="fa-solid fa-pen-to-square mr-2"></i>
+              <span>Edit config.json</span>
+            </a>
+          </div>
+          <div class="border-t border-gray-700/50"></div>
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-gray-300">Changelog Management</h3>
+              <p class="text-sm text-gray-400 mt-1">Edit the changelog entries directly. Changes are reflected on the Change Log page.</p>
+            </div>
+            <a routerLink="/settings/changelog-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
+              <i class="fa-solid fa-pen-to-square mr-2"></i>
+              <span>Edit Changelog</span>
+            </a>
+          </div>
+          <div class="border-t border-gray-700/50"></div>
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-gray-300">Reference Content Management</h3>
+              <p class="text-sm text-gray-400 mt-1">Edit the markdown content displayed on the GPIO Reference page.</p>
+            </div>
+            <a routerLink="/settings/reference-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
+              <i class="fa-solid fa-pen-to-square mr-2"></i>
+              <span>Edit reference.txt</span>
+            </a>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+</main>
