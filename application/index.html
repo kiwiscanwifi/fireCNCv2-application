@@ -1,0 +1,64 @@
+<!--
+  File: index.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  The main HTML document for the fireCNC application. It sets up the page structure,
+  loads Tailwind CSS, FontAwesome, and the application's root component.
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>fireCNC</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/x-icon" href="favicon.ico">
+  <!-- 
+    NOTE: The following script is for Tailwind CSS. It uses a Just-in-Time (JIT) compiler
+    that runs in the browser. Making this fully offline would require a build step
+    to pre-generate the CSS, which is not possible in this environment.
+  -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 
+    REMOVED: Marked.js CDN link. Markdown parsing is now handled by a local
+    function within the relevant components.
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" integrity="sha512-SnH5WK+bZxgPHs44uWIX+LLJAJ9/2PkPKZ5QiAj6Ta86w+fsb2TkcmfRyVX3pBnMFcV7oQPJkl9QevSCWr3W6A==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="src/style.css">
+  <!-- CodeMirror CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+<script type="importmap">
+{
+  "imports": {
+    "rxjs": "https://aistudiocdn.com/rxjs@^7.8.2?conditions=es2015",
+    "rxjs/operators": "https://aistudiocdn.com/rxjs@^7.8.2/operators?conditions=es2015",
+    "rxjs/ajax": "https://aistudiocdn.com/rxjs@^7.8.2/ajax?conditions=es2015",
+    "rxjs/webSocket": "https://aistudiocdn.com/rxjs@^7.8.2/webSocket?conditions=es2015",
+    "rxjs/testing": "https://aistudiocdn.com/rxjs@^7.8.2/testing?conditions=es2015",
+    "rxjs/fetch": "https://aistudiocdn.com/rxjs@^7.8.2/fetch?conditions=es2015",
+    "@angular/compiler": "https://next.esm.sh/@angular/compiler@^20.3.9?external=rxjs",
+    "@angular/platform-browser": "https://next.esm.sh/@angular/platform-browser@^20.3.9?external=rxjs",
+    "@angular/core": "https://next.esm.sh/@angular/core@^20.3.9?external=rxjs",
+    "@angular/common": "https://next.esm.sh/@angular/common@^20.3.9?external=rxjs",
+    "@angular/router": "https://next.esm.sh/@angular/router@^20.3.9?external=rxjs",
+    "@angular/forms": "https://next.esm.sh/@angular/forms@^20.3.9?external=rxjs",
+    "@angular/core/rxjs-interop": "https://next.esm.sh/@angular/core@^20.3.9/rxjs-interop?external=rxjs"
+  }
+}
+</script>
+</head>
+<body class="bg-gray-900 text-gray-100 font-sans">
+  <app-root></app-root>
+  <!-- CodeMirror JS -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/javascript/javascript.min.js"></script>
+</body>
+</html>

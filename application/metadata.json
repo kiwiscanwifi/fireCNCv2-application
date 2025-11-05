@@ -1,0 +1,5 @@
+{
+  "name": "fireCNC",
+  "description": "A web-based control panel for the fireCNC machine. Control digital outputs and monitor digital inputs in real-time.",
+  "requestFramePermissions": []
+}
