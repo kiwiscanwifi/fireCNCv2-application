@@ -27,7 +27,7 @@ export class SystemLogService implements OnDestroy {
   private snmpConfigService = inject(SnmpConfigService);
   
   private readonly MAX_LOG_ENTRIES = 200;
-  private logFetchInterval: any;
+  private logFetchInterval: number | null = null;
   private readonly levelSeverity: Record<LogLevel, number> = {
     'DEBUG': 0,
     'INFO': 1,
@@ -42,7 +42,9 @@ export class SystemLogService implements OnDestroy {
   }
 
   ngOnDestroy() {
-    clearInterval(this.logFetchInterval);
+    if (this.logFetchInterval !== null) {
+      clearInterval(this.logFetchInterval);
+    }
   }
 
   private startLogSimulation() {
@@ -52,7 +54,7 @@ export class SystemLogService implements OnDestroy {
     this.generateLogEntry();
 
     // Then, add new entries periodically
-    this.logFetchInterval = setInterval(() => {
+    this.logFetchInterval = window.setInterval(() => {
       this.generateLogEntry();
     }, 3000); // Fetch/simulate new log data every 3 seconds
   }

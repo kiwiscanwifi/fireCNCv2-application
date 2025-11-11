@@ -13,9 +13,9 @@ import { CommonModule, NgOptimizedImage } from '@angular/common';
 import { RouterLink } from '@angular/router';
 
 @Component({
-  selector: 'app-waveshare-rs485-hub-4p',
+  selector: 'app-waveshare-rs485-hub',
   imports: [CommonModule, NgOptimizedImage, RouterLink],
   templateUrl: './waveshare-rs485-hub-4p.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class WaveshareRs485Hub4pComponent {}
+export class WaveshareRs485HubComponent {}

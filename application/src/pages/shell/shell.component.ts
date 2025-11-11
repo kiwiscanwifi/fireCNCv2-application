@@ -36,12 +36,15 @@ export class ShellComponent {
 
   prompt = computed(() => `fireCNC:${this.shellService.cwd()}$ `);
 
+  private commandHistory = this.shellService.commandHistory;
+  private historyIndex = 0;
+
   constructor() {
     // Add a welcome message to the history on initialization
     this.history.set([{
       command: '',
       prompt: '',
-      output: "fireCNC Shell v1.0.0\nType 'help' for a list of available commands."
+      output: "fireCNC Shell v1.0.1\nType 'help' for a list of available commands."
     }]);
 
     // Effect to automatically scroll to the bottom when history changes
@@ -55,23 +58,28 @@ export class ShellComponent {
     afterNextRender(() => {
       this.focusInput();
     });
+
+    // Effect to keep the history navigation index in sync
+    effect(() => {
+      this.historyIndex = this.commandHistory().length;
+    });
   }
 
   onCommandSubmit(): void {
     const command = this.commandControl.value.trim();
     this.commandControl.setValue('');
-    
+    if (!command) return;
+
+    const output = this.shellService.executeCommand(command);
+
     if (command.toLowerCase() === 'clear') {
       this.history.set([]);
-      return;
+    } else {
+      this.history.update(current => [
+        ...current,
+        { command, output, prompt: this.prompt() }
+      ]);
     }
-    
-    const output = this.shellService.executeCommand(command);
-    
-    this.history.update(current => [
-      ...current,
-      { command, output, prompt: this.prompt() }
-    ]);
   }
 
   focusInput(): void {
@@ -88,6 +96,30 @@ export class ShellComponent {
       container.scrollTop = container.scrollHeight;
     } catch (err) {
       console.error('Error scrolling terminal to bottom:', err);
+    }
+  }
+
+  handleKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter') {
+      this.onCommandSubmit();
+      return;
+    }
+    
+    const history = this.commandHistory();
+    if (history.length === 0) return;
+    
+    if (event.key === 'ArrowUp') {
+      event.preventDefault();
+      this.historyIndex = Math.max(0, this.historyIndex - 1);
+      this.commandControl.setValue(history[this.historyIndex] ?? '');
+    } else if (event.key === 'ArrowDown') {
+      event.preventDefault();
+      this.historyIndex = Math.min(history.length, this.historyIndex + 1);
+      if (this.historyIndex >= history.length) {
+        this.commandControl.setValue('');
+      } else {
+        this.commandControl.setValue(history[this.historyIndex]);
+      }
     }
   }
 }

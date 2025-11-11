@@ -12,7 +12,6 @@
 import { ChangeDetectionStrategy, Component, Signal, inject, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ArduinoService } from '../../services/arduino.service';
-import { DashboardSettingsService } from '../../services/dashboard-settings.service';
 
 @Component({
   selector: 'app-digital-outputs',
@@ -22,7 +21,6 @@ import { DashboardSettingsService } from '../../services/dashboard-settings.serv
 })
 export class DigitalOutputsComponent {
   private arduinoService = inject(ArduinoService);
-  // No longer injecting DashboardSettingsService for output config, use ArduinoService directly
   
   private digitalOutputsState: Signal<boolean[]> = this.arduinoService.digitalOutputs;
   private digitalOutputsConfig = this.arduinoService.digitalOutputsConfig; // Use ArduinoService for config

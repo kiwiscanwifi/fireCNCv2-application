@@ -1,0 +1,47 @@
+<main class="flex-grow flex flex-col select-text">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
+    <h3 class="text-xl font-bold text-gray-300 flex items-center">
+      <i class="fa-solid fa-folder-open mr-3 text-orange-400"></i>
+      Configuration Backups
+    </h3>
+    <a routerLink="/settings/landing" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+      Back
+    </a>
+  </div>
+  <div class="flex-grow grid grid-cols-1 md:grid-cols-4 gap-6 min-h-0">
+    <!-- Backup List -->
+    <div class="md:col-span-1 bg-gray-800/50 border border-gray-700 rounded-lg p-4 shadow-lg overflow-y-auto">
+      <h4 class="font-bold text-gray-300 mb-2">Available Versions</h4>
+      @if (backups().length > 0) {
+        <ul>
+          @for (backup of backups(); track backup.key) {
+            <li>
+              <button (click)="selectBackup(backup)"
+                      class="w-full text-left p-2 rounded-md font-mono text-sm"
+                      [class]="selectedBackup()?.key === backup.key ? 'bg-orange-500/20 text-orange-300' : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-200'">
+                Version {{ backup.version }}
+              </button>
+            </li>
+          }
+        </ul>
+      } @else {
+        <p class="text-sm text-gray-500 italic">No backups found.</p>
+      }
+    </div>
+    <!-- Config Viewer -->
+    <div class="md:col-span-3 bg-gray-900 border border-gray-700 rounded-lg shadow-lg flex flex-col overflow-hidden">
+      @if (selectedBackup(); as backup) {
+        <div class="p-4 border-b border-gray-700 text-gray-400 font-mono bg-gray-800/50">/etc/firecnc.conf (v{{ backup.version }})</div>
+        <div class="flex-grow relative">
+          <div #editorHost class="absolute inset-0">
+            <!-- CodeMirror will be attached here -->
+          </div>
+        </div>
+      } @else {
+        <div class="flex-grow flex items-center justify-center text-gray-500">
+            <p>Select a backup to view its content.</p>
+        </div>
+      }
+    </div>
+  </div>
+</main>

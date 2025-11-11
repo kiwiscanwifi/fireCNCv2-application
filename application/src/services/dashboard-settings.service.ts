@@ -1,6 +1,9 @@
 import { Injectable, signal, WritableSignal, inject, Injector } from '@angular/core';
 import { ConfigFileService } from './config-file.service';
 import { Module } from './module.service';
+import { NotificationService } from './notification.service'; // NEW
+import { StateService } from './state.service';
+import { ConfigManagementService } from './config-management.service';
 
 export interface DashboardWidget {
   id: 'digital-outputs' | 'digital-inputs' | 'system-details' | 'storage-info' | 'sram-info' | 'analog-inputs' | string;
@@ -70,21 +73,21 @@ export const DEFAULT_ANALOG_INPUTS: AnalogInputConfig[] = Array.from({ length: 4
   providedIn: 'root',
 })
 export class DashboardSettingsService {
+  private notificationService = inject(NotificationService);
+  private stateService = inject(StateService);
   private injector = inject(Injector);
-  private _configFileService?: ConfigFileService;
 
-  // Lazy-loaded to break circular dependency
-  private get configFileService(): ConfigFileService {
-    if (!this._configFileService) {
-      this._configFileService = this.injector.get(ConfigFileService);
+  private _configManagementService!: ConfigManagementService;
+  private get configManagementService(): ConfigManagementService {
+    if (!this._configManagementService) {
+      this._configManagementService = this.injector.get(ConfigManagementService);
     }
-    return this._configFileService;
+    return this._configManagementService;
   }
 
-  layout: WritableSignal<DashboardLayout> = signal(DEFAULT_LAYOUT);
-  // MOVED: digitalOutputsConfig is now in ArduinoService
-  // MOVED: digitalInputsConfig is now in ArduinoService
-  analogInputsConfig: WritableSignal<AnalogInputConfig[]> = signal(DEFAULT_ANALOG_INPUTS);
+  // State is now read from StateService
+  layout = this.stateService.layout;
+  analogInputsConfig = this.stateService.analogInputsConfig;
 
   constructor() {
     // The constructor is now empty. The initial state is set by `setConfig`
@@ -127,57 +130,18 @@ export class DashboardSettingsService {
    */
   setConfig(layout: DashboardLayout | undefined, analogInputs: AnalogInputConfig[] | undefined) {
     this.layout.set(layout || this.getDefaultLayout());
-    // Digital outputs and inputs are now managed directly by ConfigFileService and ArduinoService.
     this.analogInputsConfig.set(analogInputs || this.getDefaultAnalogInputs());
   }
 
   /**
-   * Initiates an update to the dashboard layout.
+   * Stages an update to the dashboard layout.
    * @param newLayout The new layout to be saved to config.json.
    */
-  updateLayout(newLayout: DashboardLayout) {
+  updateLayout(newLayout: DashboardLayout): void {
     this.layout.set(newLayout);
-    this.configFileService.updateDashboardLayout(newLayout);
+    this.configManagementService.updateDashboardLayout(newLayout);
+    // The component is responsible for calling commitChanges()
   }
-
-  /**
-   * Updates the title of a specific dashboard widget and persists the change.
-   * @param widgetId The ID of the widget whose title to update.
-   * @param newTitle The new title for the widget.
-   */
-  public updateWidgetTitle(widgetId: string, newTitle: string): void {
-    const currentLayout = JSON.parse(JSON.stringify(this.layout())); // Deep copy
-    let widgetFound = false;
-    for (const col of [currentLayout.column1, currentLayout.column2]) {
-      const widget = col.find((w: DashboardWidget) => w.id === widgetId);
-      if (widget) {
-        widget.title = newTitle;
-        widgetFound = true;
-        break;
-      }
-    }
-    if (widgetFound) {
-      this.updateLayout(currentLayout); // This will trigger the save via ConfigFileService
-    }
-  }
-
-  /**
-   * Initiates an update to the digital outputs configuration.
-   * @param newConfig The new config to be saved.
-   */
-  // REMOVED: This method is now obsolete as OnboardSettingsComponent will call ConfigFileService directly.
-  // updateDigitalOutputsConfig(newConfig: DigitalOutputConfig[]) {
-  //   this.configFileService.updateDigitalOutputsConfig(newConfig);
-  // }
-
-  /**
-   * Initiates an update to the digital inputs configuration.
-   * @param newConfig The new config to be saved.
-   */
-  // REMOVED: This method is now obsolete as OnboardSettingsComponent will call ConfigFileService directly.
-  // updateDigitalInputsConfig(newConfig: DigitalInputConfig[]) {
-  //   this.configFileService.updateDigitalInputsConfig(newConfig);
-  // }
 
   /**
    * Initiates an update to the analog inputs configuration.
@@ -185,7 +149,9 @@ export class DashboardSettingsService {
    */
   updateAnalogInputsConfig(newConfig: AnalogInputConfig[]) {
     this.analogInputsConfig.set(newConfig);
-    this.configFileService.updateAnalogInputsConfig(newConfig);
+    // This is a slice of a different config section, so we don't save it here.
+    // The DashboardSettingsComponent will handle saving via ConfigManagementService.
+    console.warn('Staged Analog Input config change. Awaiting commit.');
   }
 
   /**
@@ -198,7 +164,7 @@ export class DashboardSettingsService {
   }
 
   /**
-   * Toggles the enabled state of a widget and initiates a save.
+   * Toggles the enabled state of a widget and stages a save.
    * @param widgetId The ID of the widget to toggle.
    */
   toggleWidget(widgetId: DashboardWidget['id']) {
@@ -213,8 +179,7 @@ export class DashboardSettingsService {
       }
     }
     if (widgetFound) {
-      this.layout.set(newLayout);
-      this.configFileService.updateDashboardLayout(newLayout);
+      this.updateLayout(newLayout);
     }
   }
 

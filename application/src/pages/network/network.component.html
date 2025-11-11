@@ -1,9 +1,12 @@
 <main class="flex-grow">
   <form [formGroup]="networkSettingsForm" (ngSubmit)="saveNetworkSettings()">
     <!-- Header for Save/Reset Actions -->
-    <div class="py-4 mb-4 border-b border-gray-700">
+    <div class="mb-4">
       <div class="flex justify-between items-center">
-        <h2 class="text-2xl font-bold text-gray-200">Network</h2>
+        <h2 class="text-xl font-bold text-gray-200 flex items-center">
+          <i class="fa-solid fa-network-wired mr-3 text-orange-400"></i>
+          Network
+        </h2>
         <div class="flex gap-4">
           <button type="button" (click)="resetNetworkSettings()" [disabled]="!networkSettingsForm.dirty"
             class="bg-gray-600 hover:bg-gray-700 disabled:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
@@ -11,7 +14,7 @@
           </button>
           <button type="submit" [disabled]="!networkSettingsForm.dirty || networkSettingsForm.invalid"
             class="bg-orange-500 hover:bg-orange-600 disabled:bg-orange-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 shadow-md">
-            Save Changes
+            Save
           </button>
         </div>
       </div>
@@ -31,11 +34,14 @@
                   <input id="staticIp" formControlName="STATIC_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
                     [class]="networkSettingsForm.get('network.STATIC_IP')?.invalid && networkSettingsForm.get('network.STATIC_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
                 </div>
+                <!-- REMOVED: Subnet Mask for Ethernet -->
+                <!--
                 <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
                   <label for="subnet" class="font-semibold text-gray-300">Subnet Mask</label>
                   <input id="subnet" formControlName="SUBNET" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
                     [class]="networkSettingsForm.get('network.SUBNET')?.invalid && networkSettingsForm.get('network.SUBNET')?.touched ? 'border-red-500' : 'border-gray-600'">
                 </div>
+                -->
                 <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
                   <label for="gateway" class="font-semibold text-gray-300">Default Gateway</label>
                   <input id="gateway" formControlName="GATEWAY_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
@@ -112,11 +118,14 @@
                           <input id="wifiStationStaticIp" formControlName="WIFI_STATION_STATIC_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
                             [class]="networkSettingsForm.get('network.WIFI_STATION_STATIC_IP')?.invalid && networkSettingsForm.get('network.WIFI_STATION_STATIC_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
                         </div>
+                        <!-- REMOVED: Subnet Mask for Wi-Fi Station Static IP -->
+                        <!--
                         <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
                           <label for="wifiStationStaticSubnet" class="font-semibold text-gray-300">Subnet Mask</label>
                           <input id="wifiStationStaticSubnet" formControlName="WIFI_STATION_STATIC_SUBNET" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
                             [class]="networkSettingsForm.get('network.WIFI_STATION_STATIC_SUBNET')?.invalid && networkSettingsForm.get('network.WIFI_STATION_STATIC_SUBNET')?.touched ? 'border-red-500' : 'border-gray-600'">
                         </div>
+                        -->
                         <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
                           <label for="wifiStationStaticGateway" class="font-semibold text-gray-300">Default Gateway</label>
                           <input id="wifiStationStaticGateway" formControlName="WIFI_STATION_STATIC_GATEWAY" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
@@ -151,11 +160,14 @@
                       <input id="apIp" formControlName="AP_IP" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
                         [class]="networkSettingsForm.get('network.AP_IP')?.invalid && networkSettingsForm.get('network.AP_IP')?.touched ? 'border-red-500' : 'border-gray-600'">
                     </div>
+                    <!-- REMOVED: AP Subnet Mask -->
+                    <!--
                     <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
                       <label for="apSubnet" class="font-semibold text-gray-300">AP Subnet Mask</label>
                       <input id="apSubnet" formControlName="AP_SUBNET" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1.5 font-mono text-right w-48"
                         [class]="networkSettingsForm.get('network.AP_SUBNET')?.invalid && networkSettingsForm.get('network.AP_SUBNET')?.touched ? 'border-red-500' : 'border-gray-600'">
                     </div>
+                    -->
                   </div>
 
                   <div class="my-4 border-t border-gray-700/50"></div>
@@ -219,6 +231,18 @@
         <div class="lg:col-span-2 bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg">
           <div class="p-6" formGroupName="snmp">
             <app-snmp-settings></app-snmp-settings>
+            <!-- NEW: Error message for TRAP_TARGET -->
+            @if (networkSettingsForm.get('snmp.TRAPS_ENABLED')?.value && 
+                 networkSettingsForm.get('snmp.TRAP_TARGET')?.invalid && 
+                 networkSettingsForm.get('snmp.TRAP_TARGET')?.touched) {
+              <div class="mt-2 p-2 bg-red-900/50 border border-red-700 text-red-300 rounded-lg text-sm">
+                @if (networkSettingsForm.get('snmp.TRAP_TARGET')?.hasError('required')) {
+                  <p><i class="fa-solid fa-triangle-exclamation mr-2"></i>Trap Target IP is required when traps are enabled.</p>
+                } @else if (networkSettingsForm.get('snmp.TRAP_TARGET')?.hasError('pattern')) {
+                  <p><i class="fa-solid fa-triangle-exclamation mr-2"></i>Please enter a valid IP address or 'localhost' for the Trap Target.</p>
+                }
+              </div>
+            }
           </div>
         </div>
     </div>

@@ -1,4 +1,5 @@
-import { Injectable, signal, WritableSignal } from '@angular/core';
+import { Injectable, signal, WritableSignal, inject } from '@angular/core';
+import { StateService } from './state.service';
 
 export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 'restarting';
 
@@ -6,25 +7,31 @@ export type ConnectionStatus = 'connecting' | 'connected' | 'disconnected' | 're
   providedIn: 'root',
 })
 export class WebSocketService {
+  private stateService = inject(StateService);
   private readonly MAX_LOG_ENTRIES = 100;
-  private connectionTimeout: any; // Manages simulated connection delay
+  private connectionTimeout: number | null = null; // Manages simulated connection delay
 
-  connectionStatus: WritableSignal<ConnectionStatus> = signal('disconnected');
-  logMessages: WritableSignal<string[]> = signal([]);
-  lastConnectedTimestamp: WritableSignal<number | null> = signal(null);
+  // State is now managed by StateService
+  connectionStatus = this.stateService.connectionStatus;
+  logMessages = this.stateService.logMessages;
+  lastConnectedTimestamp = this.stateService.lastConnectedTimestamp;
+  lastFailedTimestamp = this.stateService.lastFailedTimestamp;
 
   /**
    * Simulates a WebSocket connection attempt, transitioning through 'connecting' to 'connected'.
    */
   public simulateConnect(): void {
-    clearTimeout(this.connectionTimeout); // Clear any pending simulated connections
+    if (this.connectionTimeout !== null) {
+      clearTimeout(this.connectionTimeout); // Clear any pending simulated connections
+    }
     this.connectionStatus.set('connecting');
     this.addLogMessage('--- Simulating WebSocket connection... ---');
 
     // Simulate a connection delay
-    this.connectionTimeout = setTimeout(() => {
+    this.connectionTimeout = window.setTimeout(() => {
       this.connectionStatus.set('connected');
       this.lastConnectedTimestamp.set(Date.now());
+      this.lastFailedTimestamp.set(null); // Clear on successful connection
       this.addLogMessage('--- Simulated WebSocket connection established ---');
     }, 2000); // Simulate a 2-second connection time
   }
@@ -33,11 +40,14 @@ export class WebSocketService {
    * Simulates a disconnection from the WebSocket.
    */
   public simulateDisconnect(): void {
-    clearTimeout(this.connectionTimeout); // Clear any pending simulated connections
+    if (this.connectionTimeout !== null) {
+      clearTimeout(this.connectionTimeout); // Clear any pending simulated connections
+    }
     // Only set to disconnected if not already in a restarting state
     if (this.connectionStatus() !== 'restarting') {
         this.connectionStatus.set('disconnected');
         this.lastConnectedTimestamp.set(null);
+        this.lastFailedTimestamp.set(Date.now()); // Set on disconnection
         this.addLogMessage('--- Simulated WebSocket connection disconnected ---');
     }
   }
@@ -46,9 +56,12 @@ export class WebSocketService {
    * Sets the connection status to 'restarting'.
    */
   public setRestarting(): void {
-    clearTimeout(this.connectionTimeout); // Clear any pending simulated connections
+    if (this.connectionTimeout !== null) {
+      clearTimeout(this.connectionTimeout); // Clear any pending simulated connections
+    }
     this.connectionStatus.set('restarting');
     this.lastConnectedTimestamp.set(null); // Clear timestamp
+    this.lastFailedTimestamp.set(Date.now()); // Set on restarting (as it's a temporary break in connection)
     this.addLogMessage('--- Simulated WebSocket connection restarting ---');
   }
 

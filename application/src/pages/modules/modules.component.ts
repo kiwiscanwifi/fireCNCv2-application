@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, WritableSignal, afterNextRender, effect, inject, viewChild, ElementRef, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, WritableSignal, effect, inject, viewChild, ElementRef, OnInit, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ModuleService } from '../../services/module.service';
 
@@ -18,7 +18,7 @@ export class ModulesPageComponent implements OnInit {
   errorMessage: WritableSignal<string | null> = signal(null);
   isDirty = signal(false);
 
-  editorHost = viewChild.required<ElementRef<HTMLDivElement>>('editorHost');
+  editorHost = viewChild<ElementRef<HTMLDivElement>>('editorHost');
   private editor: any; // CodeMirror instance
 
   constructor() {
@@ -27,7 +27,27 @@ export class ModulesPageComponent implements OnInit {
       this.errorMessage.set(this.moduleService.lastSaveError());
     });
     
-    afterNextRender(() => this.initializeCodeMirror());
+    // Initialize CodeMirror once the host element is available
+    effect(() => {
+      const host = this.editorHost();
+      if (host && !this.editor) {
+        this.initializeCodeMirror(host);
+      }
+    });
+
+    // Update editor content when a different file is selected
+    effect(() => {
+      const fileName = this.selectedFile();
+      if (fileName && this.editor) {
+        const contentSignal = this.moduleService.getModuleFileContent(fileName);
+        const content = contentSignal ? contentSignal() : '';
+        if (this.editor.getValue() !== content) {
+          this.editor.setValue(content);
+          this.editor.markClean();
+          this.isDirty.set(false);
+        }
+      }
+    });
   }
 
   ngOnInit(): void {
@@ -38,9 +58,9 @@ export class ModulesPageComponent implements OnInit {
     }
   }
 
-  private initializeCodeMirror(): void {
+  private initializeCodeMirror(host: ElementRef<HTMLDivElement>): void {
     try {
-      this.editor = CodeMirror(this.editorHost().nativeElement, {
+      this.editor = CodeMirror(host.nativeElement, {
         lineNumbers: true,
         theme: 'dracula',
         mode: { name: 'javascript', json: true },
@@ -50,6 +70,16 @@ export class ModulesPageComponent implements OnInit {
       this.editor.on('change', () => {
         this.isDirty.set(true);
       });
+
+      // Set initial content if a file is already selected
+      const initialFile = this.selectedFile();
+      if (initialFile) {
+        const contentSignal = this.moduleService.getModuleFileContent(initialFile);
+        const content = contentSignal ? contentSignal() : '';
+        this.editor.setValue(content);
+        this.editor.markClean();
+        this.isDirty.set(false);
+      }
     } catch (e) {
       console.error("Failed to initialize CodeMirror:", e);
     }
@@ -61,16 +91,6 @@ export class ModulesPageComponent implements OnInit {
     }
     this.selectedFile.set(fileName);
     this.errorMessage.set(null);
-    
-    const contentSignal = this.moduleService.getModuleFileContent(fileName);
-    const content = contentSignal ? contentSignal() : '';
-    
-    if (this.editor) {
-      this.editor.setValue(content);
-      // Use a timeout to ensure the refresh happens after the DOM is fully settled.
-      setTimeout(() => this.editor.refresh(), 10);
-    }
-    
     this.isDirty.set(false);
   }
 

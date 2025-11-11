@@ -1,8 +1,8 @@
-import { ChangeDetectionStrategy, Component, Signal, signal, computed, inject, WritableSignal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, signal, computed, inject, WritableSignal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SnmpService, SramInfo, EepromInfo } from '../../services/snmp.service';
-import { ArduinoService, SdCardInfo, HealthStats } from '../../services/arduino.service';
+import { ArduinoService, SdCardInfo, HealthStats, LedsConfig, LedsState, SnmpConfig } from '../../services/arduino.service';
 import { SnmpConfigService } from '../../services/snmp-config.service';
 import { ServoControlService } from '../../services/servo-control.service';
 import { ServoPositions, ServoLimits } from '../../services/snmp.service';
@@ -23,27 +23,48 @@ export class SnmpPageComponent {
   private dashboardSettingsService = inject(DashboardSettingsService);
   private moduleService = inject(ModuleService);
 
+  // FIX: These signals should come from the snmpService, not the arduinoService facade.
   adcVoltage: Signal<number> = this.snmpService.adcVoltage;
   temperature: Signal<number> = this.snmpService.temperature;
-  uptime: Signal<string> = this.snmpService.uptime;
+  // FIX: Use computed() for signals, not .pipe(map()).
+  uptime: Signal<string> = computed(() => this.arduinoService.systemInfo().uptime);
   sdCardInfo: Signal<SdCardInfo> = this.arduinoService.sdCardInfo;
+  healthStats: Signal<HealthStats> = this.arduinoService.healthStats;
+  // FIX: source snmpConfig from snmpConfigService to ensure consistency with update logic.
+  snmpConfig: Signal<SnmpConfig> = this.snmpConfigService.config;
+  ledsConfig: Signal<LedsConfig> = this.arduinoService.ledsConfig;
+  ledsState: Signal<LedsState> = this.arduinoService.ledsState;
+  
+  isAgentEnabled: Signal<boolean> = computed(() => this.snmpConfig().AGENT_ENABLED);
+  displayOid: Signal<boolean> = computed(() => this.snmpConfig().DISPLAY_OID_ON_STATUS_PAGE);
+
+  // FIX: These computed signals should be sourced from snmpService.
+  ledPowerConsumption: Signal<number> = this.snmpService.ledPowerConsumption;
   sdCardAvailableGb: Signal<number> = this.snmpService.sdCardAvailableGb;
   sdCardPercentFree: Signal<number> = this.snmpService.sdCardPercentFree;
-  healthStats: Signal<HealthStats> = this.snmpService.healthStats;
-  isAgentEnabled: Signal<boolean> = computed(() => this.snmpConfigService.config().AGENT_ENABLED);
-  displayOid: Signal<boolean> = computed(() => this.snmpConfigService.config().DISPLAY_OID_ON_STATUS_PAGE);
+  sramUsedPercent: Signal<number> = this.snmpService.sramUsedPercent;
+  sramFragmentationPercent: Signal<number> = this.snmpService.sramFragmentationPercent;
+  localStorageUsedMb: Signal<number> = this.snmpService.localStorageUsedMb;
+  localStorageAvailableMb: Signal<number> = this.snmpService.localStorageAvailableMb;
+  localStoragePercentFree: Signal<number> = this.snmpService.localStoragePercentFree;
+  eepromAvailableBytes: Signal<number> = this.snmpService.eepromAvailableBytes;
+  eepromPercentFree: Signal<number> = this.snmpService.eepromPercentFree;
+  sramInfo: Signal<SramInfo> = this.snmpService.sramInfo;
+  eepromInfo: Signal<EepromInfo> = this.snmpService.eepromInfo;
+
+  masterBrightnessPercent: Signal<number> = computed(() => {
+    return Math.round(this.ledsState().brightness / 2.55);
+  });
 
   // NEW: Signals for copied OID feedback
   copiedOid: WritableSignal<string | null> = signal(null);
   private copiedOidTimeout: any;
 
   private digitalOutputsState: Signal<boolean[]> = this.arduinoService.digitalOutputs;
-  // Fetch from ArduinoService instead of DashboardSettingsService
   private digitalOutputsConfig = this.arduinoService.digitalOutputsConfig;
 
   visibleDigitalOutputs = computed(() => {
     const outputsState = this.digitalOutputsState();
-    // Invoke the signal to get its value
     const outputsConfig = this.digitalOutputsConfig();
     
     return outputsConfig
@@ -56,12 +77,10 @@ export class SnmpPageComponent {
   });
 
   private digitalInputsState: Signal<boolean[]> = this.arduinoService.digitalInputs;
-  // Fetch from ArduinoService instead of DashboardSettingsService
   private digitalInputsConfig = this.arduinoService.digitalInputsConfig;
   
   visibleDigitalInputs = computed(() => {
     const inputsState = this.digitalInputsState();
-    // Invoke the signal to get its value
     const inputsConfig = this.digitalInputsConfig();
     
     return inputsConfig
@@ -77,6 +96,7 @@ export class SnmpPageComponent {
     x: Math.round(this.servoControlService.servoX().position),
     y: Math.round(this.servoControlService.servoY().position),
     yy: Math.round(this.servoControlService.servoYY().position),
+    z: Math.round(this.servoControlService.servoZ().position),
   }));
 
   servoLimits: Signal<ServoLimits> = computed(() => ({
@@ -86,25 +106,13 @@ export class SnmpPageComponent {
     y_max: this.servoControlService.servoY().limitMax,
     yy_min: this.servoControlService.servoYY().limitMin,
     yy_max: this.servoControlService.servoYY().limitMax,
+    z_min: this.servoControlService.servoZ().limitMin,
+    z_max: this.servoControlService.servoZ().limitMax,
   }));
-
-  // SRAM signals
-  sramInfo: Signal<SramInfo> = this.snmpService.sramInfo;
-  sramUsedPercent: Signal<number> = this.snmpService.sramUsedPercent;
-  sramFragmentationPercent: Signal<number> = this.snmpService.sramFragmentationPercent;
-
-  // Local Storage signals
-  localStorageUsedMb: Signal<number> = this.snmpService.localStorageUsedMb;
-  localStorageAvailableMb: Signal<number> = this.snmpService.localStorageAvailableMb;
-  localStoragePercentFree: Signal<number> = this.snmpService.localStoragePercentFree;
-
-  // EEPROM signals
-  eepromInfo: Signal<EepromInfo> = this.snmpService.eepromInfo;
-  eepromAvailableBytes: Signal<number> = this.snmpService.eepromAvailableBytes;
-  eepromPercentFree: Signal<number> = this.snmpService.eepromPercentFree;
   
   // Analog Input signals
   private analogInputsConfig = this.dashboardSettingsService.analogInputsConfig;
+  // FIX: Source analog input values from the snmpService
   private analogInputValues = this.snmpService.analogInputs;
 
   visibleAnalogInputs = computed(() => {
@@ -130,34 +138,27 @@ export class SnmpPageComponent {
       }));
   });
 
-  /**
-   * Toggles the display of OIDs on the status page and persists the change.
-   */
+  constructor() {}
+
   toggleDisplayOid(): void {
-    const currentConfig = this.snmpConfigService.config();
+    const currentConfig = this.snmpConfig();
     this.snmpConfigService.updateConfig({
       ...currentConfig,
       DISPLAY_OID_ON_STATUS_PAGE: !currentConfig.DISPLAY_OID_ON_STATUS_PAGE,
-    });
+    }, false); 
   }
 
-  /**
-   * Copies the given OID string to the clipboard and shows a temporary feedback.
-   * @param event The mouse event, to stop propagation.
-   * @param oid The OID string to copy.
-   */
   async copyOidToClipboard(event: MouseEvent, oid: string): Promise<void> {
-    event.stopPropagation(); // Prevent any parent click handlers
+    event.stopPropagation(); 
     try {
       await navigator.clipboard.writeText(oid);
       this.copiedOid.set(oid);
       clearTimeout(this.copiedOidTimeout);
       this.copiedOidTimeout = setTimeout(() => {
         this.copiedOid.set(null);
-      }, 2000); // Clear feedback after 2 seconds
+      }, 2000); 
     } catch (err) {
       console.error('Failed to copy OID to clipboard:', err);
-      // Optionally show a temporary error message to the user
     }
   }
 }

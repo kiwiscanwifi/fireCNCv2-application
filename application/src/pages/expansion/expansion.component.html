@@ -1,18 +1,8 @@
-<!--
-  File: src/pages/expansion/expansion.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
-
-  Description:
-  Template for the Expansion Modules page. Allows users to add and manage
-  hardware expansion modules.
--->
 <main class="flex-grow">
-  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
-    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-      <h2 class="text-2xl font-bold text-gray-200 flex items-center">
+  <!-- Header for Title and Action Buttons -->
+  <div class="sticky top-0 bg-gray-900/80 backdrop-blur-sm z-10 mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
           <i class="fa-solid fa-puzzle-piece mr-3 text-orange-400"></i>
           Expansion Modules
       </h2>
@@ -27,7 +17,11 @@
         </button>
       </div>
     </div>
+    <p class="text-gray-400 text-sm mt-2">Manage and configure external hardware modules for your fireCNC system.</p>
+  </div>
 
+  <!-- Main content card -->
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
     @if (installedModules().length > 0) {
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         @for (module of installedModules(); track module.id) {

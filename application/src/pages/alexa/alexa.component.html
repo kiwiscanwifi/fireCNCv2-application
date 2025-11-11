@@ -1,33 +1,32 @@
-<!--
-  File: src/pages/alexa/alexa.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
+<main class="flex-grow flex flex-col">
+  <!-- Header for Title and Action Buttons -->
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-brands fa-amazon mr-3 text-orange-400"></i>
+        Alexa
+      </h2>
+      <a routerLink="/dashboard" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 md:hidden">
+        Back
+      </a>
+    </div>
+  </div>
 
-  Description:
-  Template for the Alexa page. Renders a UI for monitoring and controlling
-  simulated Alexa devices.
--->
-<main class="flex-grow">
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
-    
-    <!-- Left Column: Log -->
-    <div class="lg:col-span-1 flex flex-col gap-6 lg:gap-8">
-      <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full flex flex-col">
-        <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
-          <i class="fa-solid fa-comment mr-3 text-orange-400"></i>
-          Announcements
-        </h2>
-        <div class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-cyan-300 overflow-y-auto min-h-[200px]">
-          @for(log of announcements(); track log) {
-            <p class="whitespace-pre-wrap">
-              <span class="text-gray-500 mr-2">{{ log.timestamp | date:'HH:mm:ss' }} ></span>{{ log.message }}
-            </p>
-          } @empty {
-            <p class="text-gray-500">Awaiting announcements...</p>
-          }
-        </div>
+  <div class="flex-grow grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
+    <!-- Announcements Log -->
+    <div class="lg:col-span-1 bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full flex flex-col">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-comment mr-3 text-orange-400"></i>
+        Announcements
+      </h2>
+      <div class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-cyan-300 overflow-y-auto min-h-[200px]">
+        @for(log of announcements(); track log) {
+          <p class="whitespace-pre-wrap">
+            <span class="text-gray-500 mr-2">{{ log.timestamp | date:'HH:mm:ss' }} ></span>{{ log.message }}
+          </p>
+        } @empty {
+          <p class="text-gray-500">Awaiting announcements...</p>
+        }
       </div>
     </div>
 
@@ -63,21 +62,21 @@
                   <div class="flex items-center space-x-3">
                     <input type="range" min="0" max="100" [value]="device.state.brightness" (input)="handleBrightness(device, $event)" 
                       [disabled]="!device.state.on"
-                      class="w-full h-2 bg-gray-700 rounded-lg cursor-pointer accent-orange-500">
+                      class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
                     <span class="font-mono text-orange-300 w-10 text-center">{{ device.state.brightness }}%</span>
                   </div>
                 </div>
               }
 
               @if (device.state.color !== undefined) {
-                 <div class="pt-2" [class.opacity-50]="!device.state.on">
-                   <label class="text-sm font-semibold text-gray-400">Color</label>
-                   <div class="flex items-center space-x-3">
+                <div class="pt-2" [class.opacity-50]="!device.state.on">
+                  <label class="text-sm font-semibold text-gray-400">Color</label>
+                  <div class="flex items-center space-x-3">
                     <input type="color" [value]="device.state.color" (input)="handleColor(device, $event)" 
                       [disabled]="!device.state.on"
                       class="p-1 h-10 w-full block bg-gray-700 border border-gray-600 rounded-lg">
-                   </div>
-                 </div>
+                  </div>
+                </div>
               }
             </div>
           }
@@ -88,6 +87,5 @@
         </div>
       }
     </div>
-
   </div>
 </main>

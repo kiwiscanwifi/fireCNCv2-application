@@ -1,20 +1,17 @@
-<!--
-  File: src/pages/help/help.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
-
-  Description:
-  Template for the Help page. Renders a user guide in an accordion format.
--->
 <main class="flex-grow">
-  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
-    <h2 class="text-2xl font-bold text-gray-300 mb-6 flex items-center">
-      <i class="fa-solid fa-book-open mr-3 text-orange-400"></i>
-      Application Help
-    </h2>
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-book-open mr-3 text-orange-400"></i>
+        Application Help
+      </h2>
+      <a routerLink="/information/landing" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 md:hidden">
+        Back
+      </a>
+    </div>
+  </div>
 
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
     <div class="space-y-2">
       @for (topic of topics(); track topic.title) {
         <div class="bg-gray-900/50 rounded-lg border border-gray-700 overflow-hidden">

@@ -11,22 +11,24 @@
 -->
 <main class="flex-grow flex flex-col">
   <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg flex flex-col flex-grow">
-    <div class="flex justify-between items-center mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-4 gap-4">
       <h3 class="text-xl font-bold text-gray-300 flex items-center">
         <i class="fa-solid fa-clipboard-list mr-3 text-orange-400"></i>
-        SNMP Trap Log
+        SNMP Log
       </h3>
-      <button (click)="clearLogs()" class="bg-red-800 hover:bg-red-700 border border-red-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md text-sm">
-        <i class="fa-solid fa-trash mr-2"></i>
-        Clear Log
+      <button (click)="clearLogs()" class="self-end sm:self-auto bg-red-800 hover:bg-red-700 border border-red-600 text-white font-bold py-2 px-2 sm:px-4 rounded-lg transition-colors duration-200 shadow-md text-sm shrink-0">
+        <i class="fa-solid fa-trash sm:mr-2"></i>
+        <span class="hidden sm:inline">Clear Log</span>
       </button>
     </div>
     
     <div #logContainer class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-gray-400 overflow-y-auto min-h-0">
-      @for(trap of reversedTraps(); track trap.timestamp + trap.message) {
-        <div class="flex items-start">
-          <span class="text-gray-500 mr-4">{{ trap.timestamp | date:'yyyy-MM-dd HH:mm:ss' }}</span>
-          <p class="whitespace-pre-wrap flex-1 text-blue-300">{{ trap.message }}</p>
+      @for(trap of reversedTraps(); track $index) {
+        <div class="block sm:flex sm:items-start sm:gap-x-2 mb-1">
+          <div class="flex-shrink-0 whitespace-nowrap">
+            <span class="text-gray-500 mr-2">{{ trap.timestamp | date:'dd/MM/yy HH:mm:ss' }}</span>
+          </div>
+          <p class="whitespace-pre-wrap flex-1 pt-1 sm:pt-0 pl-2 sm:pl-0 text-blue-300">{{ trap.message }}</p>
         </div>
       } @empty {
         <p class="text-gray-500">No SNMP traps sent yet...</p>

@@ -33,6 +33,25 @@
   animation: fadeIn 0.3s ease-out forwards;
 }
 
+/* Animation for Firmware Update Banner fade out */
+@keyframes fadeOutBanner {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); } /* Fade upwards slightly */
+}
+.animate-firmware-fade-out {
+  animation: fadeOutBanner 0.3s ease-out forwards;
+}
+
+/* NEW: Animation for Global Notification fade out */
+@keyframes fadeOutNotification {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-10px); }
+}
+.animate-notification-fade-out {
+  animation: fadeOutNotification 0.3s ease-out forwards;
+}
+
+
 /* Styles for rendered markdown content */
 .markdown-content ul {
   list-style-type: disc;
@@ -65,10 +84,10 @@
 
 /* CodeMirror Customization */
 .CodeMirror {
-  height: 100%;
   font-family: monospace;
   font-size: 0.9rem;
   background-color: transparent !important; /* Integrate with parent bg */
+  height: 100% !important; /* Forces CodeMirror to take full height */
 }
 
 .CodeMirror-gutters {
@@ -76,21 +95,55 @@
   border-right: 1px solid #374151 !important; /* border-gray-700 */
 }
 
-/* Make the editor's scrollbar match the app's scrollbar */
-.CodeMirror-scrollbar-filler, .CodeMirror-gutter-filler {
-  background-color: #1f2937;
+/* Hide CodeMirror's internal scrollbars by default for full-page editors */
+.CodeMirror-vscrollbar, .CodeMirror-hscrollbar {
+  overflow: hidden !important; /* Important to override inline styles */
 }
+
+/*
+  The cm-embedded-editor is the wrapper for CodeMirror instances used for things like API request bodies.
+  - max-height: Sets a limit on how tall the editor can grow.
+  - overflow-y: auto; Makes the container itself scrollable when content exceeds the max-height.
+  This approach avoids conflicts with CodeMirror's internal scrolling logic, which is affected by global styles.
+*/
+.cm-embedded-editor {
+  position: relative;
+  max-height: 16rem; /* 256px, equivalent to h-64 */
+  overflow-y: auto;
+}
+
+/*
+  Force the CodeMirror instance inside an embedded container to size itself
+  based on its content, rather than a fixed percentage height. This allows the parent
+  container's scrolling to work correctly.
+*/
+.cm-embedded-editor .CodeMirror {
+  height: auto !important;
+}
+
+
+/* The scrollbar styling below is now redundant for CodeMirror's own scrollbars,
+   but kept for consistency if other elements might use them. */
 .CodeMirror-vscrollbar::-webkit-scrollbar, .CodeMirror-hscrollbar::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 0px !important; /* Hide scrollbar completely */
+  height: 0px !important; /* Hide scrollbar completely */
 }
 .CodeMirror-vscrollbar::-webkit-scrollbar-track, .CodeMirror-hscrollbar::-webkit-scrollbar-track {
-  background: #1f2937;
+  background: transparent;
 }
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb {
-  background: #4b5563;
-  border-radius: 4px;
+  background: transparent;
 }
 .CodeMirror-vscrollbar::-webkit-scrollbar-thumb:hover, .CodeMirror-hscrollbar::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
+  background: transparent;
+}
+
+/* Utility to disable text selection globally */
+.select-none {
+  -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none;   /* Safari */
+     -khtml-user-select: none;   /* Konqueror HTML */
+       -moz-user-select: none;   /* Old versions of Firefox */
+        -ms-user-select: none;   /* Internet Explorer/Edge */
+            user-select: none;   /* Non-prefixed version, currently supported by Chrome, Edge, Opera and Firefox */
 }

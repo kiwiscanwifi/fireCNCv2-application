@@ -1,26 +1,25 @@
 import { Injectable, signal, WritableSignal, computed, inject } from '@angular/core';
 import { PersistenceService } from './persistence.service';
-import { ArduinoService } from './arduino.service'; // NEW: Import ArduinoService
+import { StateService } from './state.service'; // NEW: Import StateService
 
 @Injectable({
   providedIn: 'root',
 })
 export class AdminService {
   private persistenceService = inject(PersistenceService);
-  private arduinoService = inject(ArduinoService); // NEW: Inject ArduinoService
+  private stateService = inject(StateService); // NEW: Inject StateService
 
-  // State for administration mode
-  isAdminMode: WritableSignal<boolean> = signal(false);
+  // State is now in StateService
+  isAdminMode = this.stateService.isAdminMode;
 
-  // Expose a readable status for the UI, now based on the ArduinoService config
+  // Expose a readable status for the UI, now based on the StateService config
   hasSecurityCodeConfigured = computed(() => {
-    const code = this.arduinoService.watchdogConfig().ACCESS_CODE;
+    const code = this.stateService.watchdogConfig().ACCESS_CODE;
     return code !== null && code.length > 0;
   });
 
   constructor() {
-    // No explicit load needed here, as ArduinoService is initialized first
-    // and its watchdogConfig will hold the loaded (or default '0000') ACCESS_CODE.
+    // No explicit load needed here, as StateService is populated by ConfigFileService
   }
 
   /**
@@ -29,7 +28,7 @@ export class AdminService {
    * @returns True if login is successful, false otherwise.
    */
   login(code: string): boolean {
-    const configuredCode = this.arduinoService.watchdogConfig().ACCESS_CODE;
+    const configuredCode = this.stateService.watchdogConfig().ACCESS_CODE;
     if (configuredCode && code === configuredCode) {
       this.isAdminMode.set(true);
       console.log('Admin mode enabled.');
@@ -53,6 +52,6 @@ export class AdminService {
    * @returns The security code string or null.
    */
   getCurrentSecurityCode(): string {
-    return this.arduinoService.watchdogConfig().ACCESS_CODE;
+    return this.stateService.watchdogConfig().ACCESS_CODE;
   }
 }

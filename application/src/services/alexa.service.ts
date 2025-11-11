@@ -12,30 +12,13 @@ import { Injectable, signal, WritableSignal, effect, computed, Signal, inject } 
 import { ArduinoService, AlexaConfig, LedsState, LedState } from './arduino.service';
 import { WebSocketService } from './websocket.service';
 import { ConfigFileService } from './config-file.service';
+import { NotificationService } from './notification.service';
+import { InternetConnectivityService } from './internet-connectivity.service';
+// FIX: Import StateService and Alexa-related types to break circular dependency and use centralized state.
+import { StateService, AlexaDevice, AlexaAnnouncement, AlexaDeviceType } from './state.service';
 
-export interface AlexaNotification {
-  title: string;
-  message: string;
-}
-
-export interface AlexaAnnouncement {
-  timestamp: Date;
-  message: string;
-}
-
-export type AlexaDeviceType = 'Dimmable Light' | 'Color Light' | 'Switch' | 'Contact Sensor' | 'Motion Sensor';
-
-export interface AlexaDevice {
-  name: string;
-  type: AlexaDeviceType;
-  state: {
-    on: boolean;
-    brightness?: number; // 0-100 for Alexa, maps to 0-255
-    color?: string; // hex
-  };
-  // A unique key for internal tracking
-  key: string; 
-}
+// FIX: Re-export types for consumers of AlexaService
+export { AlexaDevice, AlexaAnnouncement };
 
 @Injectable({
   providedIn: 'root',
@@ -44,15 +27,20 @@ export class AlexaService {
   private arduinoService = inject(ArduinoService);
   private webSocketService = inject(WebSocketService);
   private configFileService = inject(ConfigFileService);
+  private notificationService = inject(NotificationService);
+  private internetConnectivityService = inject(InternetConnectivityService);
+  // FIX: Inject StateService to use its signals.
+  private stateService = inject(StateService);
   
   config: Signal<AlexaConfig> = this.arduinoService.alexaConfig;
-  devices: WritableSignal<AlexaDevice[]> = signal([]);
-  announcements: WritableSignal<AlexaAnnouncement[]> = signal([]);
-  lastNotification: WritableSignal<AlexaNotification | null> = signal(null);
+  // FIX: Use signals from the central StateService.
+  devices = this.stateService.alexaDevices;
+  announcements = this.stateService.alexaAnnouncements;
 
   isAlexaEnabled: Signal<boolean> = computed(() => this.config().ENABLED);
 
   private lastOnboardLedColor = '#FFFFFF'; // Default to white
+  private hasAnnouncedPowerOn = signal(false);
 
   constructor() {
     // Initialize lastOnboardLedColor from the current state if it's not 'off'
@@ -70,11 +58,27 @@ export class AlexaService {
       }
     });
 
-    // Effect to announce when the device connects
+    // Effect to announce when the device connects and has internet
     effect(() => {
-        const status = this.webSocketService.connectionStatus();
-        if (status === 'connected' && this.isAlexaEnabled()) {
-            this.announce(`${this.config().ANNOUNCE_DEVICE} has powered on.`);
+        const wsStatus = this.webSocketService.connectionStatus();
+        const internetStatus = this.internetConnectivityService.status();
+
+        if (
+            wsStatus === 'connected' &&
+            internetStatus === 'online' &&
+            this.isAlexaEnabled() &&
+            !this.hasAnnouncedPowerOn()
+        ) {
+            this.announce(`${this.config().ANNOUNCE_DEVICE} has powered on.`, 'power_on');
+            this.hasAnnouncedPowerOn.set(true);
+        }
+    });
+
+    // Effect to reset the power on announcement flag when connection is lost
+    effect(() => {
+        const wsStatus = this.webSocketService.connectionStatus();
+        if (wsStatus === 'disconnected' || wsStatus === 'restarting') {
+            this.hasAnnouncedPowerOn.set(false);
         }
     });
 
@@ -222,21 +226,24 @@ export class AlexaService {
      }
   }
 
-  setAlexaEnabled(enabled: boolean): void {
-    const currentConfig = this.config();
-    if (currentConfig.ENABLED !== enabled) {
-      this.configFileService.updateAlexaConfig({ ...currentConfig, ENABLED: enabled });
-    }
-  }
-
-  announce(message: string): void {
+  announce(message: string, type: string): void {
     if (!this.isAlexaEnabled()) return;
     
     const newAnnouncement: AlexaAnnouncement = { timestamp: new Date(), message };
     this.announcements.update(a => [newAnnouncement, ...a].slice(0, 50));
     
-    this.lastNotification.set({ title: 'Alexa Announcement', message });
-    setTimeout(() => this.lastNotification.set(null), 3000);
     console.log(`[Alexa SIM] Announcing: ${message}`);
+
+    const config = this.config();
+    if (!config.ANNOUNCE_BANNERS_ENABLED) {
+      return; // Master switch is off
+    }
+
+    const announcementTypes = config.ANNOUNCEMENT_TYPES || [];
+    const announcementType = announcementTypes.find(t => t.key === type);
+    
+    if (announcementType && announcementType.enabled) {
+      this.notificationService.showAlexa(message);
+    }
   }
 }

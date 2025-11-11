@@ -13,9 +13,12 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class EditModulePortComponent implements OnInit, OnDestroy {
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
-  private route = inject(ActivatedRoute);
+  // FIX: Explicitly type `fb` as `FormBuilder` to resolve 'Property does not exist on type unknown' errors.
+  private fb: FormBuilder = inject(FormBuilder);
+  // FIX: Explicitly type `router` as `Router` to resolve 'Property does not exist on type unknown' errors.
+  private router: Router = inject(Router);
+  // FIX: Explicitly type `route` as `ActivatedRoute` to resolve 'Property does not exist on type unknown' errors.
+  private route: ActivatedRoute = inject(ActivatedRoute);
   private moduleService = inject(ModuleService);
   private destroy$ = new Subject<void>();
 

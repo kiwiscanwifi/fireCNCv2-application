@@ -1,51 +1,78 @@
-<div class="grid grid-cols-2 gap-x-8 text-sm">
-  <div class="space-y-3">
-    <div class="flex justify-between">
-      <span class="font-semibold text-gray-400">Firmware:</span>
-      <span class="font-mono text-gray-200">{{ systemInfo().firmwareVersion }}</span>
-    </div>
-    <div class="flex justify-between">
-      <span class="font-semibold text-gray-400">Uptime:</span>
-      <span class="font-mono text-gray-200">{{ systemInfo().uptime }}</span>
-    </div>
-    <!-- MODIFIED: Network Status Line -->
-    <div class="flex justify-between items-center">
-      <span class="font-semibold text-gray-400 flex items-center">
-        <i class="{{ networkDisplayInfo().icon }} mr-2" [class]="networkDisplayInfo().colorClass"></i>
-        {{ networkDisplayInfo().label }}:
-      </span>
-      <span class="font-mono" [class]="networkDisplayInfo().colorClass">
-        {{ networkDisplayInfo().value }}{{ networkDisplayInfo().suffix }}
-      </span>
-    </div>
-  </div>
+<div>
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-y-4 sm:gap-y-0 sm:gap-x-8 text-sm">
+    <div class="space-y-3">
+      <div class="flex justify-between">
+        <span class="font-semibold text-gray-400">Firmware:</span>
+        <span class="font-mono text-gray-200">{{ systemInfo().firmwareVersion }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="font-semibold text-gray-400">Uptime:</span>
+        <span class="font-mono text-gray-200">{{ systemInfo().uptime }}</span>
+      </div>
+      <!-- REFINED: Unified Network Status Line -->
+      <div class="flex justify-between items-center">
+        <span class="font-semibold text-gray-400 flex items-center">
+          <i class="{{ networkDisplayInfo().icon }} mr-2" [class]="networkDisplayInfo().colorClass"></i>
+          {{ networkDisplayInfo().label }}:
+        </span>
+        <span class="font-mono" [class]="networkDisplayInfo().colorClass">
+          {{ networkDisplayInfo().value }}{{ networkDisplayInfo().suffix }}
+        </span>
+      </div>
+      
+      @if (wifiConfig().MODE !== 'Disabled') {
+        <div class="my-2 border-t border-gray-700"></div>
+    
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400 flex items-center"><i class="fa-solid fa-wifi mr-2"></i>Wireless Mode:</span>
+          <span class="font-mono text-gray-300">{{ wifiConfig().MODE }}</span>
+        </div>
+        @if(wifiConfig().MODE === 'Station') {
+          <div class="flex justify-between">
+            <span class="font-semibold text-gray-500 pl-7">Assignment:</span>
+            <span class="font-mono text-gray-300">{{ wifiConfig().IP_ASSIGNMENT }}</span>
+          </div>
+        }
+      }
 
-  <div class="space-y-3">
-    <div class="flex justify-between">
-      <span class="font-semibold text-gray-400">SSH Server:</span>
-      <span class="font-mono" [class]="systemInfo().sshEnabled ? 'text-green-400' : 'text-gray-500'">
-        {{ systemInfo().sshEnabled ? 'Enabled' : 'Disabled' }}
-      </span>
     </div>
-    <div class="flex justify-between">
-      <span class="font-semibold text-gray-400">SNMP Agent:</span>
-      <span class="font-mono" [class]="isAgentEnabled() ? 'text-green-400' : 'text-gray-500'">
-        {{ isAgentEnabled() ? 'Enabled' : 'Disabled' }}
-      </span>
-    </div>
-    <div class="flex justify-between">
-      <span class="font-semibold text-gray-400">SNMP Traps:</span>
-      <span class="font-mono" [class]="isTrapsEnabled() ? 'text-green-400' : 'text-gray-500'">
-        {{ isTrapsEnabled() ? 'Enabled' : 'Disabled' }}
-      </span>
-    </div>
-    <div class="flex justify-between">
-      <span class="font-semibold text-gray-400">Alexa Integration:</span>
-      <span class="font-mono" [class]="isAlexaEnabled() ? 'text-green-400' : 'text-gray-500'">
-        {{ isAlexaEnabled() ? 'Enabled' : 'Disabled' }}
-      </span>
+  
+    <div class="space-y-3">
+      <div class="flex justify-between">
+        <span class="font-semibold text-gray-400">SSH Server:</span>
+        <span class="font-mono" [class]="systemInfo().sshEnabled ? 'text-green-400' : 'text-gray-500'">
+          {{ systemInfo().sshEnabled ? 'Enabled' : 'Disabled' }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="font-semibold text-gray-400">SNMP Agent:</span>
+        <span class="font-mono" [class]="isAgentEnabled() ? 'text-green-400' : 'text-gray-500'">
+          {{ isAgentEnabled() ? 'Enabled' : 'Disabled' }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="font-semibold text-gray-400">SNMP Traps:</span>
+        <span class="font-mono" [class]="isTrapsEnabled() ? 'text-green-400' : 'text-gray-500'">
+          {{ isTrapsEnabled() ? 'Enabled' : 'Disabled' }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="font-semibold text-gray-400">Alexa Integration:</span>
+        <span class="font-mono" [class]="isAlexaEnabled() ? 'text-green-400' : 'text-gray-500'">
+          {{ isAlexaEnabled() ? 'Enabled' : 'Disabled' }}
+        </span>
+      </div>
+
+      @if(wifiConfig().MODE === 'AP') {
+        <div class="flex justify-between pt-3">
+          <span class="font-semibold text-gray-400">SSID:</span>
+          <span class="font-mono text-gray-300">{{ wifiConfig().WIFI_AP_SSID }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Clients:</span>
+          <span class="font-mono text-gray-300">{{ simulatedApClients() }}</span>
+        </div>
+      }
     </div>
   </div>
 </div>
-
-<!-- REMOVED: Wireless Network Status -->

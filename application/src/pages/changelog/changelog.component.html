@@ -9,18 +9,38 @@
   Template for the Change Log page. Renders a list of application updates.
 -->
 <main class="flex-grow flex flex-col">
-  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg flex flex-col flex-grow">
-    <div class="flex justify-between items-center mb-4">
-      <h3 class="text-xl font-bold text-gray-300 flex items-center">
-        <i class="fa-solid fa-history mr-3 text-orange-400"></i>
-        Change Log
-      </h3>
-    </div>
-    
-    <div class="flex-grow overflow-y-auto min-h-0 space-y-4 pr-2">
-      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700 hover:border-orange-500/50 transition-colors duration-200">
-        <div class="text-gray-300 markdown-content" [innerHTML]="parseMarkdown(changelog())"></div>
+  <div class="flex justify-between items-center mb-4">
+    <h3 class="text-xl font-bold text-gray-300 flex items-center">
+      <i class="fa-solid fa-history mr-3 text-orange-400"></i>
+      Change Log
+    </h3>
+  </div>
+  
+  <div class="flex-grow overflow-y-auto min-h-0 space-y-4 pr-2">
+    @if (entries().length > 0) {
+      @for(entry of entries(); track entry.version) {
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+          <div class="p-4 bg-gray-900/50 border-b border-gray-700 flex justify-between items-center">
+            <h2 class="text-lg font-bold text-gray-200">Version {{ entry.version }}</h2>
+            <span class="font-mono text-sm text-gray-400">{{ entry.date }}</span>
+          </div>
+          <ul class="p-4 space-y-2">
+            @for (change of entry.changes; track $index) {
+              <li class="flex items-start">
+                <span class="flex-shrink-0 font-semibold text-xs px-2 py-0.5 rounded-full mr-3 mt-1" [class]="getChangeTypeClass(change.type)">
+                  {{ change.type }}
+                </span>
+                <p class="text-gray-300 text-sm">{{ change.description }}</p>
+              </li>
+            }
+          </ul>
+        </div>
+      }
+    } @else {
+      <div class="text-center text-gray-500 py-16 border-2 border-dashed border-gray-700 rounded-lg">
+          <i class="fa-solid fa-file-excel text-5xl mb-4"></i>
+          <p class="font-semibold">Changelog is empty or could not be loaded.</p>
       </div>
-    </div>
+    }
   </div>
 </main>

@@ -1,224 +1,244 @@
-<!--
-  File: src/pages/leds/leds.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
-
-  Description:
-  Template for the LEDs page. Renders the UI for controlling the WS2815 LED strips.
--->
-<main class="flex-grow">
-  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
-    
-    <!-- Column 1: LED Controls -->
-    <div class="flex flex-col gap-6 lg:gap-8">
-      <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
-        <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
-          <i class="fa-solid fa-lightbulb mr-3 text-orange-400"></i>
-          LED Strip
-        </h2>
-
-        <div class="space-y-4">
-          <!-- Power Control -->
-          <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
-            <div class="flex items-center">
-              <i class="fa-solid fa-power-off mr-3" [class]="ledsState().power ? 'text-green-400' : 'text-gray-500'"></i>
-              <span class="font-semibold text-gray-300">Power</span>
-            </div>
-            <button 
-              (click)="setPower(!ledsState().power)"
-              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
-              [class]="ledsState().power ? 'bg-orange-500' : 'bg-gray-600'"
-              type="button" role="switch" [attr.aria-checked]="ledsState().power">
-              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                [class]="ledsState().power ? 'translate-x-5' : 'translate-x-0'">
-              </span>
-            </button>
-          </div>
-
-          <!-- Brightness Control -->
-          <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="!ledsState().power">
-            <label for="brightness" class="font-semibold text-gray-300 flex items-center mb-2">
-              <i class="fa-solid fa-sun mr-3"></i>
-              Brightness
-            </label>
-            <div class="flex items-center space-x-4">
-              <input id="brightness" type="range" min="0" max="255" [value]="ledsState().brightness" (input)="setBrightness($event)" 
-                    [disabled]="!ledsState().power"
-                    class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
-              <span class="font-mono text-orange-300 w-10 text-center">{{ ledsState().brightness }}</span>
-            </div>
-          </div>
-
-          <!-- Color Control -->
-          <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="!ledsState().power || ledsState().effect !== 'Solid'">
-            <div class="flex items-center space-x-4">
-              <input id="color" type="color" [value]="ledsState().color" (input)="setColor($event)" 
-                    [disabled]="!ledsState().power || ledsState().effect !== 'Solid'"
-                    class="p-1 h-10 w-full block bg-gray-700 border border-gray-600 cursor-pointer rounded-lg disabled:cursor-not-allowed">
-            </div>
-          </div>
-
-          <!-- Effects Control -->
-          <div class="p-3 bg-gray-900/50 rounded-lg">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-              @for(effect of ledEffects; track effect) {
-                <button (click)="setEffect(effect)"
-                        type="button"
-                        class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 border-2"
-                        [class]="ledsState().effect === effect ? 'bg-orange-500 border-orange-400 text-white' : 'bg-gray-700 hover:bg-gray-600 border-gray-600 text-gray-300'">
-                  {{ effect }}
-                </button>
-              }
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Onboard LED Control Card -->
-      <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
-        <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
-          <i class="fa-solid fa-microchip mr-3 text-orange-400"></i>
-          Onboard LED
-        </h2>
-        <div class="space-y-4">
-          <!-- Power Control -->
-          <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
-            <div class="flex items-center">
-              <i class="fa-solid fa-power-off mr-3" [class]="onboardLed().color !== 'off' ? 'text-green-400' : 'text-gray-500'"></i>
-              <span class="font-semibold text-gray-300">Power</span>
-            </div>
-            <button 
-              (click)="setOnboardLedPower(onboardLed().color === 'off')"
-              type="button" role="switch" [attr.aria-checked]="onboardLed().color !== 'off'"
-              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
-              [class]="onboardLed().color !== 'off' ? 'bg-orange-500' : 'bg-gray-600'">
-              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                [class]="onboardLed().color !== 'off' ? 'translate-x-5' : 'translate-x-0'">
-              </span>
-            </button>
-          </div>
-
-          <!-- Brightness Control -->
-          <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="onboardLed().color === 'off'">
-            <label for="onboard-brightness" class="font-semibold text-gray-300 flex items-center mb-2">
-              <i class="fa-solid fa-sun mr-3"></i>
-              Brightness
-            </label>
-            <div class="flex items-center space-x-4">
-              <input id="onboard-brightness" type="range" min="0" max="255" [value]="onboardLed().brightness" (input)="setOnboardLedBrightness($event)" 
-                    [disabled]="onboardLed().color === 'off'"
-                    class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
-              <span class="font-mono text-orange-300 w-10 text-center">{{ onboardLed().brightness }}</span>
-            </div>
-          </div>
-
-          <!-- Color Control -->
-          <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="onboardLed().color === 'off'">
-            <div class="flex items-center space-x-4">
-              <input id="onboard-color" type="color" [value]="onboardLed().color === 'off' ? '#FFFFFF' : onboardLed().color" (input)="setOnboardLedColor($event)" 
-                    [disabled]="onboardLed().color === 'off'"
-                    class="p-1 h-10 w-full block bg-gray-700 border border-gray-600 cursor-pointer rounded-lg disabled:cursor-not-allowed">
-            </div>
-          </div>
-        </div>
-      </div>
+<main class="flex-grow flex flex-col">
+  <!-- Header for Title and Action Buttons -->
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-lightbulb mr-3 text-orange-400"></i>
+        Visuals
+      </h2>
+      <a routerLink="/information/landing" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 md:hidden">
+        Back
+      </a>
     </div>
+  </div>
 
-    <!-- Column 2: LED Info & Visualization -->
-    <div class="flex flex-col gap-6 lg:gap-8">
-      <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
-        <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
-          <i class="fa-solid fa-circle-info mr-3 text-orange-400"></i>
-          Status
-        </h2>
-        <div class="space-y-4 text-sm">
-            <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg">
-              <span class="font-semibold text-gray-400">Total LED Count:</span>
-              <span class="font-mono text-2xl font-bold text-orange-300">{{ totalLedCount() }}</span>
-            </div>
-            <div class="bg-gray-900/50 p-3 rounded-lg space-y-2">
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-gray-400">Strip LEDX Count:</span>
-                <span class="font-mono text-gray-200">{{ ledsConfig().COUNT_X }} LEDs</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-gray-400">Default Brightness:</span>
-                <span class="font-mono text-gray-200">{{ ledsConfig().DEFAULT_BRIGHTNESS_X }} / 255</span>
-              </div>
-            </div>
-            <div class="bg-gray-900/50 p-3 rounded-lg space-y-2">
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-gray-400">Strip LEDY Count:</span>
-                <span class="font-mono text-gray-200">{{ ledsConfig().COUNT_Y }} LEDs</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-gray-400">Default Brightness:</span>
-                <span class="font-mono text-gray-200">{{ ledsConfig().DEFAULT_BRIGHTNESS_Y }} / 255</span>
-              </div>
-            </div>
-            <div class="bg-gray-900/50 p-3 rounded-lg space-y-2">
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-gray-400">Strip LEDYY Count:</span>
-                <span class="font-mono text-gray-200">{{ ledsConfig().COUNT_YY }} LEDs</span>
-              </div>
-              <div class="flex justify-between items-center">
-                <span class="font-semibold text-gray-400">Default Brightness:</span>
-                <span class="font-mono text-gray-200">{{ ledsConfig().DEFAULT_BRIGHTNESS_YY }} / 255</span>
-              </div>
-            </div>
-          </div>
-      </div>
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg h-full flex-grow">
+    <div class="p-6 flex flex-col h-full flex-grow">
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8 flex-grow">
+        <!-- Column 1: LED Controls -->
+        <div class="flex flex-col gap-6 lg:gap-8">
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+            <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
+              <i class="fa-solid fa-lightbulb mr-3 text-orange-400"></i>
+              Master LED Strip
+            </h2>
 
-      <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
-        <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
-          <i class="fa-solid fa-desktop mr-3 text-orange-400"></i>
-          Live Visualization
-        </h2>
-        <div class="space-y-4">
-          <!-- Strip Y -->
-          <div>
-            <span class="font-semibold text-gray-400 font-mono text-sm">LEDY</span>
-            <div class="flex w-full h-4 bg-black/50 rounded-full overflow-hidden mt-1 border border-gray-700">
-              @for (pixel of sampledLedStripY(); track $index) {
-                <div class="h-full" 
-                    [style.width.%]="1" 
-                    [style.backgroundColor]="pixel.displayColor"
-                    [style.opacity]="pixel.brightness / 255"
-                    [class.animate-pulse]="pixel.flashing"></div>
-              }
+            <div class="space-y-4">
+              <!-- Power Control -->
+              <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fa-solid fa-power-off mr-3" [class]="ledsState().power ? 'text-green-400' : 'text-gray-500'"></i>
+                  <span class="font-semibold text-gray-300">Power</span>
+                </div>
+                <button 
+                  (click)="setPower(!ledsState().power)"
+                  class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                  [class]="ledsState().power ? 'bg-orange-500' : 'bg-gray-600'"
+                  type="button" role="switch" [attr.aria-checked]="ledsState().power">
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    [class]="ledsState().power ? 'translate-x-5' : 'translate-x-0'">
+                  </span>
+                </button>
+              </div>
+
+              <!-- Brightness Control -->
+              <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="!ledsState().power">
+                <label for="brightness" class="font-semibold text-gray-300 flex items-center mb-2">
+                  <i class="fa-solid fa-sun mr-3"></i>
+                  Master Brightness
+                </label>
+                <div class="flex items-center space-x-4">
+                  <input id="brightness" type="range" min="0" max="255" step="12.75" [value]="ledsState().brightness" (input)="setBrightness($event)" 
+                        [disabled]="!ledsState().power"
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
+                  <span class="font-mono w-12 text-center"
+                        [class]="ledPowerConsumption() >= (ledsConfig().MAX_POWER_CONSUMPTION * (ledsConfig().POWER_WARNING_THRESHOLD / 100)) ? 'text-red-400' : 'text-orange-300'">{{ masterBrightnessPercent() }}%</span>
+                </div>
+              </div>
+
+              <!-- Color Control -->
+              <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="!ledsState().power || ledsState().effect !== 'Solid'">
+                <div class="flex items-center space-x-4">
+                  <input id="color" type="color" [value]="ledsState().color" (input)="setColor($event)" 
+                        [disabled]="!ledsState().power || ledsState().effect !== 'Solid'"
+                        class="p-1 h-10 w-full block bg-gray-700 border border-gray-600 cursor-pointer rounded-lg disabled:cursor-not-allowed">
+                </div>
+              </div>
+
+              <!-- Effects Control -->
+              <div class="p-3 bg-gray-900/50 rounded-lg">
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                  @for(effect of ledEffects; track effect) {
+                    <button (click)="setEffect(effect)"
+                            type="button"
+                            class="px-4 py-2 text-sm font-semibold rounded-lg transition-colors duration-200 border-2"
+                            [class]="ledsState().effect === effect ? 'bg-orange-500 border-orange-400 text-white' : 'bg-gray-700 hover:bg-gray-600 border-gray-600 text-gray-300'">
+                      {{ effect }}
+                    </button>
+                  }
+                </div>
+              </div>
             </div>
           </div>
-          <!-- Strip X -->
-          <div>
-            <span class="font-semibold text-gray-400 font-mono text-sm">LEDX</span>
-            <div class="flex w-full h-4 bg-black/50 rounded-full overflow-hidden mt-1 border border-gray-700">
-              @for (pixel of sampledLedStripX(); track $index) {
-                <div class="h-full" 
-                    [style.width.%]="1" 
-                    [style.backgroundColor]="pixel.displayColor"
-                    [style.opacity]="pixel.brightness / 255"
-                    [class.animate-pulse]="pixel.flashing"></div>
-              }
-            </div>
-          </div>
-          <!-- Strip YY -->
-          <div>
-            <span class="font-semibold text-gray-400 font-mono text-sm">LEDYY</span>
-            <div class="flex w-full h-4 bg-black/50 rounded-full overflow-hidden mt-1 border border-gray-700">
-              @for (pixel of sampledLedStripYY(); track $index) {
-                <div class="h-full" 
-                    [style.width.%]="1" 
-                    [style.backgroundColor]="pixel.displayColor"
-                    [style.opacity]="pixel.brightness / 255"
-                    [class.animate-pulse]="pixel.flashing"></div>
-              }
+
+          <!-- Onboard LED Control Card -->
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+            <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
+              <i class="fa-solid fa-microchip mr-3 text-orange-400"></i>
+              Onboard LED
+            </h2>
+            <div class="space-y-4">
+              <!-- Power Control -->
+              <div class="flex items-center justify-between p-3 bg-gray-900/50 rounded-lg">
+                <div class="flex items-center">
+                  <i class="fa-solid fa-power-off mr-3" [class]="onboardLed().color !== 'off' ? 'text-green-400' : 'text-gray-500'"></i>
+                  <span class="font-semibold text-gray-300">Power</span>
+                </div>
+                <button 
+                  (click)="setOnboardLedPower(onboardLed().color === 'off')"
+                  type="button" role="switch" [attr.aria-checked]="onboardLed().color !== 'off'"
+                  class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+                  [class]="onboardLed().color !== 'off' ? 'bg-orange-500' : 'bg-gray-600'">
+                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                    [class]="onboardLed().color !== 'off' ? 'translate-x-5' : 'translate-x-0'">
+                  </span>
+                </button>
+              </div>
+
+              <!-- Brightness Control -->
+              <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="onboardLed().color === 'off'">
+                <label for="onboard-brightness" class="font-semibold text-gray-300 flex items-center mb-2">
+                  <i class="fa-solid fa-sun mr-3"></i>
+                  Brightness
+    
+                </label>
+                <div class="flex items-center space-x-4">
+                  <input id="onboard-brightness" type="range" min="0" max="255" step="12.75" [value]="onboardLed().brightness" (input)="setOnboardLedBrightness($event)" 
+                        [disabled]="onboardLed().color === 'off'"
+                        class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
+                  <span class="font-mono text-orange-300 w-12 text-center">{{ onboardLedBrightnessPercent() }}%</span>
+                </div>
+              </div>
+
+              <!-- Color Control -->
+              <div class="p-3 bg-gray-900/50 rounded-lg" [class.opacity-50]="onboardLed().color === 'off'">
+                <div class="flex items-center space-x-4">
+                  <input id="onboard-color" type="color" [value]="onboardLed().color === 'off' ? '#FFFFFF' : onboardLed().color" (input)="setOnboardLedColor($event)" 
+                        [disabled]="onboardLed().color === 'off'"
+                        class="p-1 h-10 w-full block bg-gray-700 border border-gray-600 rounded-lg disabled:cursor-not-allowed">
+                </div>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
+        <!-- Column 2: LED Info & Visualization -->
+        <div class="flex flex-col gap-6 lg:gap-8">
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+            <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
+              <i class="fa-solid fa-circle-info mr-3 text-orange-400"></i>
+              Status
+            </h2>
+            <div class="space-y-4 text-sm">
+                <div class="flex justify-between items-center bg-gray-900/50 p-3 rounded-lg">
+                  <span class="font-semibold text-gray-400">Total LED Count:</span>
+                  <span class="font-mono text-2xl font-bold text-orange-300">{{ totalLedCount() }}</span>
+                </div>
+                <div class="flex justify-between items-baseline bg-gray-900/50 p-3 rounded-lg">
+                  <div class="flex items-baseline gap-2">
+                    <span class="font-semibold text-gray-400">Power Consumption:</span>
+                    <span class="font-mono text-xs text-gray-400">(Max {{ ledsConfig().MAX_POWER_CONSUMPTION }} W)</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="font-mono text-xl font-bold"
+                          [class]="ledPowerConsumption() >= (ledsConfig().MAX_POWER_CONSUMPTION * (ledsConfig().POWER_WARNING_THRESHOLD / 100)) ? 'text-red-400' : 'text-orange-300'">
+                      {{ ledPowerConsumption() }} W
+                    </span>
+                  </div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-gray-400">Strip LEDX Count:</span>
+                    <span class="font-mono text-gray-200">{{ ledsConfig().COUNT_X }} LEDs</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-gray-400">Default Brightness:</span>
+                    <span class="font-mono text-gray-200">{{ defaultBrightnessXPercent() }}%</span>
+                  </div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-gray-400">Strip LEDY Count:</span>
+                    <span class="font-mono text-gray-200">{{ ledsConfig().COUNT_Y }} LEDs</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-gray-400">Default Brightness:</span>
+                    <span class="font-mono text-gray-200">{{ defaultBrightnessYPercent() }}%</span>
+                  </div>
+                </div>
+                <div class="bg-gray-900/50 p-3 rounded-lg space-y-2">
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-gray-400">Strip LEDYY Count:</span>
+                    <span class="font-mono text-gray-200">{{ ledsConfig().COUNT_YY }} LEDs</span>
+                  </div>
+                  <div class="flex justify-between items-center">
+                    <span class="font-semibold text-gray-400">Default Brightness:</span>
+                    <span class="font-mono text-gray-200">{{ defaultBrightnessYYPercent() }}%</span>
+                  </div>
+                </div>
+              </div>
+          </div>
+
+          <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+            <h2 class="text-xl font-bold text-gray-300 mb-6 flex items-center">
+              <i class="fa-solid fa-desktop mr-3 text-orange-400"></i>
+              Live Visualization
+            </h2>
+            <div class="space-y-4">
+              <!-- Strip Y -->
+              <div>
+                <span class="font-semibold text-gray-400 font-mono text-sm">LEDY</span>
+                <div class="flex w-full h-4 bg-black/50 rounded-full overflow-hidden mt-1 border border-gray-700">
+                  @for (pixel of sampledLedStripY(); track $index) {
+                    <div class="h-full" 
+                        [style.width.%]="1" 
+                        [style.backgroundColor]="pixel.displayColor"
+                        [style.opacity]="pixel.brightness / 255"
+                        [class.animate-pulse]="pixel.flashing"></div>
+                  }
+                </div>
+              </div>
+              <!-- Strip X -->
+              <div>
+                <span class="font-semibold text-gray-400 font-mono text-sm">LEDX</span>
+                <div class="flex w-full h-4 bg-black/50 rounded-full overflow-hidden mt-1 border border-gray-700">
+                  @for (pixel of sampledLedStripX(); track $index) {
+                    <div class="h-full" 
+                        [style.width.%]="1" 
+                        [style.backgroundColor]="pixel.displayColor"
+                        [style.opacity]="pixel.brightness / 255"
+                        [class.animate-pulse]="pixel.flashing"></div>
+                  }
+                </div>
+              </div>
+              <!-- Strip YY -->
+              <div>
+                <span class="font-semibold text-gray-400 font-mono text-sm">LEDYY</span>
+                <div class="flex w-full h-4 bg-black/50 rounded-full overflow-hidden mt-1 border border-gray-700">
+                  @for (pixel of sampledLedStripYY(); track $index) {
+                    <div class="h-full" 
+                        [style.width.%]="1" 
+                        [style.backgroundColor]="pixel.displayColor"
+                        [style.opacity]="pixel.brightness / 255"
+                        [class.animate-pulse]="pixel.flashing"></div>
+                  }
+                </div>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
     </div>
   </div>
 </main>

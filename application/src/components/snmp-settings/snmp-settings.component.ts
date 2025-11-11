@@ -23,7 +23,8 @@ import { LogLevel } from '../../services/system-log.service';
 })
 export class SnmpSettingsComponent implements OnInit {
   private snmpConfigService = inject(SnmpConfigService);
-  private controlContainer = inject(ControlContainer);
+  // FIX: Explicitly type `controlContainer` as `ControlContainer` to resolve 'Property does not exist on type unknown' errors.
+  private controlContainer: ControlContainer = inject(ControlContainer);
   
   logLevels: LogLevel[] = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
   protocols: SnmpProtocol[] = ['UDP', 'TCP'];
@@ -81,9 +82,5 @@ export class SnmpSettingsComponent implements OnInit {
     } else {
       trapControls.forEach(c => this.snmpForm.get(c)?.disable());
     }
-  }
-
-  sendTestTrap(): void {
-    this.snmpConfigService.sendTrap('This is a test trap from the fireCNC UI.');
   }
 }

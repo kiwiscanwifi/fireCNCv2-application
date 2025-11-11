@@ -1,17 +1,7 @@
-/**
- * @file src/services/servo-control.service.ts
- * @project fireCNC
- * @author Mark Dyer
- * @location Blenheim, New Zealand
- * @contact intelliservenz@gmail.com
- *
- * @description
- * A service that simulates controlling AC servo drivers and manages the state
- * of the corresponding LED strips for visual feedback.
- */
 import { Injectable, signal, WritableSignal, OnDestroy, effect, inject } from '@angular/core';
 import { ArduinoService } from './arduino.service';
 import { WebSocketService } from './websocket.service';
+import { SnmpService } from './snmp.service';
 
 export interface ServoState {
   position: number; // in mm
@@ -32,12 +22,15 @@ export interface LedPixel {
 export class ServoControlService implements OnDestroy {
   private arduinoService = inject(ArduinoService);
   private webSocketService = inject(WebSocketService);
+  private snmpService = inject(SnmpService);
+
   private simulationInterval: any;
 
   // Servo states
   servoX: WritableSignal<ServoState>;
   servoY: WritableSignal<ServoState>;
   servoYY: WritableSignal<ServoState>;
+  servoZ: WritableSignal<ServoState>; // NEW: Added Z-axis
 
   // LED strip states
   ledStripX: WritableSignal<LedPixel[]> = signal([]);
@@ -47,6 +40,7 @@ export class ServoControlService implements OnDestroy {
   private moveDirectionX: 1 | -1 = 1;
   private moveDirectionY: 1 | -1 = 1;
   private moveDirectionYY: 1 | -1 = 1;
+  private moveDirectionZ: 1 | -1 = 1; // NEW: Added Z-axis movement direction
   
   // System and animation state
   private systemState = signal<'startup' | 'post_startup_white' | 'running'>('startup');
@@ -65,6 +59,7 @@ export class ServoControlService implements OnDestroy {
     this.servoX = signal({ position: 0, limitMin: false, limitMax: false, lastMoved: now });
     this.servoY = signal({ position: 0, limitMin: false, limitMax: false, lastMoved: now });
     this.servoYY = signal({ position: 0, limitMin: false, limitMax: false, lastMoved: now });
+    this.servoZ = signal({ position: 0, limitMin: false, limitMax: false, lastMoved: now }); // NEW: Initialize Z-axis
 
     this.initializeStrips();
     this.startSimulation();
@@ -73,6 +68,33 @@ export class ServoControlService implements OnDestroy {
     effect(() => {
       this.arduinoService.ledsConfig(); // depend on config
       this.initializeStrips();
+    });
+
+    // Effect for dynamic brightness adjustment
+    effect(() => {
+      const config = this.arduinoService.ledsConfig();
+      if (!config.DYNAMIC_BRIGHTNESS_ENABLED) {
+        return;
+      }
+
+      const power = this.snmpService.ledPowerConsumption();
+      const maxPower = config.MAX_POWER_CONSUMPTION;
+      const currentBrightness = this.arduinoService.ledsState().brightness;
+
+      // Check if power exceeds the limit and brightness is not already zero
+      if (power > maxPower && currentBrightness > 0) {
+        // Calculate a new brightness based on the power ratio.
+        // Apply a small buffer (e.g., 99%) to prevent oscillating at the boundary.
+        const targetPower = maxPower * 0.99;
+        const reductionFactor = targetPower / power;
+        const newBrightness = Math.max(0, Math.floor(currentBrightness * reductionFactor));
+        
+        // Only update if the brightness value actually changes.
+        if (newBrightness < currentBrightness) {
+          console.log(`Dynamic Brightness: Power limit exceeded (${power.toFixed(2)}W > ${maxPower}W). Reducing brightness from ${currentBrightness} to ${newBrightness}.`);
+          this.arduinoService.updateLedsState({ brightness: newBrightness });
+        }
+      }
     });
 
     // Effect to control system state based on connection
@@ -194,6 +216,14 @@ export class ServoControlService implements OnDestroy {
       if (newPos <= 0) { newPos = 0; this.moveDirectionYY = 1; }
       return { position: newPos, limitMin: newPos < 1, limitMax: newPos > tableConfig.RAIL_Y - 1, lastMoved: now };
     });
+
+    // NEW: Update Z
+    this.servoZ.update(s => {
+      let newPos = s.position + this.moveDirectionZ * 0.5; // Simulate slower Z movement
+      if (newPos >= tableConfig.RAIL_Z) { newPos = tableConfig.RAIL_Z; this.moveDirectionZ = -1; }
+      if (newPos <= 0) { newPos = 0; this.moveDirectionZ = 1; }
+      return { position: newPos, limitMin: newPos < 1, limitMax: newPos > (tableConfig.RAIL_Z - 1), lastMoved: now };
+    });
   }
 
   private updateAllLedStrips(): void {
@@ -221,12 +251,14 @@ export class ServoControlService implements OnDestroy {
     
     if (state === 'post_startup_white') {
       const ledsConfig = this.arduinoService.ledsConfig();
+      const masterLedsState = this.arduinoService.ledsState();
+      const masterBrightness = masterLedsState.brightness;
       const ledCount = axis === 'X' ? ledsConfig.COUNT_X : axis === 'Y' ? ledsConfig.COUNT_Y : ledsConfig.COUNT_YY;
       const newStrip: LedPixel[] = new Array(ledCount);
       
       if (axis === 'Y' || axis === 'YY') {
         for (let i = 0; i < ledCount; i++) {
-          newStrip[i] = { displayColor: '#FFFFFF', flashing: false, brightness: 255 };
+          newStrip[i] = { displayColor: '#FFFFFF', flashing: false, brightness: masterBrightness };
         }
         return newStrip;
       }
@@ -318,9 +350,13 @@ export class ServoControlService implements OnDestroy {
     // Check for idle
     const isIdle = (Date.now() - servoState.lastMoved) > ledsConfig.IDLE_SERVO_SECONDS * 1000;
     const brightnessMultiplier = isIdle ? (ledsConfig.IDLE_SERVO_DIM / 100) : 1;
+    
+    // NEW: Incorporate master LED strip brightness
+    const masterBrightnessFactor = masterLedsState.brightness / 255;
+    const effectiveBrightnessMultiplier = brightnessMultiplier * masterBrightnessFactor;
 
     const baseColor = masterLedsState.color;
-    const baseBrightness = Math.round(defaultBrightness * brightnessMultiplier);
+    const baseBrightness = Math.round(defaultBrightness * effectiveBrightnessMultiplier);
 
     // 1. Set base state for all pixels
     for (let i = 0; i < ledCount; i++) {
@@ -331,7 +367,7 @@ export class ServoControlService implements OnDestroy {
     const limitLedCount = 20;
     if (servoState.limitMin) {
       for (let i = 0; i < Math.min(limitLedCount, ledCount); i++) {
-        newStrip[i] = { displayColor: '#FF0000', flashing: true, brightness: Math.round(255 * brightnessMultiplier) };
+        newStrip[i] = { displayColor: '#FF0000', flashing: true, brightness: Math.round(255 * effectiveBrightnessMultiplier) };
       }
       for (let i = limitLedCount; i < ledCount; i++) {
         newStrip[i] = { displayColor: '#FFA500', flashing: false, brightness: baseBrightness };
@@ -339,7 +375,7 @@ export class ServoControlService implements OnDestroy {
     }
     if (servoState.limitMax) {
       for (let i = ledCount - 1; i >= Math.max(0, ledCount - limitLedCount); i--) {
-        newStrip[i] = { displayColor: '#FF0000', flashing: true, brightness: Math.round(255 * brightnessMultiplier) };
+        newStrip[i] = { displayColor: '#FF0000', flashing: true, brightness: Math.round(255 * effectiveBrightnessMultiplier) };
       }
       for (let i = 0; i < ledCount - limitLedCount; i++) {
         newStrip[i] = { displayColor: '#FFA500', flashing: false, brightness: baseBrightness };
@@ -355,7 +391,7 @@ export class ServoControlService implements OnDestroy {
       const end = Math.min(ledCount - 1, centerIndex + indicatorSize);
 
       for (let i = start; i <= end; i++) {
-        newStrip[i] = { displayColor: '#00FF00', flashing: false, brightness: Math.round(255 * brightnessMultiplier) };
+        newStrip[i] = { displayColor: '#00FF00', flashing: false, brightness: Math.round(255 * effectiveBrightnessMultiplier) };
       }
     }
 
@@ -369,11 +405,11 @@ export class ServoControlService implements OnDestroy {
         for (let i = 0; i < ledCount; i++) {
             const distance = Math.abs(i - scannerPos);
             if (distance === 0) { // Head
-                newStrip[i] = { ...newStrip[i], displayColor: chaseColor, brightness: 255 };
+                newStrip[i] = { ...newStrip[i], displayColor: chaseColor, brightness: Math.round(255 * effectiveBrightnessMultiplier) };
             } else if (distance <= tailLength) { // Tail
                 const chaseBrightness = 255 * (1 - (distance / tailLength));
                 // Overlay the chase color, keeping the original pixel's brightness multiplier
-                newStrip[i] = { ...newStrip[i], displayColor: chaseColor, brightness: Math.round(chaseBrightness * brightnessMultiplier) };
+                newStrip[i] = { ...newStrip[i], displayColor: chaseColor, brightness: Math.round(chaseBrightness * effectiveBrightnessMultiplier) };
             }
         }
     }

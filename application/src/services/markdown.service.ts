@@ -15,7 +15,12 @@ import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
   providedIn: 'root',
 })
 export class MarkdownService {
-  private sanitizer = inject(DomSanitizer);
+  // FIX: Explicitly type `sanitizer` as `DomSanitizer` to resolve 'Property does not exist on type unknown' errors.
+  private sanitizer: DomSanitizer;
+
+  constructor() {
+    this.sanitizer = inject(DomSanitizer);
+  }
 
   private inlineParse(text: string): string {
     return text

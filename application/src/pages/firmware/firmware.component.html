@@ -1,43 +1,51 @@
-<!--
-  File: src/pages/firmware/firmware.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
-
-  Description:
-  Template for the Firmware page. Displays detailed information about the
-  device and application firmware.
--->
-<main class="flex-grow flex flex-col items-center p-4">
-  <div class="w-full max-w-5xl mb-8 flex justify-between items-center">
-    <h1 class="text-3xl font-bold text-gray-200 flex items-center">
-        <i class="fa-solid fa-microchip mr-4 text-orange-400"></i>
-        Firmware
-    </h1>
-    <div class="flex items-center space-x-4">
-        <a routerLink="/dependencies" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md text-sm">
-          <i class="fa-solid fa-link mr-2"></i>
-          <span>View Dependencies</span>
-        </a>
-        <a routerLink="/firmware-browser" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md text-sm">
-          <i class="fa-solid fa-code mr-2"></i>
-          <span>Browse Firmware</span>
-        </a>
+<main class="flex-grow flex flex-col">
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+          <i class="fa-solid fa-microchip mr-3 text-orange-400"></i>
+          Software
+      </h2>
+      <div class="flex items-center space-x-4">
+          <a routerLink="/information/landing" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 md:hidden">
+            Back
+          </a>
+          <a routerLink="/information/software/firmware-browser" class="bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 hidden md:flex items-center justify-center shadow-md text-sm">
+            <i class="fa-solid fa-code mr-2"></i>
+            <span>Browse Controller Source</span>
+          </a>
+      </div>
     </div>
   </div>
 
-  <div class="w-full max-w-5xl grid grid-cols-1 lg:grid-cols-2 gap-8">
+  <div class="w-full grid grid-cols-1 lg:grid-cols-3 gap-8">
     <!-- Hardware Details Card -->
     <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
       <h2 class="text-xl font-bold text-gray-300 flex items-center mb-4">
         <i class="fa-solid fa-desktop mr-3 text-orange-400"></i>
-        Hardware
+        Controller Firmware
       </h2>
       <div class="space-y-3 text-sm">
         <div class="flex justify-between">
           <span class="font-semibold text-gray-400">fireCNC Firmware:</span>
-          <span class="font-mono text-gray-200">{{ systemInfo().firmwareVersion }}</span>
+          <span class="font-mono text-gray-200">
+            {{ systemInfo().firmwareVersion }}
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Release Date:</span>
+          <span class="font-mono text-gray-200">{{ systemInfo().firmwareDate | date:'dd/MM/yy' }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span class="font-semibold text-gray-400">Update Status:</span>
+            @if (githubFirmwareVersionInfo(); as info) {
+                @if (isFirmwareUpdateAvailable()) {
+                    <span class="font-mono text-green-400">Update available: v{{ info.version }}</span>
+                } @else {
+                    <span class="font-mono text-gray-400">Up to date</span>
+                }
+            } @else {
+                <span class="font-mono text-gray-500">Checking...</span>
+            }
         </div>
         <div class="flex justify-between items-center">
           <span class="font-semibold text-gray-400">Firmware Source:</span>
@@ -45,10 +53,6 @@
             <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
             <span>View on GitHub</span>
           </a>
-        </div>
-        <div class="flex justify-between">
-          <span class="font-semibold text-gray-400">Release Date:</span>
-          <span class="font-mono text-gray-200">{{ systemInfo().firmwareDate | date:'longDate' }}</span>
         </div>
         <div class="flex justify-between">
           <span class="font-semibold text-gray-400">Board:</span>
@@ -64,22 +68,83 @@
       </div>
     </div>
 
-    <!-- UI Libraries Card -->
+    <!-- Application Details Card -->
     <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
-      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
-        <i class="fa-solid fa-palette mr-3 text-orange-400"></i>
-        UI Libraries
+      <h2 class="text-xl font-bold text-gray-300 flex items-center mb-4">
+        <i class="fa-solid fa-code mr-3 text-orange-400"></i>
+        Web Application
       </h2>
       <div class="space-y-3 text-sm">
-        @for(lib of uiLibs; track lib.name) {
-          <a [href]="lib.url" target="_blank" rel="noopener noreferrer" class="flex justify-between items-start hover:bg-gray-900/50 p-2 rounded-md transition-colors duration-200 group">
-            <div>
-              <span class="font-semibold text-gray-300 group-hover:text-orange-300">{{ lib.name }}</span>
-              <p class="text-xs text-gray-500">{{ lib.description }}</p>
-            </div>
-            <span class="font-mono text-orange-300 ml-4 shrink-0">{{ lib.version }}</span>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">fireCNC App:</span>
+          <span class="font-mono text-gray-200">
+            v{{ appVersion }}
+          </span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Release Date:</span>
+          <span class="font-mono text-gray-200">{{ appReleaseDate | date:'dd/MM/yy' }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+            <span class="font-semibold text-gray-400">Update Status:</span>
+            @if (githubAppVersionInfo(); as info) {
+                @if (isAppUpdateAvailable()) {
+                    <span class="font-mono text-green-400">Update available: v{{ info.version }}</span>
+                } @else {
+                    <span class="font-mono text-gray-400">Up to date</span>
+                }
+            } @else {
+                <span class="font-mono text-gray-500">Checking...</span>
+            }
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="font-semibold text-gray-400">App Source:</span>
+          <a href="https://github.com/kiwiscanwifi/fireCNCv2" target="_blank" rel="noopener noreferrer" class="font-mono text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-200 flex items-center">
+            <i class="fa-solid fa-arrow-up-right-from-square mr-2"></i>
+            <span>View on GitHub</span>
           </a>
-        }
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="font-semibold text-gray-400">Community:</span>
+          <a [href]="facebookGroupUrl" target="_blank" rel="noopener noreferrer" class="font-mono text-blue-400 hover:text-blue-300 hover:underline transition-colors duration-200 flex items-center">
+            <i class="fa-brands fa-facebook mr-2"></i>
+            <span>Facebook Group</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Configuration Card -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 flex items-center mb-4">
+        <i class="fa-solid fa-file-code mr-3 text-orange-400"></i>
+        Configuration
+      </h2>
+      <div class="space-y-3 text-sm">
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Version:</span>
+          <span class="font-mono text-gray-200">{{ configVersion() }}</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Last Saved:</span>
+          @if (configLastSaved(); as lastSaved) {
+            <span class="font-mono text-gray-200">{{ lastSaved | date:'dd/MM/yy HH:mm:ss' }}</span>
+          } @else {
+            <span class="font-mono text-gray-500">Never</span>
+          }
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">File Size:</span>
+          <span class="font-mono text-gray-200">{{ (configFileSize() / 1024).toFixed(2) }} KB</span>
+        </div>
+        <div class="flex justify-between">
+          <span class="font-semibold text-gray-400">Variables:</span>
+          <span class="font-mono text-gray-200">{{ configVariableCount() }}</span>
+        </div>
+        <div class="flex justify-between items-center">
+          <span class="font-semibold text-gray-400">Location:</span>
+          <span class="font-mono text-gray-200">{{ configFilePath() }}</span>
+        </div>
       </div>
     </div>
 
@@ -99,6 +164,25 @@
               <p class="text-xs text-gray-500">{{ item.description }}</p>
             </div>
             <span class="font-mono text-orange-300 ml-4 shrink-0">{{ item.version }}</span>
+          </a>
+        }
+      </div>
+    </div>
+
+    <!-- UI Libraries Card -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-palette mr-3 text-orange-400"></i>
+        UI Libraries
+      </h2>
+      <div class="space-y-3 text-sm">
+        @for(lib of uiLibs; track lib.name) {
+          <a [href]="lib.url" target="_blank" rel="noopener noreferrer" class="flex justify-between items-start hover:bg-gray-900/50 p-2 rounded-md transition-colors duration-200 group">
+            <div>
+              <span class="font-semibold text-gray-300 group-hover:text-orange-300">{{ lib.name }}</span>
+              <p class="text-xs text-gray-500">{{ lib.description }}</p>
+            </div>
+            <span class="font-mono text-orange-300 ml-4 shrink-0">{{ lib.version }}</span>
           </a>
         }
       </div>

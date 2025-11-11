@@ -1,18 +1,25 @@
 import { ChangeDetectionStrategy, Component, Signal, signal, computed, inject, effect, OnDestroy, WritableSignal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
-import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router'; // Import Router
+import { RouterOutlet, RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { WebSocketService, ConnectionStatus } from './services/websocket.service';
-import { SnmpConfigService, ToastNotification } from './services/snmp-config.service';
-import { ArduinoService, LedState, WifiStatus, WifiConfig } from './services/arduino.service'; // MODIFIED: Import WifiConfig
+import { SnmpConfigService } from './services/snmp-config.service';
+// FIX: Import InternetStatus from the arduino service facade
+import { ArduinoService, LedState, WifiStatus, WifiConfig, InternetStatus } from './services/arduino.service';
 import { ConfirmationModalComponent } from './components/confirmation-modal/confirmation-modal.component';
-import { AlexaService, AlexaNotification } from './services/alexa.service';
+import { AlexaService } from './services/alexa.service';
 import { versions } from './version';
 import { FirmwareUpdateService, FirmwareUpdateInfo } from './services/firmware-update.service';
 import { ConfigFileService } from './services/config-file.service';
-import { InternetConnectivityService, InternetStatus } from './services/internet-connectivity.service';
+// FIX: Remove incorrect InternetStatus import from here
+import { InternetConnectivityService } from './services/internet-connectivity.service';
 import { ModuleService } from './services/module.service';
 import { AdminService } from './services/admin.service';
 import { AccessCodeModalComponent } from './components/access-code-modal/access-code-modal.component';
+import { PersistenceService } from './services/persistence.service';
+import { NotificationService, GlobalNotification } from './services/notification.service'; // NEW
+import { SettingsLandingComponent } from './pages/settings-landing/settings-landing.component';
+import { InformationLandingComponent } from './pages/information-landing/information-landing.component';
+import { ActivityLandingComponent } from './pages/activity-landing/activity-landing.component';
 
 @Component({
   selector: 'app-root',
@@ -33,20 +40,22 @@ export class AppComponent implements OnDestroy {
   protected snmpConfigService = inject(SnmpConfigService);
   protected arduinoService = inject(ArduinoService);
   protected alexaService = inject(AlexaService);
-  private firmwareUpdateService = inject(FirmwareUpdateService);
+  protected firmwareUpdateService = inject(FirmwareUpdateService);
   private configFileService = inject(ConfigFileService);
   protected internetConnectivityService = inject(InternetConnectivityService);
   private moduleService = inject(ModuleService);
   protected adminService = inject(AdminService);
-  private router = inject(Router); // Inject Router
-  
+  protected router: Router = inject(Router);
+  protected persistenceService = inject(PersistenceService);
+  protected notificationService = inject(NotificationService);
+
+  private readonly MOBILE_MENU_STATE_KEY = 'fireCNC_mobileMenuOpen';
+
   // Directly expose signals from services
   connectionStatus: Signal<ConnectionStatus> = this.webSocketService.connectionStatus;
   internetStatus: Signal<InternetStatus> = this.internetConnectivityService.status;
   linuxCncConnectionStatus: Signal<ConnectionStatus> = this.arduinoService.linuxCncConnectionStatus;
   linuxCncLastConnectedTimestamp: Signal<number | null> = this.arduinoService.linuxCncLastConnectedTimestamp;
-  lastSnmpNotification: Signal<ToastNotification | null> = this.snmpConfigService.lastNotification;
-  lastAlexaNotification: Signal<AlexaNotification | null> = this.alexaService.lastNotification;
   showRebootConfirmation = signal(false);
   trapsEnabled: Signal<boolean> = computed(() => this.snmpConfigService.config().TRAPS_ENABLED);
   isAlexaEnabled: Signal<boolean> = this.alexaService.isAlexaEnabled;
@@ -55,21 +64,20 @@ export class AppComponent implements OnDestroy {
   readonly appReleaseDate = versions.APP_RELEASE_DATE;
   firmwareUpdate: Signal<FirmwareUpdateInfo | null> = this.firmwareUpdateService.updateAvailable;
   ethernetActivity = signal(false);
-  private activityInterval: any;
-  
-  wifiStatus: Signal<WifiStatus> = this.arduinoService.wifiStatus;
-  wifiConfig: Signal<WifiConfig> = this.arduinoService.wifiConfig; // NEW: Expose wifiConfig
-  showMobileMenu = signal(false); // New signal for mobile menu visibility
+  private activityInterval: number | null = null;
 
-  // NEW: Admin mode state and modal visibility
+  wifiStatus: Signal<WifiStatus> = this.arduinoService.wifiStatus;
+  wifiConfig: Signal<WifiConfig> = this.arduinoService.wifiConfig;
+  showMobileMenu: WritableSignal<boolean>;
+
   isAdminMode: Signal<boolean> = this.adminService.isAdminMode;
   showAccessCodeModal = signal(false);
-  loginError: WritableSignal<string | null> = signal(null); // NEW: Signal for login errors
-  preLoginRouteUrl: WritableSignal<string | null> = signal(null); // NEW: To store route before login modal
+  loginError: WritableSignal<string | null> = signal(null);
+  preLoginRouteUrl: WritableSignal<string | null> = signal(null);
 
-  // NEW: Signals for reboot overlay
   showRebootOverlay: WritableSignal<boolean> = signal(false);
   private previousRouteUrl: WritableSignal<string | null> = signal(null);
+  applyFirmwareFadeOut: Signal<boolean> = this.firmwareUpdateService.applyFadeOutSignal; 
 
   // Computed properties for MPG/Pendant link
   mpgModules = computed(() => this.moduleService.installedModules().filter(m => m.function === 'MPG'));
@@ -77,13 +85,13 @@ export class AppComponent implements OnDestroy {
   pendantLink = computed(() => {
     const firstMpg = this.mpgModules()[0];
     if (!firstMpg) {
-      return '/'; // Fallback, though it won't be shown
+      return '/';
     }
     return firstMpg.protocol === 'LinuxCNC API' ? '/linuxcnc-mpg' : '/mpg';
   });
 
   wifiSignalBars = computed(() => {
-    const status = this.wifiStatus();
+    const status = this.arduinoService.wifiStatus();
     if (status.status !== 'connected') {
       return 0;
     }
@@ -91,26 +99,47 @@ export class AppComponent implements OnDestroy {
     if (strength > 80) return 4;
     if (strength > 55) return 3;
     if (strength > 30) return 2;
-    if (strength > 0) return 1; // Even a weak signal shows the dot
+    if (strength > 0) return 1;
     return 0;
   });
 
+  githubAppVersionInfo: Signal<FirmwareUpdateInfo | null> = this.firmwareUpdateService.githubAppVersionInfo;
+  internetStatusColorClass: Signal<string> = computed(() => this.arduinoService.getConnectionStatusColorClass(this.internetStatus()));
+  internetStatusText: Signal<string> = computed(() => this.arduinoService.getConnectionStatusText(this.internetStatus()));
+
+  // NEW: Remote Config Status
+  remoteConfigStatus = this.configFileService.remoteConfigStatus;
+  remoteConfigStatusIcon = computed(() => {
+    switch(this.remoteConfigStatus()) {
+        case 'remote': return 'fa-cloud text-green-400';
+        case 'local': return 'fa-server text-gray-400';
+        case 'loading': return 'fa-cloud-arrow-down text-yellow-400 animate-pulse';
+        case 'error': return 'fa-cloud text-red-400';
+        default: return 'fa-question-circle text-gray-500';
+    }
+  });
+  remoteConfigStatusTitle = computed(() => {
+      switch(this.remoteConfigStatus()) {
+          case 'remote': return 'Configuration loaded from remote URL.';
+          case 'local': return 'Using local/cached configuration.';
+          case 'loading': return 'Loading remote configuration...';
+          case 'error': return 'Failed to load remote configuration. Using fallback.';
+          default: return 'Configuration status is unknown.';
+      }
+  });
+
+  // State for new clickable dropdowns
+  isSettingsDropdownOpen = signal(false);
+  isSystemDropdownOpen = signal(false);
+  isInformationDropdownOpen = signal(false);
+  isActivityDropdownOpen = signal(false);
+  private dropdownCloseTimeout: any;
+
   constructor() {
-    // Manually initialize the config service after all root services are created
-    // to prevent circular dependency errors during instantiation.
+    const storedMenuState = this.persistenceService.getItem<boolean>(this.MOBILE_MENU_STATE_KEY);
+    this.showMobileMenu = signal(storedMenuState ?? false);
     this.configFileService.initializeConfig();
 
-    // Removed: Redundant WebSocket connection initiation.
-    // This logic is now correctly centralized in ArduinoService.
-    /*
-    effect(() => {
-      const port = this.arduinoService.watchdogConfig().WEBSOCKET_PORT;
-      const wsUrl = `ws://localhost:${port}/ws-endpoint`;
-      this.webSocketService.connect(wsUrl);
-    });
-    */
-
-    // Effect for ethernet activity simulation
     effect(() => {
       if (this.connectionStatus() === 'connected') {
         this.startEthernetActivitySimulation();
@@ -119,55 +148,50 @@ export class AppComponent implements OnDestroy {
       }
     });
 
-    // Reactively trigger a simulated WebSocket connect when the port configuration changes.
     effect(() => {
-      const port = this.arduinoService.watchdogConfig().WEBSOCKET_PORT; // Read port to create dependency
-      // Call simulateConnect explicitly here on initial load and config changes.
-      // The WebSocketService itself no longer needs the URL, as it's fully simulated.
-      this.webSocketService.simulateConnect(); 
+      const url = this.arduinoService.watchdogConfig().WEBSOCKET_URL;
+      this.webSocketService.simulateConnect();
     });
 
-    // NEW: Effect for reboot overlay and navigation
     effect(() => {
       const wsStatus = this.webSocketService.connectionStatus();
+
       if (wsStatus === 'restarting') {
         this.showRebootOverlay.set(true);
       } else if (wsStatus === 'connected' && this.showRebootOverlay()) {
         this.showRebootOverlay.set(false);
-        // Navigate back to the previous route if one was stored
         const prevUrl = this.previousRouteUrl();
         if (prevUrl) {
           this.router.navigateByUrl(prevUrl);
-          this.previousRouteUrl.set(null); // Clear after use
+          this.previousRouteUrl.set(null);
         } else {
-          // Fallback to dashboard if no previous route or if we were on the dashboard
           this.router.navigate(['/dashboard']);
         }
       }
     });
 
-    // Removed the LinuxCNC connection simulation from AppComponent.
-    // This logic is now centralized within the ArduinoService.
+    effect(() => {
+      this.persistenceService.setItem(this.MOBILE_MENU_STATE_KEY, this.showMobileMenu());
+    });
   }
 
   ngOnDestroy(): void {
     this.stopEthernetActivitySimulation();
+    this.firmwareUpdateService.clearDismissalTimers();
   }
 
   private startEthernetActivitySimulation(): void {
-    if (this.activityInterval) { return; }
-    this.activityInterval = setInterval(() => {
-      // 40% chance to blink
+    if (this.activityInterval !== null) { return; }
+    this.activityInterval = window.setInterval(() => {
       if (Math.random() > 0.6) {
         this.ethernetActivity.set(true);
-        // Random blink duration
         setTimeout(() => this.ethernetActivity.set(false), 100 + Math.random() * 50);
       }
-    }, 300); // Check every 300ms
+    }, 300);
   }
 
   private stopEthernetActivitySimulation(): void {
-    if (this.activityInterval) {
+    if (this.activityInterval !== null) {
       clearInterval(this.activityInterval);
       this.activityInterval = null;
     }
@@ -179,67 +203,37 @@ export class AppComponent implements OnDestroy {
   }
 
   handleRebootConfirm(): void {
-    this.previousRouteUrl.set(this.router.url); // Store current route
+    this.previousRouteUrl.set(this.router.url);
     this.arduinoService.rebootDevice();
     this.showRebootConfirmation.set(false);
-    this.showRebootOverlay.set(true); // Activate overlay immediately
+    this.showRebootOverlay.set(true);
   }
 
   handleRebootCancel(): void {
     this.showRebootConfirmation.set(false);
   }
-  
-  getWifiSignalColorClass(): string {
-    const wifiStatus = this.wifiStatus();
-    const wifiMode = this.wifiConfig().MODE;
-
-    if (wifiMode === 'AP') {
-      return 'text-blue-400'; // Distinct color for AP mode
-    }
-    if (wifiStatus.status === 'disconnected') {
-      return 'text-gray-600';
-    }
-
-    switch (this.wifiSignalBars()) {
-      case 4:
-      case 3:
-        return 'text-green-400';
-      case 2:
-        return 'text-yellow-400';
-      case 1:
-        return 'text-red-400'; // Poor signal
-      default:
-        return 'text-gray-600';
-    }
-  }
 
   hexToRgba(hex: string, alpha: number = 1): string {
     if (!hex || hex === 'off' || hex.length < 4) {
-      return 'rgba(128, 128, 128, 0)'; // Return transparent for off state
+      return 'rgba(128, 128, 128, 0)';
     }
-    let c: any;
+    let c: number;
     if (/^#([A-Fa-f0-9]{3}){1,2}$/.test(hex)) {
-        c = hex.substring(1).split('');
-        if (c.length === 3) {
-            c = [c[0], c[0], c[1], c[1], c[2], c[2]];
-        }
-        c = '0x' + c.join('');
+        c = Number('0x' + hex.substring(1).split('').map((char, i, arr) => arr.length === 3 ? char + char : char).join(''));
         return `rgba(${[(c >> 16) & 255, (c >> 8) & 255, c & 255].join(',')},${alpha})`;
     }
-    return 'rgba(128, 128, 128, 0)'; // Fallback to transparent
+    return 'rgba(128, 128, 128, 0)';
   }
 
   flashOnboardLed(): void {
     const originalState = this.onboardLed();
-    // Prevent re-triggering if already flashing from a click
     if (originalState.color === '#800080' && originalState.flashing) {
       return;
     }
 
-    this.arduinoService.updateOnboardLedState({ color: '#800080', flashing: true, brightness: 255 }); // Purple
+    this.arduinoService.updateOnboardLedState({ color: '#800080', flashing: true, brightness: 255 });
 
     setTimeout(() => {
-      // Only revert if the state hasn't been changed by something else
       const currentState = this.onboardLed();
       if (currentState.color === '#800080' && currentState.flashing) {
         this.arduinoService.updateOnboardLedState(originalState);
@@ -251,33 +245,122 @@ export class AppComponent implements OnDestroy {
     this.showMobileMenu.update(v => !v);
   }
 
-  // Admin related methods
   openAccessCodeModal(): void {
-    this.preLoginRouteUrl.set(this.router.url); // Store current route before opening modal
+    this.preLoginRouteUrl.set(this.router.url);
     this.showAccessCodeModal.set(true);
-    this.loginError.set(null); // Clear any previous errors when opening the modal
+    this.loginError.set(null);
   }
 
   handleLogin(code: string): void {
-    // Pass the entered code to AdminService for authentication
     if (this.adminService.login(code)) {
       this.showAccessCodeModal.set(false);
-      this.loginError.set(null); // Clear error on success
+      this.loginError.set(null);
       const prevUrl = this.preLoginRouteUrl();
       if (prevUrl) {
         this.router.navigateByUrl(prevUrl);
       } else {
-        this.router.navigate(['/dashboard']); // Fallback to dashboard
+        this.router.navigate(['/dashboard']);
       }
-      this.preLoginRouteUrl.set(null); // Clear the stored URL
+      this.preLoginRouteUrl.set(null);
     } else {
-      // Handle incorrect code
       this.loginError.set('Incorrect access code. Please try again.');
     }
   }
 
   handleLogout(): void {
     this.adminService.logout();
-    this.router.navigate(['/dashboard']); // Redirect to dashboard on logout
+    this.router.navigate(['/dashboard']);
+  }
+
+  dismissFirmwareUpdate(version: string): void {
+    // Trigger fade-out animation before dismissing
+    this.firmwareUpdateService.applyFadeOutSignal.set(true);
+    setTimeout(() => {
+        this.firmwareUpdateService.dismissVersion(version);
+    }, 300); // Corresponds to animation duration in style.css
+  }
+
+  // --- New Dropdown Logic ---
+
+  private getDropdownSignal(menu: string): WritableSignal<boolean> | null {
+    switch (menu) {
+      case 'settings': return this.isSettingsDropdownOpen;
+      case 'system': return this.isSystemDropdownOpen;
+      case 'information': return this.isInformationDropdownOpen;
+      case 'activity': return this.isActivityDropdownOpen;
+      default: return null;
+    }
+  }
+
+  closeAllDropdowns(exclude?: string): void {
+    if (exclude !== 'settings') this.isSettingsDropdownOpen.set(false);
+    if (exclude !== 'system') this.isSystemDropdownOpen.set(false);
+    if (exclude !== 'information') this.isInformationDropdownOpen.set(false);
+    if (exclude !== 'activity') this.isActivityDropdownOpen.set(false);
+  }
+
+  toggleDropdown(menu: 'settings' | 'system' | 'information' | 'activity'): void {
+    const targetSignal = this.getDropdownSignal(menu);
+    if (!targetSignal) return;
+  
+    const isOpening = !targetSignal();
+    this.closeAllDropdowns(); // Close all before opening/toggling
+    
+    if (isOpening) {
+      targetSignal.set(true);
+      // Fire the on-open logic
+      const update = this.firmwareUpdate();
+      if (update) this.dismissFirmwareUpdate(update.version);
+      this.notificationService.clearAllWithFade();
+    }
+  }
+  
+  openDropdown(menu: 'settings' | 'system' | 'information' | 'activity'): void {
+    clearTimeout(this.dropdownCloseTimeout);
+    this.closeAllDropdowns();
+    const targetSignal = this.getDropdownSignal(menu);
+    if (targetSignal) {
+      targetSignal.set(true);
+      // Fire the on-open logic
+      const update = this.firmwareUpdate();
+      if (update) this.dismissFirmwareUpdate(update.version);
+      this.notificationService.clearAllWithFade();
+    }
+  }
+  
+  closeDropdown(menu: 'settings' | 'system' | 'information' | 'activity'): void {
+    this.dropdownCloseTimeout = setTimeout(() => {
+      const targetSignal = this.getDropdownSignal(menu);
+      if (targetSignal) {
+        targetSignal.set(false);
+      }
+    }, 100);
+  }
+
+  // --- End New Dropdown Logic ---
+
+  // NEW: Helper methods for stacked notifications
+  getNotificationClass(type: GlobalNotification['type']): string {
+    switch (type) {
+      case 'error': return 'bg-red-900/90 border-red-700 text-red-100';
+      case 'success': return 'bg-green-900/90 border-green-700 text-green-100';
+      case 'alexa': return 'bg-cyan-800/90 border-cyan-600 text-cyan-100';
+    }
+  }
+
+  getNotificationIcon(type: GlobalNotification['type']): string {
+    switch (type) {
+      case 'error': return 'fa-solid fa-triangle-exclamation text-red-400';
+      case 'success': return 'fa-solid fa-check text-green-400';
+      case 'alexa': return 'fa-brands fa-amazon text-cyan-300';
+    }
+  }
+
+  getNotificationTitle(type: GlobalNotification['type']): string {
+    switch (type) {
+      case 'error': return 'Validation Error!';
+      case 'success': return 'Success!';
+      case 'alexa': return 'Alexa Announcement';
+    }
   }
 }

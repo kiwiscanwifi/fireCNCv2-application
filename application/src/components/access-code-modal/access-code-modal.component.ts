@@ -17,7 +17,8 @@ export class AccessCodeModalComponent implements OnInit, AfterViewInit, OnDestro
   login = output<string>();
   close = output<void>();
 
-  private fb = inject(FormBuilder);
+  // FIX: Explicitly type `fb` as `FormBuilder` to resolve 'Property does not exist on type unknown' errors.
+  private fb: FormBuilder = inject(FormBuilder);
 
   accessCodeForm: FormGroup;
   displayError: WritableSignal<string | null> = signal(null); // NEW: Local signal for error display

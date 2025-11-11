@@ -15,10 +15,13 @@
       <i class="fa-solid fa-cogs mr-3 text-orange-400"></i>
       SNMP Configuration
     </h2>
+    <!-- REMOVED: Send Test Trap button, moved to SimulationComponent -->
+    <!--
     <button type="button" (click)="sendTestTrap()" [disabled]="!snmpForm.get('TRAPS_ENABLED')?.value" class="bg-blue-500 hover:bg-blue-600 disabled:bg-blue-500/50 disabled:cursor-not-allowed text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md">
       <i class="fa-solid fa-paper-plane mr-2"></i>
       Send Test Trap
     </button>
+    -->
   </div>
   
   <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -48,18 +51,18 @@
         </div>
         <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded transition-opacity" [class.opacity-50]="!snmpForm.get('AGENT_ENABLED')?.value">
           <label for="community" class="text-gray-400">Community:</label>
-          <input id="community" formControlName="COMMUNITY" type="text" class="bg-gray-700 border text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-32" [class]="snmpForm.get('COMMUNITY')?.invalid && snmpForm.get('COMMUNITY')?.touched ? 'border-red-500' : 'border-gray-600'">
+          <input id="community" formControlName="COMMUNITY" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-32" [class]="snmpForm.get('COMMUNITY')?.invalid && snmpForm.get('COMMUNITY')?.touched ? 'border-red-500' : 'border-gray-600'">
         </div>
         <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded transition-opacity" [class.opacity-50]="!snmpForm.get('AGENT_ENABLED')?.value">
           <label for="port" class="text-gray-400">Port:</label>
-          <input id="port" formControlName="PORT" type="number" class="bg-gray-700 border text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-24" [class]="snmpForm.get('PORT')?.invalid && snmpForm.get('PORT')?.touched ? 'border-red-500' : 'border-gray-600'">
+          <input id="port" formControlName="PORT" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-24" [class]="snmpForm.get('PORT')?.invalid && snmpForm.get('PORT')?.touched ? 'border-red-500' : 'border-gray-600'">
         </div>
         <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded transition-opacity" [class.opacity-50]="!snmpForm.get('AGENT_ENABLED')?.value">
           <label for="protocol" class="text-gray-400">Protocol:</label>
           <select
             id="protocol"
             formControlName="PROTOCOL"
-            class="bg-gray-700 border border-gray-600 text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono">
+            class="bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono">
             @for(proto of protocols; track proto) {
               <option [value]="proto">{{ proto }}</option>
             }
@@ -94,22 +97,22 @@
 
         <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded transition-opacity" [class.opacity-50]="!snmpForm.get('TRAPS_ENABLED')?.value">
           <label for="trapTarget" class="text-gray-400">Target:</label>
-          <input id="trapTarget" formControlName="TRAP_TARGET" type="text" class="bg-gray-700 border text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-40" [class]="snmpForm.get('TRAP_TARGET')?.invalid && snmpForm.get('TRAP_TARGET')?.touched ? 'border-red-500' : 'border-gray-600'">
+          <input id="trapTarget" formControlName="TRAP_TARGET" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-40" [class]="snmpForm.get('TRAP_TARGET')?.invalid && snmpForm.get('TRAP_TARGET')?.touched ? 'border-red-500' : 'border-gray-600'">
         </div>
         <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded transition-opacity" [class.opacity-50]="!snmpForm.get('TRAPS_ENABLED')?.value">
           <label for="trapPort" class="text-gray-400">Port:</label>
-          <input id="trapPort" formControlName="TRAP_PORT" type="number" class="bg-gray-700 border text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-24" [class]="snmpForm.get('TRAP_PORT')?.invalid && snmpForm.get('TRAP_PORT')?.touched ? 'border-red-500' : 'border-gray-600'">
+          <input id="trapPort" formControlName="TRAP_PORT" type="number" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-24" [class]="snmpForm.get('TRAP_PORT')?.invalid && snmpForm.get('TRAP_PORT')?.touched ? 'border-red-500' : 'border-gray-600'">
         </div>
           <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded transition-opacity" [class.opacity-50]="!snmpForm.get('TRAPS_ENABLED')?.value">
           <label for="trapCommunity" class="text-gray-400">Community:</label>
-          <input id="trapCommunity" formControlName="TRAP_COMMUNITY" type="text" class="bg-gray-700 border text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-32" [class]="snmpForm.get('TRAP_COMMUNITY')?.invalid && snmpForm.get('TRAP_COMMUNITY')?.touched ? 'border-red-500' : 'border-gray-600'">
+          <input id="trapCommunity" formControlName="TRAP_COMMUNITY" type="text" class="bg-gray-700 border text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono text-right w-32" [class]="snmpForm.get('TRAP_COMMUNITY')?.invalid && snmpForm.get('TRAP_COMMUNITY')?.touched ? 'border-red-500' : 'border-gray-600'">
         </div>
         <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded transition-opacity" [class.opacity-50]="!snmpForm.get('TRAPS_ENABLED')?.value">
           <label for="trapProtocol" class="text-gray-400">Protocol:</label>
           <select
             id="trapProtocol"
             formControlName="TRAP_PROTOCOL"
-            class="bg-gray-700 border border-gray-600 text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono">
+            class="bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono">
             @for(proto of protocols; track proto) {
               <option [value]="proto">{{ proto }}</option>
             }
@@ -120,7 +123,7 @@
             <select
               id="trapLevel"
               formControlName="TRAP_LEVEL"
-              class="bg-gray-700 border border-gray-600 text-orange-300 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono">
+              class="bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-1 font-bold font-mono">
               @for(level of logLevels; track level) {
                 <option [value]="level">{{ level }}</option>
               }
@@ -130,7 +133,7 @@
     </div>
   </div>
   <!-- Status Page Settings Card -->
-  <div class="mt-6 bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+  <div class="mt-6 bg-gray-900/50 p-4 rounded-lg border border-gray-700 hidden md:block">
     <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
       <i class="fa-solid fa-desktop mr-2 w-4 text-center text-orange-400"></i>
       <span>Status Page</span>

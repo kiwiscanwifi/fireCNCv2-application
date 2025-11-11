@@ -1,79 +1,20 @@
-<!--
-  File: src/pages/logic/logic.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
-
-  Description:
-  Template for the Logic page. Displays detailed information about the application's
-  internal workings and decision-making processes.
--->
 <main class="flex-grow">
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-atom mr-3 text-orange-400"></i>
+        System Logic
+      </h2>
+      <a routerLink="/information/landing" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 md:hidden">
+        Back
+      </a>
+    </div>
+    <p class="text-gray-500 text-sm mt-2">Last Updated: {{ lastUpdated }}</p>
+  </div>
+
   <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
-    <h2 class="text-2xl font-bold text-gray-300 mb-6 flex items-center">
-      <i class="fa-solid fa-atom mr-3 text-orange-400"></i>
-      System Logic
-    </h2>
-
-    <div class="space-y-6 text-gray-300">
-
-      <!-- System Startup & Connectivity -->
-      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-        <h3 class="font-bold text-orange-300 text-lg mb-2">System Startup & Connectivity</h3>
-        <ul class="list-disc list-inside space-y-2 text-sm">
-          <li><strong>Network Priority:</strong> The device first attempts to connect via Ethernet using DHCP. If this fails, it falls back to a configured Wi-Fi connection. If Wi-Fi also fails, it reverts to using a static IP address on the Ethernet interface as a final measure.</li>
-          <li><strong>NTP Time Sync:</strong> Upon connecting, the system synchronizes its Real-Time Clock (RTC) with an NTP server obtained from DHCP or specified in the configuration.</li>
-          <li><strong>Onboard LED Indicators:</strong> The onboard LED provides immediate connection feedback: flashing <strong>BLUE</strong> for a successful DHCP connection and <strong>GREEN</strong> for a static IP connection.</li>
-        </ul>
-      </div>
-
-      <!-- Watchdogs -->
-      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-        <h3 class="font-bold text-orange-300 text-lg mb-2">Watchdog Timers</h3>
-        <ul class="list-disc list-inside space-y-2 text-sm">
-          <li><strong>System Watchdog:</strong> A software watchdog monitors the main application loop. If the WebSocket connection remains unresponsive for a configured duration (default: 30 seconds), it triggers a system reboot to prevent freezes.</li>
-          <li><strong>ICMP Watchdog:</strong> An optional network watchdog periodically pings a configured IP address (e.g., your router). If the target becomes unreachable for a set number of consecutive attempts, the device reboots, assuming a critical network failure.</li>
-        </ul>
-      </div>
-
-      <!-- LED & Servo Control -->
-      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-        <h3 class="font-bold text-orange-300 text-lg mb-2">LED & Servo Control Logic</h3>
-        <ul class="list-disc list-inside space-y-2 text-sm">
-          <li><strong>Startup Sequence:</strong> On boot, the LED strips perform a diagnostic sequence: the X-axis strip flashes blue, while the Y/YY strips show a "Knight Rider" scanning effect.</li>
-          <li><strong>Running State:</strong> During normal operation, the LEDs display a base color. A green segment indicates the current servo position on the rail. The ends of the strips will flash red if a limit switch for that axis is triggered.</li>
-          <li><strong>Idle State:</strong> If a servo has not moved for a configured period, its corresponding LED strip will dim to save power and reduce light pollution.</li>
-          <li><strong>Error States:</strong> Critical errors, like an SD card failure, will cause all LED strips to flash red, providing a clear visual warning.</li>
-          <li><strong>Chase Effect:</strong> A periodic "chase" animation can be enabled, which sends a purple scanner light across all strips when their color is set to white.</li>
-        </ul>
-      </div>
-
-      <!-- SNMP Integration -->
-      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-        <h3 class="font-bold text-orange-300 text-lg mb-2">SNMP Integration</h3>
-        <ul class="list-disc list-inside space-y-2 text-sm">
-          <li><strong>Agent:</strong> A simulated SNMP agent is available, exposing key system metrics (voltage, temperature, storage, etc.) via standard OIDs for network monitoring tools.</li>
-          <li><strong>Traps:</strong> The system sends SNMP traps (notifications) for important events. The severity level for which traps are sent is configurable (e.g., ERROR, WARN, INFO). Events that can trigger traps include:
-            <ul class="list-['-_'] list-inside ml-4 mt-1">
-              <li>System log entries matching the configured severity level.</li>
-              <li>GPIO digital input state changes.</li>
-              <li>Storage usage (SD card, SRAM, etc.) exceeding configured thresholds.</li>
-              <li>Critical hardware failures (e.g., I/O expander or SD card initialization failure).</li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-
-      <!-- Shutdown & Reboot Logic -->
-      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
-        <h3 class="font-bold text-orange-300 text-lg mb-2">Shutdown & Reboot Logic</h3>
-        <ul class="list-disc list-inside space-y-2 text-sm">
-          <li><strong>Reboot Reasons:</strong> The system logs the reason for every reboot, which can be viewed in the System Log. Reasons include: User-initiated reboot, Watchdog timeout, ICMP watchdog timeout, SD card failure, and Shutdown Pin activation.</li>
-          <li><strong>Shutdown Pin:</strong> A dedicated GPIO pin can be configured to trigger a graceful shutdown. When this pin goes HIGH, the system initiates a shutdown sequence, including a 5-second blue fade-out on the LEDs before rebooting.</li>
-        </ul>
-      </div>
-
+    <div class="space-y-6 text-gray-300 markdown-content" [innerHTML]="parseMarkdown(referenceContent())">
+      <!-- Content is now dynamically rendered from referenceContent signal -->
     </div>
   </div>
 </main>

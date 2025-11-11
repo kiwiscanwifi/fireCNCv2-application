@@ -4,28 +4,29 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractCon
 import { DashboardSettingsService, DigitalOutputConfig, DigitalInputConfig } from '../../services/dashboard-settings.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { DatePipe } from '@angular/common'; // For toast
 import { RouterLink } from '@angular/router';
 // FIX: Import ReactiveFormsModule
 import { ReactiveFormsModule } from '@angular/forms';
-import { ConfigFileService } from '../../services/config-file.service'; // NEW: Import ConfigFileService
+import { ConfigManagementService } from '../../services/config-management.service'; // NEW
 import { ArduinoService } from '../../services/arduino.service'; // NEW: Import ArduinoService
+import { NotificationService } from '../../services/notification.service'; // NEW
 
 @Component({
   selector: 'app-onboard-settings',
-  imports: [CommonModule, ReactiveFormsModule, DatePipe, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './onboard-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class OnboardSettingsComponent implements OnDestroy {
-  private fb = inject(FormBuilder);
+  // FIX: Explicitly type `fb` as `FormBuilder` to resolve 'Property does not exist on type unknown' errors.
+  private fb: FormBuilder = inject(FormBuilder);
   private dashboardSettingsService = inject(DashboardSettingsService);
-  private configFileService = inject(ConfigFileService); // NEW: Inject ConfigFileService
-  private arduinoService = inject(ArduinoService); // NEW: Inject ArduinoService
+  private configManagementService = inject(ConfigManagementService); // NEW
+  private arduinoService = inject(ArduinoService); // NEW: Import ArduinoService
+  private notificationService = inject(NotificationService); // NEW
   private destroy$ = new Subject<void>();
 
   onboardSettingsForm!: FormGroup;
-  savedConfirmation: WritableSignal<boolean> = signal(false);
 
   // NEW: Add FormControls for widget titles
   digitalOutputsWidgetTitle = new FormControl('', Validators.required);
@@ -108,39 +109,43 @@ export class OnboardSettingsComponent implements OnDestroy {
     return this.onboardSettingsForm.get('digitalInputs') as FormArray;
   }
 
-  saveSettings(): void {
+  async saveSettings(): Promise<void> {
     this.onboardSettingsForm.markAllAsTouched();
+    this.notificationService.clearAll();
 
     if (this.onboardSettingsForm.invalid) {
       console.log('Form is invalid, cannot save.');
+      this.notificationService.showError('Onboard I/O settings could not be saved. Please correct errors.');
       return;
     }
 
     if (this.onboardSettingsForm.dirty) {
       const formValue = this.onboardSettingsForm.getRawValue();
+      
+      // Stage I/O config changes
+      this.configManagementService.updateDigitalOutputsConfig(formValue.digitalOutputs);
+      this.configManagementService.updateDigitalInputsConfig(formValue.digitalInputs);
+      
+      // Stage dashboard layout changes (for titles)
+      let layout = JSON.parse(JSON.stringify(this.dashboardSettingsService.layout()));
+      const updateTitle = (id: string, newTitle: string) => {
+        layout.column1.forEach((w: any) => { if (w.id === id) w.title = newTitle; });
+        layout.column2.forEach((w: any) => { if (w.id === id) w.title = newTitle; });
+      };
+      updateTitle('digital-outputs', formValue.digitalOutputsWidgetTitle);
+      updateTitle('digital-inputs', formValue.digitalInputsWidgetTitle);
+      this.configManagementService.updateDashboardLayout(layout);
 
-      // Update widget titles in DashboardSettingsService
-      this.dashboardSettingsService.updateWidgetTitle(
-        'digital-outputs',
-        formValue.digitalOutputsWidgetTitle
-      );
-      this.dashboardSettingsService.updateWidgetTitle(
-        'digital-inputs',
-        formValue.digitalInputsWidgetTitle
-      );
-
-      // Directly call ConfigFileService to update digital I/O configs
-      this.configFileService.updateDigitalOutputsConfig(formValue.digitalOutputs);
-      this.configFileService.updateDigitalInputsConfig(formValue.digitalInputs);
-
+      // Commit all staged changes
+      await this.configManagementService.commitChanges();
       this.onboardSettingsForm.markAsPristine();
-      this.savedConfirmation.set(true);
-      setTimeout(() => this.savedConfirmation.set(false), 3000);
     }
   }
 
   resetSettings(): void {
+    this.configManagementService.discardChanges();
     this.populateForm(); // Re-populate from current service state
+    this.notificationService.clearAll(); // NEW: Clear all notifications
   }
 
   // Helpers for template access

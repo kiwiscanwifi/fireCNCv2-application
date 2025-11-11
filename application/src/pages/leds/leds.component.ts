@@ -12,6 +12,7 @@ import { ChangeDetectionStrategy, Component, computed, Signal, inject, signal } 
 import { CommonModule } from '@angular/common';
 import { ArduinoService, LedsConfig, LedsState, LedEffect, LedState } from '../../services/arduino.service';
 import { ServoControlService, LedPixel } from '../../services/servo-control.service';
+import { SnmpService } from '../../services/snmp.service';
 
 @Component({
   selector: 'app-leds-page',
@@ -22,11 +23,14 @@ import { ServoControlService, LedPixel } from '../../services/servo-control.serv
 export class LedsPageComponent {
   private arduinoService = inject(ArduinoService);
   private servoControlService = inject(ServoControlService);
+  private snmpService = inject(SnmpService);
   
   ledsConfig: Signal<LedsConfig> = this.arduinoService.ledsConfig;
   ledsState: Signal<LedsState> = this.arduinoService.ledsState;
   onboardLed: Signal<LedState> = this.arduinoService.onboardLed;
   
+  ledPowerConsumption: Signal<number> = this.snmpService.ledPowerConsumption;
+
   private lastOnboardLedColor = signal<string>('#FFFFFF'); // Default to white
   
   totalLedCount: Signal<number> = computed(() => {
@@ -41,6 +45,26 @@ export class LedsPageComponent {
   private readonly RENDER_COUNT = 100;
 
   ledEffects: LedEffect[] = ['Solid', 'Rainbow', 'Chase', 'Off'];
+
+  masterBrightnessPercent: Signal<number> = computed(() => {
+    return Math.round(this.ledsState().brightness / 2.55);
+  });
+
+  onboardLedBrightnessPercent: Signal<number> = computed(() => {
+    return Math.round(this.onboardLed().brightness / 2.55);
+  });
+
+  defaultBrightnessXPercent: Signal<number> = computed(() => {
+    return Math.round(this.ledsConfig().DEFAULT_BRIGHTNESS_X / 2.55);
+  });
+
+  defaultBrightnessYPercent: Signal<number> = computed(() => {
+    return Math.round(this.ledsConfig().DEFAULT_BRIGHTNESS_Y / 2.55);
+  });
+
+  defaultBrightnessYYPercent: Signal<number> = computed(() => {
+    return Math.round(this.ledsConfig().DEFAULT_BRIGHTNESS_YY / 2.55);
+  });
 
   constructor() {
     this.sampledLedStripX = this.createSampledSignal(this.servoControlService.ledStripX);
@@ -69,7 +93,7 @@ export class LedsPageComponent {
   }
 
   setBrightness(event: Event): void {
-    const value = parseInt((event.target as HTMLInputElement).value, 10);
+    const value = parseFloat((event.target as HTMLInputElement).value);
     this.arduinoService.updateLedsState({ brightness: value });
   }
 
@@ -100,7 +124,7 @@ export class LedsPageComponent {
   }
 
   setOnboardLedBrightness(event: Event): void {
-    const value = parseInt((event.target as HTMLInputElement).value, 10);
+    const value = parseFloat((event.target as HTMLInputElement).value);
     this.arduinoService.updateOnboardLedState({ brightness: value });
   }
 

@@ -1,56 +1,91 @@
-<!--
-  File: src/pages/hardware/hardware.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
-
-  Description:
-  Template for the Hardware Hub page.
--->
 <main class="flex-grow">
-  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
-    <h2 class="text-2xl font-bold text-gray-300 mb-6 flex items-center">
-      <i class="fa-solid fa-microchip mr-3 text-orange-400"></i>
-      Hardware Modules
+  <!-- Header for Title and Action Buttons, similar to settings/status pages -->
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-microchip mr-3 text-orange-400"></i>
+        Hardware Modules
+      </h2>
+      <a routerLink="/information" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 md:hidden">
+        Back
+      </a>
+    </div>
+  </div>
+  <p class="text-gray-400 text-sm mb-6">Select a hardware module below to view its detailed pinout and reference information.</p>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+    <!-- Waveshare ESP32 Card -->
+    <a routerLink="/information/hardware/esp32-s3-poe" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+      <div class="flex items-center mb-3">
+        <i class="fa-solid fa-desktop mr-4 text-3xl text-orange-400"></i>
+        <div>
+          <h3 class="font-bold text-gray-200 text-lg">Waveshare ESP32</h3>
+          <p class="text-sm text-gray-400">Main Controller Board</p>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 group-hover:text-gray-400">View GPIO reference, schematics, and notes for the primary ESP32-S3 board.</p>
+    </a>
+
+    <!-- Waveshare RS485 to Ethernet Card -->
+    <a routerLink="/information/hardware/rs485-to-ethernet" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+      <div class="flex items-center mb-3">
+        <i class="fa-solid fa-network-wired mr-4 text-3xl text-orange-400"></i>
+        <div>
+          <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 to Ethernet</h3>
+          <p class="text-sm text-gray-400">Serial to Ethernet Adapter</p>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount RS485 to Ethernet serial server module.</p>
+    </a>
+
+    <!-- Waveshare RS485 HUB Card -->
+    <a routerLink="/information/hardware/rs485-hub" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+      <div class="flex items-center mb-3">
+        <i class="fa-solid fa-sitemap mr-4 text-3xl text-orange-400"></i>
+        <div>
+          <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 HUB</h3>
+          <p class="text-sm text-gray-400">Industrial 4-Ch RS485 Hub</p>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount 4-channel RS485 hub with signal isolation.</p>
+    </a>
+
+    <!-- NEW: Waveshare Modbus RTU Analog Input 8ch Card -->
+    <a routerLink="/information/hardware/waveshare-rs485-io-analog" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+      <div class="flex items-center mb-3">
+        <i class="fa-solid fa-wave-square mr-4 text-3xl text-orange-400"></i>
+        <div>
+          <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 IO Analog</h3>
+          <p class="text-sm text-gray-400">8-Channel Analog Input Module</p>
+        </div>
+      </div>
+      <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the 8-channel analog input module with RS485 Modbus RTU.</p>
+    </a>
+  </div>
+
+  <!-- NEW: Hardware Summary Section -->
+  <div class="mt-8 bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+    <h2 class="text-xl font-bold text-gray-200 flex items-center mb-4">
+      <i class="fa-solid fa-cubes-stacked mr-3 text-orange-400"></i>
+      Hardware Components Summary
     </h2>
-    <p class="text-gray-400 mb-8">Select a hardware module below to view its detailed pinout and reference information.</p>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-      <!-- Waveshare ESP32 Card -->
-      <a routerLink="/gpio" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
-        <div class="flex items-center mb-3">
-          <i class="fa-solid fa-desktop mr-4 text-3xl text-orange-400"></i>
-          <div>
-            <h3 class="font-bold text-gray-200 text-lg">Waveshare ESP32-S3-POE-ETH</h3>
-            <p class="text-sm text-gray-400">Main Controller Board</p>
+    <div class="space-y-6">
+      @for (category of hardwareSummary; track category.title) {
+        <section>
+          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+            <i [class]="category.icon" class="mr-3 w-5 text-center text-orange-400"></i>
+            <span>{{ category.title }}</span>
+          </h3>
+          <div class="pl-8 space-y-3">
+            @for (component of category.components; track component.name) {
+              <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
+                <h4 class="font-semibold text-gray-200">{{ component.name }}</h4>
+                <p class="text-sm text-gray-400 mt-1">{{ component.description }}</p>
+              </div>
+            }
           </div>
-        </div>
-        <p class="text-sm text-gray-500 group-hover:text-gray-400">View GPIO reference, schematics, and notes for the primary ESP32-S3 board.</p>
-      </a>
-
-      <!-- Waveshare RS485 IO Card -->
-      <a routerLink="/waveshare-rs485-io" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
-        <div class="flex items-center mb-3">
-          <i class="fa-solid fa-network-wired mr-4 text-3xl text-orange-400"></i>
-          <div>
-            <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 TO ETH (B)</h3>
-            <p class="text-sm text-gray-400">Serial to Ethernet Adapter</p>
-          </div>
-        </div>
-        <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount RS485 to Ethernet serial server module.</p>
-      </a>
-
-      <!-- Waveshare RS485 HUB Card -->
-      <a routerLink="/waveshare-rs485-hub-4p" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
-        <div class="flex items-center mb-3">
-          <i class="fa-solid fa-sitemap mr-4 text-3xl text-orange-400"></i>
-          <div>
-            <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485-HUB-4P</h3>
-            <p class="text-sm text-gray-400">Industrial 4-Ch RS485 Hub</p>
-          </div>
-        </div>
-        <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount 4-channel RS485 hub with signal isolation.</p>
-      </a>
+        </section>
+      }
     </div>
   </div>
 </main>

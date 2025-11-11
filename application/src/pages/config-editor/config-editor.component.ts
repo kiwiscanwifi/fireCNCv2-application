@@ -9,7 +9,7 @@
  * Component for the configuration file editor page. Allows direct editing
  * of the `config.json` content.
  */
-import { ChangeDetectionStrategy, Component, signal, WritableSignal, ElementRef, viewChild, afterNextRender, inject, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, WritableSignal, ElementRef, viewChild, afterNextRender, inject, effect, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { ConfigFileService } from '../../services/config-file.service';
@@ -23,14 +23,14 @@ declare var CodeMirror: any;
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ConfigEditorComponent {
-  private configFileService = inject(ConfigFileService);
-  private router = inject(Router);
+  protected configFileService = inject(ConfigFileService);
+  private router: Router = inject(Router);
   
   errorMessage: WritableSignal<string | null> = signal(null);
   isDirty = signal(false);
 
   editorHost = viewChild.required<ElementRef<HTMLDivElement>>('editorHost');
-  private editor: any;
+  private editor: WritableSignal<any | null> = signal(null);
 
   constructor() {
     afterNextRender(() => this.initializeCodeMirror());
@@ -38,50 +38,75 @@ export class ConfigEditorComponent {
     effect(() => {
         this.errorMessage.set(this.configFileService.parseError());
     });
+
+    // Effect to reactively update the editor content if it changes elsewhere.
+    effect(() => {
+      const editor = this.editor();
+      if (!editor) return; // Guard clause if editor not yet initialized
+
+      const content = this.configFileService.configFileContent();
+
+      if (editor.getValue() !== content) {
+        editor.setValue(content);
+        // Also ensure dirty state is reset, similar to other editors
+        editor.markClean();
+        this.isDirty.set(false);
+      }
+    });
   }
 
   private initializeCodeMirror(): void {
     try {
-      this.editor = CodeMirror(this.editorHost().nativeElement, {
+      const editorInstance = CodeMirror(this.editorHost().nativeElement, {
         lineNumbers: true,
         theme: 'dracula',
         mode: { name: 'javascript', json: true },
         lineWrapping: true,
+        readOnly: false,
       });
 
-      this.editor.on('change', () => {
-        this.isDirty.set(true);
+      editorInstance.on('change', (_instance: any, changeObj: any) => {
+        // Only mark as dirty on user input, not on programmatic changes.
+        if (changeObj.origin !== 'setValue') {
+          this.isDirty.set(true);
+        }
       });
-
-      this.resetFile(); // Load initial content
+      
+      this.editor.set(editorInstance);
     } catch (e) {
       console.error("Failed to initialize CodeMirror:", e);
     }
   }
 
   onSave(): void {
-    const content = this.editor.getValue();
-    const success = this.configFileService.saveConfig(content);
-    if (success) {
-      this.isDirty.set(false);
-      this.router.navigate(['/advanced']);
-    }
+    const editor = this.editor();
+    if (!editor) return;
+
+    const content = editor.getValue();
+    this.configFileService.saveConfig(content).then(success => {
+      if (success) {
+        this.isDirty.set(false);
+        this.router.navigate(['/system/advanced']);
+      }
+    });
   }
 
   onBack(): void {
     if (this.isDirty() && !confirm('You have unsaved changes that will be lost. Are you sure you want to go back?')) {
       return;
     }
-    this.router.navigate(['/advanced']);
+    this.router.navigate(['/system/advanced']);
   }
 
   resetFile(): void {
+    const editor = this.editor();
+    if (!editor) return;
+
     const content = this.configFileService.configFileContent();
-    if (this.editor) {
-      this.editor.setValue(content);
-      // Use a timeout to ensure the refresh happens after the DOM is fully settled.
-      setTimeout(() => this.editor.refresh(), 10);
-    }
+      
+    editor.setValue(content);
+    // Use a timeout to ensure the refresh happens after the DOM is fully settled.
+    setTimeout(() => editor.refresh(), 10);
     this.isDirty.set(false);
     this.errorMessage.set(null);
   }

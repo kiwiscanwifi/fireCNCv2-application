@@ -1,14 +1,3 @@
-/**
- * @file src/pages/system-log/system-log.component.ts
- * @project fireCNC
- * @author Mark Dyer
- * @location Blenheim, New Zealand
- * @contact intelliservenz@gmail.com
- *
- * @description
- * Component for the System Log page, which displays a live view of the
- * `system.log` file from the device.
- */
 // FIX: Import 'signal' from '@angular/core' to resolve 'Cannot find name' error.
 import { ChangeDetectionStrategy, Component, Signal, ElementRef, viewChild, effect, inject, computed, signal } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
@@ -60,6 +49,14 @@ export class SystemLogComponent {
     const currentFilters = this.filters();
     const levelsToRemove = this.logLevels.filter(level => currentFilters[level]);
     this.systemLogService.clearFilteredLogs(levelsToRemove);
+
+    // Check all filter checkboxes after clearing the logs
+    this.filters.set({
+      ERROR: true,
+      WARN: true,
+      INFO: true,
+      DEBUG: true,
+    });
   }
 
   private scrollToTop(): void {

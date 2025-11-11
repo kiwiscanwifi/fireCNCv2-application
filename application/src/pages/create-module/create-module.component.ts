@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnDestroy, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule, FormBuilder, FormGroup, FormArray, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -13,8 +13,10 @@ import { takeUntil } from 'rxjs/operators';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CreateModulePageComponent implements OnDestroy {
-  private fb = inject(FormBuilder);
-  private router = inject(Router);
+  // FIX: Explicitly type `fb` as `FormBuilder` to resolve 'Property does not exist on type unknown' errors.
+  private fb: FormBuilder = inject(FormBuilder);
+  // FIX: Explicitly type `router` as `Router` to resolve 'Property 'navigate' does not exist on type unknown' errors.
+  private router: Router = inject(Router);
   private moduleService = inject(ModuleService);
   private destroy$ = new Subject<void>();
 

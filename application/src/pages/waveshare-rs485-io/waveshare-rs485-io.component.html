@@ -1,20 +1,10 @@
-<!--
-  File: src/pages/waveshare-rs485-io/waveshare-rs485-io.component.html
-  Project: fireCNC
-  Author: Mark Dyer
-  Location: Blenheim, New Zealand
-  Contact: intelliservenz@gmail.com
-
-  Description:
-  Template for the Waveshare RS485 IO module page.
--->
 <main class="flex-grow">
   <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
-    <h2 class="text-2xl font-bold text-gray-200 flex items-center">
+    <h2 class="text-xl font-bold text-gray-200 flex items-center">
         <i class="fa-solid fa-network-wired mr-3 text-orange-400"></i>
-        Waveshare RS485 TO ETH (B)
+        Waveshare RS485 to Ethernet
     </h2>
-    <a routerLink="/hardware" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+    <a routerLink="/information/hardware" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
       Back
     </a>
   </div>
@@ -27,11 +17,11 @@
         Module Diagram
       </h2>
       <div class="bg-gray-900/50 p-4 rounded-md border border-gray-700">
-         <img ngSrc="https://www.waveshare.com/media/catalog/product/cache/1/image/800x800/9df78eab33525d08d6e5fb8d27136e95/r/s/rs485-to-eth-b-_1_.jpg" 
+         <img ngSrc="https://raw.githubusercontent.com/kiwiscanwifi/fireCNCv2-application/289bd9f0fb4bd2393e871372faea393075ecef26/Images/RS485-TO-POE-ETH-B-intro.jpg" 
              width="800" 
              height="800" 
              priority
-             alt="Waveshare RS485 TO ETH (B) diagram"
+             alt="Waveshare RS485 to Ethernet diagram"
              class="rounded-md w-full h-auto">
       </div>
     </div>
@@ -44,7 +34,7 @@
       </h2>
       <div class="text-gray-300 space-y-4">
         <p>
-          The RS485 TO ETH (B) is an industrial rail-mount RS485 to Ethernet serial server. It is used in the fireCNC system to provide a reliable communication bridge between the main controller and devices on the RS485 bus, such as servo motors.
+          The Waveshare RS485 to Ethernet is an industrial rail-mount RS485 to Ethernet serial server. It is used in the fireCNC system to provide a reliable communication bridge between the main controller and devices on the RS485 bus, such as servo motors.
         </p>
         <h3 class="text-lg font-semibold text-gray-200 pt-2 border-t border-gray-700">Key Features</h3>
         <ul class="list-disc list-inside space-y-2">

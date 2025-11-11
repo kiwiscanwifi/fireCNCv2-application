@@ -9,56 +9,101 @@
  * Component for the changelog file editor page. Allows direct editing
  * of the changelog content.
  */
-import { ChangeDetectionStrategy, Component, OnInit, ElementRef, viewChild, afterNextRender, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, WritableSignal, ElementRef, viewChild, afterNextRender, inject, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ReactiveFormsModule, FormControl } from '@angular/forms';
 import { Router } from '@angular/router';
 import { ChangelogService } from '../../services/changelog.service';
 
+declare var CodeMirror: any;
+
 @Component({
   selector: 'app-changelog-editor',
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule],
   templateUrl: './changelog-editor.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class ChangelogEditorComponent implements OnInit {
+export class ChangelogEditorComponent {
   private changelogService = inject(ChangelogService);
-  private router = inject(Router);
+  private router: Router = inject(Router);
   
-  changelogContent = new FormControl('', { nonNullable: true });
+  errorMessage = this.changelogService.parseError;
+  isDirty = signal(false);
 
-  textarea = viewChild.required<ElementRef<HTMLTextAreaElement>>('changelogTextarea');
+  editorHost = viewChild.required<ElementRef<HTMLDivElement>>('editorHost');
+  private editor: WritableSignal<any | null> = signal(null);
 
-  ngOnInit(): void {
-    this.changelogContent.setValue(this.changelogService.changelogEntries());
-    this.changelogContent.markAsPristine();
-    // Adjust height after view is initialized and content is set.
-    afterNextRender(() => {
-      this.adjustTextareaHeight();
+  constructor() {
+    afterNextRender(() => this.initializeCodeMirror());
+    
+    // Effect to reactively update the editor content when the file content or the editor itself changes.
+    effect(() => {
+      const editor = this.editor();
+      if (!editor) return; // Guard clause if editor not yet initialized
+
+      const content = this.changelogService.changelogEntries();
+
+      if (editor.getValue() !== content) {
+        editor.setValue(content);
+        editor.markClean();
+        this.isDirty.set(false);
+      }
     });
   }
 
-  adjustTextareaHeight(): void {
+  private initializeCodeMirror(): void {
     try {
-      const textareaEl = this.textarea().nativeElement;
-      textareaEl.style.height = 'auto'; // Reset height to shrink if text is deleted
-      textareaEl.style.height = `${textareaEl.scrollHeight}px`;
-    } catch (err) {
-      console.error('Could not adjust textarea height:', err);
+      const editorInstance = CodeMirror(this.editorHost().nativeElement, {
+        lineNumbers: true,
+        theme: 'dracula',
+        mode: { name: 'javascript', json: true },
+        lineWrapping: true,
+        readOnly: false,
+      });
+
+      editorInstance.on('change', (_instance: any, changeObj: any) => {
+        // Only mark as dirty on user input, not on programmatic changes.
+        if (changeObj.origin !== 'setValue') {
+          this.isDirty.set(true);
+          this.errorMessage.set(null); // Clear previous errors on new input
+        }
+      });
+      
+      this.editor.set(editorInstance);
+    } catch (e) {
+      console.error("Failed to initialize CodeMirror:", e);
     }
   }
 
   onSave(): void {
-    const success = this.changelogService.saveChangelog(this.changelogContent.value);
+    const editor = this.editor();
+    if (!editor) return;
+
+    const content = editor.getValue();
+    const success = this.changelogService.saveChangelog(content);
     if (success) {
-      this.router.navigate(['/advanced']);
+      this.isDirty.set(false);
+      this.router.navigate(['/system/advanced']);
     }
+    // If not successful, the service will set the parseError, which is displayed.
   }
 
   onBack(): void {
-    if (this.changelogContent.dirty && !confirm('You have unsaved changes that will be lost. Are you sure you want to go back?')) {
+    if (this.isDirty() && !confirm('You have unsaved changes that will be lost. Are you sure you want to go back?')) {
       return;
     }
-    this.router.navigate(['/advanced']);
+    this.router.navigate(['/system/advanced']);
+  }
+  
+  resetFile(): void {
+    const editor = this.editor();
+    if (!editor) return;
+
+    const content = this.changelogService.changelogEntries();
+      
+    editor.setValue(content);
+    // Use a timeout to ensure the refresh happens after the DOM is fully settled.
+    setTimeout(() => editor.refresh(), 10);
+    this.isDirty.set(false);
+    this.errorMessage.set(null);
   }
 }

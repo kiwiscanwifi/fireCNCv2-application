@@ -1,6 +1,9 @@
-import { Injectable, signal, WritableSignal, inject } from '@angular/core';
+import { Injectable, WritableSignal, inject } from '@angular/core';
 import { LogLevel } from './system-log.service';
 import { SnmpTrapLogService } from './snmp-trap-log.service';
+import { NotificationService } from './notification.service';
+import { ConfigManagementService } from './config-management.service';
+import { StateService } from './state.service';
 
 export type SnmpProtocol = 'UDP' | 'TCP';
 
@@ -16,12 +19,7 @@ export interface SnmpConfig {
   TRAPS_ENABLED: boolean;
   TRAP_LOG_PATH: string;
   AGENT_ENABLED: boolean;
-  DISPLAY_OID_ON_STATUS_PAGE: boolean; // NEW: Added property
-}
-
-export interface ToastNotification {
-  title: string;
-  message: string;
+  DISPLAY_OID_ON_STATUS_PAGE: boolean;
 }
 
 @Injectable({
@@ -29,47 +27,34 @@ export interface ToastNotification {
 })
 export class SnmpConfigService {
   private snmpTrapLogService = inject(SnmpTrapLogService);
+  private notificationService = inject(NotificationService);
+  private configManagementService = inject(ConfigManagementService);
+  private stateService = inject(StateService);
   
-  // Default configuration values based on config.json
-  config: WritableSignal<SnmpConfig> = signal({
-    TRAP_TARGET: '0.0.0.0',
-    TRAP_PORT: 162,
-    TRAP_COMMUNITY: 'SNMP_trap',
-    TRAP_PROTOCOL: 'UDP',
-    COMMUNITY: 'public',
-    PORT: 161,
-    PROTOCOL: 'UDP',
-    TRAP_LEVEL: 'ERROR',
-    TRAPS_ENABLED: true,
-    TRAP_LOG_PATH: '/logs/snmp_trap.log',
-    AGENT_ENABLED: true,
-    DISPLAY_OID_ON_STATUS_PAGE: true, // NEW: Default to true
-  });
-
-  // Keep lastNotification for Alexa service announcements
-  lastNotification: WritableSignal<ToastNotification | null> = signal(null);
+  // The config signal is now sourced from the central StateService.
+  config: WritableSignal<SnmpConfig> = this.stateService.snmpConfig;
 
   /**
-   * Updates the SNMP configuration and simulates saving to a file.
+   * Stages an update to the SNMP configuration via the ConfigManagementService.
    * @param newConfig The partial configuration object with new values.
+   * @param showNotification Whether to display a global success notification.
    */
-  updateConfig(newConfig: Partial<SnmpConfig>): void {
-    this.config.update(currentConfig => ({ ...currentConfig, ...newConfig }));
-    console.log('Simulating save to config.json with new values:', this.config());
-    
-    // REMOVED: No longer displaying toast for SNMP config saves.
-    // this.lastNotification.set({ title: 'Configuration Saved', message: 'SNMP settings updated successfully!' });
-    // setTimeout(() => this.lastNotification.set(null), 3000);
+  updateConfig(newConfig: Partial<SnmpConfig>, showNotification = true): void {
+    const fullConfig = { ...this.config(), ...newConfig };
+    this.configManagementService.updateSnmpConfig(fullConfig);
+    // This action is on a view-only page, so we commit immediately.
+    this.configManagementService.commitChanges(showNotification);
   }
 
   /**
-   * Simulates sending an SNMP trap and triggers a UI notification.
+   * Simulates sending an SNMP trap.
    * @param message The message to include in the trap.
    */
   sendTrap(message: string): void {
     const config = this.config();
     if (!config.TRAPS_ENABLED) {
       console.log('[SNMP TRAP IGNORED] Traps are disabled in configuration.');
+      this.notificationService.showError('SNMP Traps are disabled in configuration.');
       return;
     }
     // In a real application, this would use a library to send a real SNMP trap.
@@ -79,8 +64,5 @@ export class SnmpConfigService {
 
     // Always log the trap to our simulated log file service
     this.snmpTrapLogService.logTrap(message);
-    
-    // REMOVED: No longer setting lastNotification for SNMP traps to avoid pop-ups.
-    // The `lastNotification` signal is retained for Alexa notifications.
   }
 }

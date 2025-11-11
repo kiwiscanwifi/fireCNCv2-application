@@ -23,7 +23,8 @@ import { ReferenceFileService } from '../../services/reference-file.service';
 })
 export class ReferenceEditorComponent implements OnInit {
   private referenceFileService = inject(ReferenceFileService);
-  private router = inject(Router);
+  // FIX: Explicitly type `router` as `Router` to resolve 'Property does not exist on type unknown' errors.
+  private router: Router = inject(Router);
   
   referenceContent = new FormControl('', { nonNullable: true });
 
@@ -50,11 +51,14 @@ export class ReferenceEditorComponent implements OnInit {
   onSave(): void {
     const success = this.referenceFileService.saveReference(this.referenceContent.value);
     if (success) {
-      this.router.navigate(['/settings']);
+      this.router.navigate(['/system/advanced']);
     }
   }
 
   onBack(): void {
-    this.router.navigate(['/settings']);
+    if (this.referenceContent.dirty && !confirm('You have unsaved changes that will be lost. Are you sure you want to go back?')) {
+      return;
+    }
+    this.router.navigate(['/system/advanced']);
   }
 }

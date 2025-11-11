@@ -1,18 +1,3 @@
-/**
- * @file src/services/snmp.service.ts
- * @project fireCNC
- * @author Mark Dyer
- * @location Blenheim, New Zealand
- * @contact intelliservenz@gmail.com
- *
- * @description
- * A service that simulates fetching SNMP data from the device. It provides signals
- * for various system metrics like voltage, temperature, servo positions, and health stats.
- *
- * @changelog
- * 2024-08-06:
- * - Updated default SRAM to 8MB to match ESP32-S3 hardware.
- */
 import { Injectable, signal, WritableSignal, OnDestroy, computed, Signal, effect, inject } from '@angular/core';
 import { ArduinoService, SdCardInfo, HealthStats } from './arduino.service';
 import { PersistenceService, StorageUsage } from './persistence.service';
@@ -23,6 +8,7 @@ export interface ServoPositions {
   x: number;
   y: number;
   yy: number;
+  z: number; // NEW: Added Z-axis
 }
 
 export interface ServoLimits {
@@ -32,6 +18,8 @@ export interface ServoLimits {
   y_max: boolean;
   yy_min: boolean;
   yy_max: boolean;
+  z_min: boolean; // NEW: Added Z-axis
+  z_max: boolean; // NEW: Added Z-axis
 }
 
 export interface SramInfo {
@@ -70,12 +58,44 @@ export class SnmpService implements OnDestroy {
   eepromInfo: WritableSignal<EepromInfo> = signal({ totalBytes: 512, usedBytes: 128 });
   analogInputs: WritableSignal<number[]> = signal([1024, 2048, 3072, 4095]);
   
+  ledPowerConsumption: Signal<number> = computed(() => {
+    const ledsState = this.arduinoService.ledsState();
+    const ledsConfig = this.arduinoService.ledsConfig();
+    const totalLeds = ledsConfig.COUNT_X + ledsConfig.COUNT_Y + ledsConfig.COUNT_YY;
+
+    // Standby power when LEDs are off but controller is on
+    if (!ledsState.power) {
+        return 0.5;
+    }
+
+    const POWER_PER_LED_WATT_WHITE = 0.3; // Max power for a WS2815 at full white
+    const brightnessFactor = ledsState.brightness / 255;
+    let colorAndEffectFactor = 1.0; // Assume white is max power
+
+    if (ledsState.effect === 'Rainbow' || ledsState.effect === 'Chase') {
+        // Effects usually don't have all LEDs on full brightness simultaneously
+        colorAndEffectFactor = 0.4;
+    } else if (ledsState.color.toUpperCase() !== '#FFFFFF') {
+        // Single colors (R, G, or B) use about 1/3 of the power of full white.
+        // Other mixed colors use more, so 0.6 is a reasonable average.
+        colorAndEffectFactor = 0.6;
+    }
+
+    const basePower = totalLeds * POWER_PER_LED_WATT_WHITE * brightnessFactor * colorAndEffectFactor;
+    
+    // Add a small random fluctuation to simulate a real-time measurement
+    const fluctuation = (Math.random() - 0.5) * (basePower * 0.05); // Fluctuate by up to 5% of base power
+    
+    return parseFloat(Math.max(0.5, basePower + fluctuation).toFixed(2));
+  });
+  
   // Data derived from ArduinoService
   uptime: Signal<string> = computed(() => this.arduinoService.systemInfo().uptime);
   sdCardInfo: Signal<SdCardInfo> = this.arduinoService.sdCardInfo;
 
   sdCardAvailableGb: Signal<number> = computed(() => {
       const info = this.sdCardInfo();
+      if (info.totalGb === 0) return 0;
       return parseFloat((info.totalGb - info.usedGb).toFixed(2));
   });
 

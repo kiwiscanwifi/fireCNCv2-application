@@ -9,7 +9,7 @@
   Template for the interactive Shell page. Renders a terminal-like UI
   for command execution.
 -->
-<main class="flex-grow flex flex-col" (click)="focusInput()">
+<main class="flex-grow flex flex-col select-text" (click)="focusInput()">
   <div class="bg-black/80 border border-gray-700 rounded-lg p-4 shadow-lg flex-1 font-mono text-sm text-gray-300 overflow-y-auto min-h-0 relative" #terminalContainer>
     
     <!-- Welcome Message or History -->
@@ -31,7 +31,7 @@
       <input #commandInput
              type="text"
              [formControl]="commandControl"
-             (keydown.enter)="onCommandSubmit()"
+             (keydown)="handleKeydown($event)"
              class="bg-transparent border-none text-gray-100 focus:outline-none focus:ring-0 flex-1 pl-2 caret-green-400 w-full"
              autocomplete="off"
              autocorrect="off"

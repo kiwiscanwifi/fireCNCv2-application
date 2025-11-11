@@ -32,19 +32,42 @@ export class ReferenceFileService {
       this.referenceContent.set(storedContent);
     } else {
       // If no content can be found, set the default from user prompt.
-      const initialContent = `### Network Connection Logic
-Connects to **Ethernet** if the link is up. If not up, tries **Wi-Fi** connection. If no Wi-Fi connection, falls back to a static IP of \`192.168.1.20\` for the Ethernet.
+      const initialContent = `### System Startup & Connectivity
+*   **Configuration Loading:** On startup, the system loads its configuration from persistent storage (simulated as browser \`localStorage\`). If a Remote Config URL is configured and enabled, it will be used as the primary source. If no configuration is found, a default set of values is used. A successful load is audibly confirmed with a single beep.
+*   **Network Priority:** The device prioritizes the wired **Ethernet** connection. If the Ethernet connection is unavailable, it will attempt to connect via **Wi-Fi** (either as a 'Station' to an existing network or by creating its own 'Access Point', depending on the Network Settings).
+*   **NTP Time Sync:** Upon a successful network connection, the system synchronizes its Real-Time Clock (RTC) with an NTP server obtained from DHCP or specified in the Network Settings configuration.
+*   **Onboard LED Indicators:** The onboard LED provides immediate connection feedback: flashing **BLUE** for a successful DHCP connection and **GREEN** for a static IP connection. The flashing stops after 3 seconds, but the LED remains lit, indicating the active network interface.
 
-If the internet connection drops, the device will first attempt to reconnect using the last known working configuration before retrying the full sequence (Ethernet > Wi-Fi > Static Ethernet).
+### Watchdog Timers
+*   **System Watchdog:** A software watchdog monitors the UI-to-device communication. If the WebSocket connection remains unresponsive for a configured duration (default: **120 seconds**, configurable in General Settings), it triggers a system reboot to recover from a potential freeze.
+*   **ICMP Watchdog:** An optional network watchdog periodically pings a configured IP address (e.g., a router or external internet target). If the target becomes unreachable for a set number of consecutive attempts, the device reboots, assuming a critical network failure has occurred that requires a full network stack reset. This is configurable in General Settings.
 
-### NTP Time Synchronization
-- Configure DHCP to use NTP Server from DHCP Server and update RTC.
-- If NTP server is not found via DHCP, use NTP Server default from \`config.json\`.
-- The NTP Server config is \`NETWORK.NTP_SERVER\` with a default of \`192.168.0.1\`.
+### LED & Servo Control Logic
+*   **Startup Sequence:** On boot, the LED strips perform a diagnostic sequence: the X-axis strip flashes blue, while the Y/YY strips show a "Knight Rider" scanning effect. This provides visual confirmation that the LED subsystems are initializing.
+*   **Running State:** During normal operation, the LEDs display a base color (configurable in LED Settings). A green segment indicates the current servo position on the rail. The ends of the strips will flash red if a limit switch for that axis is triggered.
+*   **Idle State:** If a servo has not moved for a configured period (set in LED Settings), its corresponding LED strip will dim to a configured percentage to save power and reduce light pollution.
+*   **Error States:** Critical errors provide clear visual warnings.
+    *   **SD Card Failure:** All LED strips flash red for 10 seconds, then remain solid red.
+    *   **High Storage Usage:** If SD Card, SRAM, or other storage usage exceeds its configured threshold (set in Storage Monitoring Settings), the onboard LED will flash red for 20 seconds, and an SNMP trap is sent.
+*   **Chase Effect:** A periodic "chase" animation can be enabled (in LED Settings), which sends a purple scanner light across all strips when their color is set to white.
 
-### Onboard LED Indicators
-- A successful connection via **DHCP** is indicated by **BLUE** flashes from the onboard LED for 3 seconds.
-- A successful connection using the **Static IP** is indicated by **GREEN** flashes from the onboard LED for 3 seconds.`;
+### SNMP Integration
+*   **Agent:** A simulated SNMP agent is available, exposing key system metrics (voltage, temperature, storage, etc.) via standard OIDs for network monitoring tools. You can view this data on the System Status page.
+*   **Traps:** The system sends SNMP traps (notifications) for important events. The severity level for which traps are sent is configurable (e.g., ERROR, WARN, INFO) in Network Settings. Events that can trigger traps include:
+    *   System log entries matching the configured severity level (viewable in System Log).
+    *   GPIO digital input state changes.
+    *   Storage usage (SD card, SRAM, etc.) exceeding configured thresholds.
+    *   Critical hardware failures (e.g., I/O expander or SD card initialization failure).
+The history of sent traps can be found on the SNMP Log page.
+
+### Shutdown & Reboot Logic
+*   **Reboot Reasons:** The system logs the reason for every reboot, which can be viewed in the System Log. Reasons include: User-initiated reboot, Watchdog timeout, ICMP watchdog timeout, SD card failure, and Shutdown Pin activation.
+*   **Shutdown Pin:** A dedicated GPIO pin can be configured (in General Settings) to trigger a graceful shutdown. When this pin goes HIGH, the system initiates a shutdown sequence, including a 5-second blue fade-out on the LEDs before rebooting.
+
+### Admin Mode & Security
+*   **Access Control:** Advanced features are protected by an Admin Mode. This is enabled by providing a 4-digit access code (default: \`0000\`), which is configured in the General Settings.
+*   **Unlocked Features:** When enabled, Admin Mode grants access to potentially sensitive operations, including the interactive shell, raw file editors (for configuration, modules, etc.), and Remote Config settings.
+`;
       this.referenceContent.set(initialContent);
       this.persistenceService.setItem(this.REFERENCE_CONTENT_KEY, initialContent);
     }

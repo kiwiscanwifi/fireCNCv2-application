@@ -1,0 +1,112 @@
+<main class="flex-grow">
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-server mr-3 text-orange-400"></i>
+        Backend Endpoints
+      </h2>
+      <a routerLink="/information/routes" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+        Back
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <p class="text-gray-400 text-sm mb-6">
+      This page provides an overview of the conceptual backend endpoints. Click on any endpoint to view example data structures and try live simulations.
+    </p>
+
+    @if (backendEndpointsCategory(); as category) {
+      <div class="space-y-3">
+        @for (endpoint of category.endpoints; track endpoint.path; let epIndex = $index) {
+          <div class="bg-gray-900/50 rounded-lg border border-gray-700 hover:border-orange-500/50 transition-colors duration-200">
+            <button (click)="toggleExamplePanel(endpoint, epIndex)" class="w-full text-left focus:outline-none p-3 flex flex-col sm:flex-row justify-between sm:items-center gap-2">
+              <div class="flex-grow">
+                <div class="font-mono text-gray-200 text-sm break-all flex items-center">
+                  <span class="font-semibold mr-2 w-28 text-center"
+                        [class]="!endpoint.method ? 'text-purple-400' : (endpoint.method === 'GET' ? 'text-green-400' : (endpoint.method === 'POST' ? 'text-blue-400' : (endpoint.method === 'WebSocket' ? 'text-cyan-400' : 'text-yellow-400')))">
+                    {{ endpoint.method || 'ROUTE' }}
+                  </span>
+                  @if (endpoint.pathParams && endpoint.pathParams.length > 0) {
+                    <div class="flex items-center gap-1 flex-wrap">
+                      @for (part of getPathParts(endpoint.path, endpoint.pathParams); track $index) {
+                        @if (part.isParam && part.param) {
+                          <input type="text" 
+                                 [value]="part.param.currentValue()"
+                                 (input)="onParamChange(part.param, $event)"
+                                 (click)="$event.stopPropagation()"
+                                 [placeholder]="part.param.placeholder"
+                                 class="bg-gray-700 border border-gray-600 text-orange-300 text-sm rounded-md focus:ring-orange-500 focus:border-orange-500 block p-1 font-mono text-center w-20">
+                        } @else {
+                          <span>{{ part.text }}</span>
+                        }
+                      }
+                    </div>
+                  } @else {
+                    <span>{{ endpoint.path }}</span>
+                  }
+                </div>
+                <p class="text-sm text-gray-400 mt-2 sm:pl-[8.5rem]">{{ endpoint.description }}</p>
+              </div>
+              <div class="flex items-center gap-4 self-end sm:self-center mt-2 sm:mt-0">
+                @if (endpoint.method === 'GET' || endpoint.method === 'POST') {
+                  <button (click)="tryEndpoint(endpoint); $event.stopPropagation()"
+                          type="button"
+                          class="font-bold py-2 px-4 rounded-lg text-sm transition-colors flex items-center gap-2 disabled:cursor-not-allowed"
+                          [class]="endpoint.method === 'GET' ? 'bg-green-600 hover:bg-green-700 disabled:bg-green-600/50' : 'bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50'"
+                          [disabled]="webSocketService.connectionStatus() !== 'connected'">
+                    <i class="fa-solid fa-play"></i>
+                    Try
+                  </button>
+                }
+                <i class="fa-solid text-gray-400 transition-transform duration-300" [class]="endpoint.examplePanelOpen ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+              </div>
+            </button>
+
+            @if (endpoint.examplePanelOpen) {
+              <div class="px-3 pb-3">
+                @if (endpoint.requestBody || endpoint.responseBody) {
+                  <div class="pt-3 border-t border-gray-700 space-y-4 text-sm">
+                    @if (endpoint.requestBody) {
+                      <div class="bg-gray-800 p-3 rounded-lg border border-gray-600">
+                        <h4 class="font-semibold text-gray-300 mb-2">{{ endpoint.method }} Request Example</h4>
+                        @if (endpoint.isEditable) {
+                          <div [id]="getEditorId(epIndex)" class="cm-embedded-editor border border-gray-600 rounded-md"></div>
+                        } @else {
+                          <pre class="whitespace-pre-wrap font-mono text-gray-300 overflow-x-auto p-1">{{ endpoint.requestBody }}</pre>
+                        }
+                      </div>
+                    }
+                    @if (endpoint.responseBody) {
+                      <div class="bg-gray-800 p-3 rounded-lg border border-gray-600">
+                        <h4 class="font-semibold text-gray-300 mb-2">Response Example</h4>
+                        <pre class="whitespace-pre-wrap font-mono text-blue-300 overflow-x-auto p-1">{{ endpoint.responseBody }}</pre>
+                      </div>
+                    }
+                  </div>
+                }
+                @if (endpoint.isLoading() || endpoint.liveResponse()) {
+                  <div class="pt-4 text-sm">
+                    <div class="bg-gray-800 p-3 rounded-lg border border-gray-600">
+                      <h4 class="font-semibold text-gray-300 mb-2 flex items-center">
+                        <i class="fa-solid fa-satellite-dish text-green-400 mr-2 animate-pulse"></i>
+                        Live Response
+                      </h4>
+                      @if (endpoint.isLoading()) {
+                        <div class="flex items-center justify-center p-4">
+                          <i class="fa-solid fa-spinner fa-spin text-2xl text-gray-400"></i>
+                        </div>
+                      } @else if (endpoint.liveResponse(); as response) {
+                        <pre class="whitespace-pre-wrap font-mono text-green-300 overflow-x-auto p-1">{{ response }}</pre>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+  </div>
+</main>

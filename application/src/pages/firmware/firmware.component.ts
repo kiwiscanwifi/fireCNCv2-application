@@ -1,7 +1,10 @@
-import { ChangeDetectionStrategy, Component, Signal, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Signal, inject, computed } from '@angular/core';
 import { CommonModule, DatePipe } from '@angular/common';
 import { ArduinoService, SystemInfo } from '../../services/arduino.service';
 import { RouterLink } from '@angular/router';
+import { FirmwareUpdateService, FirmwareUpdateInfo } from '../../services/firmware-update.service';
+import { versions } from '../../version';
+import { ConfigFileService } from '../../services/config-file.service';
 
 // Define interfaces locally for type safety
 interface Library {
@@ -26,7 +29,21 @@ interface FirmwareComponentInfo {
 })
 export class FirmwareComponent {
   private arduinoService = inject(ArduinoService);
+  private firmwareUpdateService = inject(FirmwareUpdateService);
+  private configFileService = inject(ConfigFileService);
+  
   systemInfo: Signal<SystemInfo> = this.arduinoService.systemInfo;
+
+  readonly appVersion = versions.APP_VERSION;
+  readonly appReleaseDate = versions.APP_RELEASE_DATE;
+  readonly facebookGroupUrl = 'https://www.facebook.com/groups/firecnc';
+
+  // NEW signals for configuration display
+  configVersion = this.configFileService.configurationVersion;
+  configLastSaved = this.configFileService.lastSavedTimestamp;
+  configFileSize = this.configFileService.fileSize;
+  configVariableCount = this.configFileService.variableCount;
+  configFilePath = this.configFileService.filePath;
 
   uiLibs: Library[] = [
     { name: 'Angular', version: '20.3.9', description: 'Core front-end framework.', url: 'https://angular.dev/' },
@@ -54,4 +71,45 @@ export class FirmwareComponent {
       { name: 'FreeRTOS', version: '11.1.0', description: 'Real-time operating system kernel.', url: 'https://www.freertos.org/' },
       { name: 'Bootloader', version: '3.3', description: 'Device startup bootloader (from partition table).', url: 'https://docs.espressif.com/projects/esp-idf/en/latest/esp32s3/api-reference/system/app_overview.html#bootloader' },
   ];
+
+  // Expose githubFirmwareVersionInfo from FirmwareUpdateService
+  githubAppVersionInfo: Signal<FirmwareUpdateInfo | null> = this.firmwareUpdateService.githubAppVersionInfo;
+  githubFirmwareVersionInfo: Signal<FirmwareUpdateInfo | null> = this.firmwareUpdateService.githubFirmwareVersionInfo;
+
+  isAppUpdateAvailable = computed(() => {
+    const localVersion = this.appVersion;
+    const remoteInfo = this.githubAppVersionInfo();
+    if (!remoteInfo) {
+      return false;
+    }
+    return this.isNewerVersion(remoteInfo.version, localVersion);
+  });
+
+  // NEW: Computed signal to check for firmware updates
+  isFirmwareUpdateAvailable = computed(() => {
+    const localVersion = this.systemInfo().firmwareVersion.replace('v', '');
+    const remoteInfo = this.githubFirmwareVersionInfo();
+    if (!remoteInfo) {
+      return false;
+    }
+    return this.isNewerVersion(remoteInfo.version, localVersion);
+  });
+
+  private isNewerVersion(remote: string, local: string): boolean {
+    const remoteParts = remote.split('.').map(Number);
+    const localParts = local.split('.').map(Number);
+
+    for (let i = 0; i < Math.max(remoteParts.length, localParts.length); i++) {
+      const remotePart = remoteParts[i] || 0;
+      const localPart = localParts[i] || 0;
+
+      if (isNaN(remotePart) || isNaN(localPart)) {
+        return false;
+      }
+
+      if (remotePart > localPart) return true;
+      if (remotePart < localPart) return false;
+    }
+    return false; // Versions are identical
+  }
 }

@@ -1,0 +1,33 @@
+<main class="flex-grow flex flex-col">
+  <!-- Header block matching settings page -->
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-circle-info mr-3 text-orange-400"></i>
+        Information
+      </h2>
+      <!-- No extra buttons needed here for this page -->
+    </div>
+  </div>
+
+  <!-- Content card below the header -->
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6 shadow-lg flex-grow">
+    <div class="space-y-3">
+      @for (link of informationLinks; track link.path) {
+        @if (!link.adminOnly || isAdminMode()) {
+          <a [routerLink]="link.path" class="block bg-gray-900/50 p-4 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+            <div class="flex items-center">
+              <div class="flex-shrink-0 w-10 h-10 rounded-full bg-gray-700/50 flex items-center justify-center mr-4">
+                  <i [class]="link.icon" class="text-xl text-orange-400"></i>
+              </div>
+              <div>
+                <h3 class="font-bold text-gray-200 text-lg">{{ link.title }}</h3>
+                <p class="text-sm text-gray-400">{{ link.description }}</p>
+              </div>
+            </div>
+          </a>
+        }
+      }
+    </div>
+  </div>
+</main>

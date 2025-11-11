@@ -24,11 +24,11 @@
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div>
               <h3 class="text-lg font-bold text-gray-300">Raw Configuration File</h3>
-              <p class="text-sm text-gray-400 mt-1">Edit the raw JSON configuration file directly. Changes will be applied after saving.</p>
+              <p class="text-sm text-gray-400 mt-1">Edit the raw firecnc.conf file directly. Changes will be applied after saving.</p>
             </div>
-            <a routerLink="/settings/config-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
+            <a routerLink="/system/advanced/config-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
               <i class="fa-solid fa-pen-to-square mr-2"></i>
-              <span>Edit config.json</span>
+              <span>Edit firecnc.conf</span>
             </a>
           </div>
           <div class="border-t border-gray-700/50"></div>
@@ -37,7 +37,7 @@
               <h3 class="text-lg font-bold text-gray-300">Changelog Management</h3>
               <p class="text-sm text-gray-400 mt-1">Edit the changelog entries directly. Changes are reflected on the Change Log page.</p>
             </div>
-            <a routerLink="/settings/changelog-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
+            <a routerLink="/system/advanced/changelog-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
               <i class="fa-solid fa-pen-to-square mr-2"></i>
               <span>Edit Changelog</span>
             </a>
@@ -46,11 +46,22 @@
           <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
             <div>
               <h3 class="text-lg font-bold text-gray-300">Reference Content Management</h3>
-              <p class="text-sm text-gray-400 mt-1">Edit the markdown content displayed on the GPIO Reference page.</p>
+              <p class="text-sm text-gray-400 mt-1">Edit the markdown content displayed on the System Logic page.</p>
             </div>
-            <a routerLink="/settings/reference-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
+            <a routerLink="/system/advanced/reference-editor" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
               <i class="fa-solid fa-pen-to-square mr-2"></i>
               <span>Edit reference.txt</span>
+            </a>
+          </div>
+          <div class="border-t border-gray-700/50"></div>
+          <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+            <div>
+              <h3 class="text-lg font-bold text-gray-300">Simulation Controls</h3>
+              <p class="text-sm text-gray-400 mt-1">Access various simulation tools for testing device behaviors.</p>
+            </div>
+            <a routerLink="/system/advanced/simulation" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 flex items-center justify-center shadow-md shrink-0">
+              <i class="fa-solid fa-flask-vial mr-2"></i>
+              <span>Go to Simulation</span>
             </a>
           </div>
         </div>

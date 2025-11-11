@@ -1,0 +1,58 @@
+<main class="flex-grow">
+  <div class="mb-4">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-route mr-3 text-orange-400"></i>
+        Application Routes & Endpoints
+      </h2>
+      <a routerLink="/information/landing" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+        Back
+      </a>
+    </div>
+  </div>
+
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <p class="text-gray-400 text-sm mb-6">
+      This section provides an overview of the application's navigable routes and conceptual backend endpoints,
+      showcasing the structure and communication points within the fireCNC system. Select a category below to explore.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- UI Routes Card -->
+      <a routerLink="/information/routes/ui" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+        <div class="flex items-center mb-3">
+          <i class="fa-solid fa-desktop mr-4 text-3xl text-orange-400"></i>
+          <div>
+            <h3 class="font-bold text-gray-200 text-lg">UI Routes</h3>
+            <p class="text-sm text-gray-400">Client-side navigation paths</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 group-hover:text-gray-400">Explore all the user-facing pages and their descriptions within the application.</p>
+      </a>
+
+      <!-- Backend Endpoints Card -->
+      <a routerLink="/information/routes/backend" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+        <div class="flex items-center mb-3">
+          <i class="fa-solid fa-server mr-4 text-3xl text-orange-400"></i>
+          <div>
+            <h3 class="font-bold text-gray-200 text-lg">Backend Endpoints</h3>
+            <p class="text-sm text-gray-400">Conceptual API endpoints</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 group-hover:text-gray-400">View and test the simulated backend API for real-time communication.</p>
+      </a>
+      
+      <!-- File System Paths Card -->
+      <a routerLink="/information/routes/filesystem" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+        <div class="flex items-center mb-3">
+          <i class="fa-solid fa-folder-open mr-4 text-3xl text-orange-400"></i>
+          <div>
+            <h3 class="font-bold text-gray-200 text-lg">File System Paths</h3>
+            <p class="text-sm text-gray-400">Simulated file locations</p>
+          </div>
+        </div>
+        <p class="text-sm text-gray-500 group-hover:text-gray-400">Browse the virtual file system paths used for configuration, logs, and modules.</p>
+      </a>
+    </div>
+  </div>
+</main>

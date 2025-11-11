@@ -30,9 +30,21 @@ export class ShellService {
 
   private fs: Record<string, FsNode> = {};
   cwd: WritableSignal<string> = signal('/home/user');
+  
+  private _commandHistory: WritableSignal<string[]> = signal([]);
+  public readonly commandHistory = this._commandHistory.asReadonly();
+
+  private dnsCache: Record<string, string> = {};
+  private rs485ListenMode = signal<boolean>(false);
 
   constructor() {
     this.initializeFileSystem();
+    this.dnsCache = {
+      'localhost': '127.0.0.1',
+      'google.com': '142.250.180.14',
+      'github.com': '140.82.121.4',
+      'firecnc.local': this.arduinoService.systemInfo().ipAddress
+    };
   }
 
   private initializeFileSystem(): void {
@@ -69,10 +81,15 @@ export class ShellService {
     createDir('/data/modules'); // For module files
 
     // Initialize files mapped to services
+    // FIX: Corrected the type mismatch for the asynchronous `saveConfig` function. The shell's file creation logic expects a synchronous boolean return, so the async call is now wrapped to return `true` immediately while the save operation proceeds in the background.
     createFile(
       '/etc/firecnc.conf',
       () => this.configFileService.configFileContent(),
-      (newContent) => this.configFileService.saveConfig(newContent)
+      (newContent: string) => {
+        // Fire off the async save but return true immediately for the shell command.
+        this.configFileService.saveConfig(newContent);
+        return true;
+      }
     );
     createFile(
       '/logs/changelog.log',
@@ -116,10 +133,25 @@ export class ShellService {
   }
 
   executeCommand(input: string): string {
-    if (!input) return '';
+    const trimmedInput = input.trim();
+    if (!trimmedInput) return '';
+    
+    const [command, ...args] = trimmedInput.split(/\s+/);
+
+    // Commands that don't go into history are handled first.
+    if (command.toLowerCase() === 'history') {
+      if (args[0] === '-c') {
+        this._commandHistory.set([]);
+        return '';
+      }
+      return this.getCommandHistory();
+    }
+
+    // Add command to history before executing
+    this._commandHistory.update(current => [...current, trimmedInput]);
 
     // Handle redirection first
-    const parts = input.split('>');
+    const parts = trimmedInput.split('>');
     if (parts.length > 1) {
       const commandPart = parts[0].trim();
       const filePath = parts[1].trim();
@@ -135,8 +167,6 @@ export class ShellService {
       return writeSuccess ? '' : `bash: failed to write to '${filePath}'`;
     }
 
-    const [command, ...args] = input.trim().split(/\s+/);
-
     switch (command.toLowerCase()) {
       case 'help':
         return this.getHelp();
@@ -151,7 +181,8 @@ export class ShellService {
       case 'echo':
         return args.join(' '); // Simple echo without redirection
       case 'clear':
-        // Handled in component
+        // The component will clear the visual history. This command has no output.
+        // And its command history is preserved.
         return '';
       case 'reboot':
         this.arduinoService.rebootDevice();
@@ -173,8 +204,16 @@ export class ShellService {
       case 'edit':
       case 'vi': // 'vi' is an alias for 'edit'
         return this.edit(args[0]);
-      case 'ping': // NEW: Ping command
+      case 'ping':
         return this.ping(args[0]);
+      case 'resolve':
+        return this.resolve(args[0]);
+      case 'date':
+        return new Date().toString();
+      case 'whoami':
+        return 'user';
+      case 'rs485':
+        return this.rs485(args);
       default:
         return `fireCNC: command not found: ${command}`;
     }
@@ -375,7 +414,6 @@ Commands:
     `;
   }
 
-  // NEW: mkdir command
   private mkdir(pathStr?: string): string {
     if (!pathStr) return 'mkdir: missing operand';
 
@@ -390,7 +428,6 @@ Commands:
     return '';
   }
 
-  // NEW: rm command
   private rm(pathStr?: string, recursive: boolean = false): string {
     if (!pathStr) return 'rm: missing operand';
 
@@ -423,7 +460,6 @@ Commands:
     return '';
   }
 
-  // NEW: edit command (simplified)
   private edit(filePath: string): string {
     if (!filePath) return 'edit: missing file operand';
 
@@ -448,7 +484,6 @@ Commands:
     return `Current content of '${filePath}':\n${content}\n\nTo modify this file, use redirection (e.g., 'echo "new content" > ${filePath}').`;
   }
 
-  // NEW: ping command (simulated)
   private ping(ipAddress: string): string {
     if (!ipAddress) {
       return 'ping: missing host operand\nUsage: ping <IP_ADDRESS>';
@@ -474,7 +509,6 @@ Commands:
     return output;
   }
 
-  // Helper for `echo > file` redirection
   private writeFile(pathStr: string, content: string): boolean {
     const { fullPath, node, parentNode, name } = this.resolvePath(pathStr);
 
@@ -506,19 +540,19 @@ Commands:
     }
   }
 
-
   private getHelp(): string {
     return `
-fireCNC Shell, version 1.0.0
+fireCNC Shell, version 1.0.1
 These shell commands are defined internally. Type 'help' to see this list.
 
   help              Show this message
+  history [-c]      Display command history. Use -c to clear history.
   ls [PATH]         List directory contents
   cat <FILE>        Display file contents
   cd <DIR>          Change the current directory
   pwd               Print the current working directory
   echo [ARGS]       Display a line of text (supports redirection: echo "text" > file)
-  clear             Clear the terminal screen (in UI)
+  clear             Clear the terminal screen
   reboot            Reboot the fireCNC device
   uname -a          Print system information
   leds              Control LEDs. Type 'leds' for subcommand help.
@@ -526,7 +560,77 @@ These shell commands are defined internally. Type 'help' to see this list.
   edit <FILE>       Display file content and hint at editing via redirection
   vi <FILE>         Alias for 'edit'
   rm [-r] <PATH>    Remove files or directories (-r for recursive deletion)
-  ping <IP_ADDRESS> Send ICMP echo requests to network hosts
+  ping <IP>         Send ICMP echo requests to network hosts
+  resolve <HOST>    Resolve a hostname to an IP address
+  date              Display the current date and time
+  whoami            Display the current user
+  rs485             Simulate RS485 communication. Type 'rs485 help'.
+    `;
+  }
+  
+  private getCommandHistory(): string {
+    const history = this._commandHistory();
+    if (history.length === 0) {
+      return '';
+    }
+    return history
+      .map((cmd, index) => `${String(index + 1).padStart(4, ' ')}  ${cmd}`)
+      .join('\n');
+  }
+
+  private resolve(hostname?: string): string {
+    if (!hostname) {
+        return 'resolve: missing hostname operand\nUsage: resolve <HOSTNAME>';
+    }
+    const ip = this.dnsCache[hostname.toLowerCase()];
+    if (ip) {
+        return `${hostname}: ${ip}`;
+    }
+    // Simulate a random IP for unknown hosts
+    const randomIp = `${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}.${Math.floor(Math.random() * 255)}`;
+    this.dnsCache[hostname.toLowerCase()] = randomIp; // "Cache" it for the session
+    return `${hostname}: ${randomIp}`;
+  }
+
+  private rs485(args: string[]): string {
+    const subCommand = args[0]?.toLowerCase();
+    
+    switch (subCommand) {
+      case 'send':
+        const data = args.slice(1).join(' ');
+        if (!data) {
+          return 'rs485 send: missing data operand\nUsage: rs485 send <data>';
+        }
+        return `Setting RTS pin HIGH (Transmit Mode)...\nTransmitting data: "${data}"\nSetting RTS pin LOW (Receive Mode)...`;
+      
+      case 'listen':
+        const state = args[1]?.toLowerCase();
+        if (state === 'on') {
+          this.rs485ListenMode.set(true);
+          return 'RS485 listen mode enabled. (Simulated)';
+        } else if (state === 'off') {
+          this.rs485ListenMode.set(false);
+          return 'RS485 listen mode disabled. (Simulated)';
+        } else {
+          return 'rs485 listen: invalid argument\nUsage: rs485 listen <on|off>';
+        }
+
+      case 'help':
+      default:
+        return this.getRs485Help();
+    }
+  }
+
+  private getRs485Help(): string {
+    return `
+Usage: rs485 <command> [args...]
+
+Simulate RS485 bus communication.
+
+Commands:
+  send <data>     Simulate sending data over the bus.
+                  Example: rs485 send "Hello World"
+  listen <on|off> Toggle simulated listening mode.
     `;
   }
 }

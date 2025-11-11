@@ -1,0 +1,216 @@
+<main class="flex-grow">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+    <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+      <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-flask-vial mr-3 text-orange-400"></i>
+        Simulation Controls
+      </h2>
+      <a routerLink="/system/advanced" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200">
+        Back
+      </a>
+    </div>
+    <p class="text-gray-400 text-sm mb-6">
+      Use these controls to simulate various device behaviors and test application reactivity.
+      These actions do not persist beyond the current session and are for diagnostic purposes only.
+    </p>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+
+      <!-- WebSocket Simulation -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-wifi mr-2 text-center text-blue-400"></i>
+          <span>WebSocket Connection</span>
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Status:</span>
+            <span class="font-mono text-gray-200">{{ connectionStatus() }}</span>
+          </div>
+          <div class="flex flex-col gap-2 pt-2 border-t border-gray-700/50">
+            <button (click)="simulateWsDisconnect()" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-link-slash mr-2"></i>
+              Disconnect
+            </button>
+            <button (click)="simulateWsConnect()" type="button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-link mr-2"></i>
+              Connect
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SD Card Simulation -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-sd-card mr-2 text-center text-orange-400"></i>
+          <span>SD Card Status</span>
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Status:</span>
+            <span class="font-mono" [class]="getSdCardStatusColor()">{{ sdCardInfo().status }}</span>
+          </div>
+          <div class="flex flex-col gap-2 pt-2 border-t border-gray-700/50">
+            <button (click)="simulateSdWriteFailure()" type="button" class="w-full bg-red-800/50 hover:bg-red-700/50 border border-red-700 text-red-300 font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-triangle-exclamation mr-2"></i>
+              Simulate Write Fail
+            </button>
+            <button (click)="simulateSdUnmount()" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-eject mr-2"></i>
+              Unmount
+            </button>
+            <button (click)="simulateSdMount()" type="button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-database mr-2"></i>
+              Mount
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- SNMP Traps & Watchdog Simulation -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-broadcast-tower mr-2 text-center text-purple-400"></i>
+          <span>SNMP & Watchdog</span>
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Agent Enabled:</span>
+            <span class="font-mono text-gray-200">{{ snmpConfigService.config().AGENT_ENABLED ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Watchdog Active:</span>
+            <span class="font-mono text-gray-200">{{ watchdogConfig().WATCHDOG ? 'Yes' : 'No' }}</span>
+          </div>
+          <div class="flex flex-col gap-2 pt-2 border-t border-gray-700/50">
+            <button (click)="sendTestTrap()" type="button" [disabled]="!snmpConfigService.config().TRAPS_ENABLED" class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-paper-plane mr-2"></i>
+              Send Test Trap
+            </button>
+            <button (click)="triggerWatchdogReboot()" type="button" [disabled]="!watchdogConfig().WATCHDOG" class="w-full bg-orange-600 hover:bg-orange-700 disabled:bg-orange-600/50 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-dog mr-2"></i>
+              Trigger Watchdog Reboot
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Temperature Simulation -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-temperature-full mr-2 text-center text-yellow-400"></i>
+          <span>Temperature</span>
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Current Temp:</span>
+            <span class="font-mono" [class]="getTempColor()">{{ temperature() }}°C</span>
+          </div>
+          <div class="flex flex-col gap-2 pt-2 border-t border-gray-700/50">
+            <button (click)="simulateHighTemperature()" type="button" class="w-full bg-orange-600 hover:bg-orange-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-exclamation-triangle mr-2"></i>
+              High Temperature
+            </button>
+            <button (click)="simulateNormalTemperature()" type="button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-check mr-2"></i>
+              Normal Temperature
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Internet Connectivity Simulation -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-earth-americas mr-2 text-center text-cyan-400"></i>
+          <span>Internet Connectivity</span>
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Status:</span>
+            <span class="font-mono text-gray-200">{{ internetStatus() }}</span>
+          </div>
+          <!-- NEW: Ping Enabled Toggle -->
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Enable Ping Check:</span>
+            <button type="button" (click)="togglePingEnabled()"
+              class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+              [class]="pingEnabled() ? 'bg-orange-500' : 'bg-gray-600'" role="switch" [attr.aria-checked]="pingEnabled()">
+              <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+                [class]="pingEnabled() ? 'translate-x-5' : 'translate-x-0'">
+              </span>
+            </button>
+          </div>
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Ping Target:</span>
+            <span class="font-mono text-gray-200">{{ pingTarget() }}</span>
+          </div>
+          <div class="flex flex-col gap-2 pt-2 border-t border-gray-700/50">
+            <button (click)="toggleInternetOffline()" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-cloud-arrow-down mr-2"></i>
+              Go Offline
+            </button>
+            <button (click)="toggleInternetOnline()" type="button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-cloud-arrow-up mr-2"></i>
+              Go Online
+            </button>
+            <button (click)="resetInternetStatus()" type="button" [disabled]="!internetOverride()" class="w-full bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600/50 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                <i class="fa-solid fa-rotate-right mr-2"></i>
+                Reset to Auto
+              </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- LinuxCNC Connection Simulation -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-desktop mr-2 text-center text-teal-400"></i>
+          <span>LinuxCNC Connection</span>
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex justify-between items-center bg-gray-800/50 p-2 rounded-lg">
+            <span class="font-semibold text-gray-400">Status:</span>
+            <span class="font-mono text-gray-200">{{ linuxCncConnectionStatus() }}</span>
+          </div>
+          <div class="flex flex-col gap-2 pt-2 border-t border-gray-700/50">
+            <button (click)="simulateLinuxCncDisconnect()" type="button" class="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-plug-circle-xmark mr-2"></i>
+              Disconnect
+            </button>
+            <button (click)="simulateLinuxCncConnect()" type="button" class="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-plug-circle-bolt mr-2"></i>
+              Connect
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Buzzer & Firmware Update Simulation -->
+      <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-700">
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i class="fa-solid fa-cogs mr-2 text-center text-gray-400"></i>
+          <span>Utilities</span>
+        </h3>
+        <div class="space-y-2 text-sm">
+          <div class="flex flex-col gap-2 pt-2">
+            <button (click)="testBuzzerBeep()" type="button" [disabled]="!arduinoService.buzzerEnabled()" class="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-blue-600/50 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-bell mr-2"></i>
+              Test Buzzer Beep
+            </button>
+            <button (click)="forceFirmwareUpdateCheck()" type="button" [disabled]="!watchdogConfig().FIRMWARE" class="w-full bg-purple-600 hover:bg-purple-700 disabled:bg-purple-600/50 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+              <i class="fa-solid fa-rocket mr-2"></i>
+              Force Update Check
+            </button>
+            <button (click)="dismissFirmwareUpdate()" type="button" [disabled]="!firmwareUpdateService.updateAvailable()" class="w-full bg-gray-600 hover:bg-gray-700 disabled:bg-gray-600/50 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200">
+                <i class="fa-solid fa-xmark mr-2"></i>
+                Dismiss Update
+            </button>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</main>
