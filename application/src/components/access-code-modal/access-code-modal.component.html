@@ -23,7 +23,7 @@
         @for (i of [0, 1, 2, 3]; track i) {
           <input #codeInputs
                  [formControlName]="'code' + (i + 1)"
-                 type="tel"
+                 type="password"
                  inputmode="numeric"
                  maxlength="1"
                  (input)="handleInput($event, i)"

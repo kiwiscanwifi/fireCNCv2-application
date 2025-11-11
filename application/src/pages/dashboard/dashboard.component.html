@@ -19,20 +19,20 @@
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 lg:gap-4">
       <!-- Column 1: Widgets -->
       <div class="flex flex-col gap-2 lg:gap-4 drop-zone"
-           [class.drag-over]="dragOverColumn() === 'column1'"
+           [class.drag-over]="dragOverColumn() === 'COLUMN1'"
            (dragover)="onDragOver($event)"
-           (dragenter)="onDragEnter('column1')"
+           (dragenter)="onDragEnter('COLUMN1')"
            (dragleave)="onDragLeave($event)"
-           (drop)="onDrop($event, 'column1')">
-        @for (widget of column1Widgets(); track widget.id) {
+           (drop)="onDrop($event, 'COLUMN1')">
+        @for (widget of column1Widgets(); track widget.ID) {
           <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg h-full widget-item"
-               [class.dragging]="draggedWidget()?.id === widget.id"
-               [attr.data-widget-id]="widget.id">
+               [class.dragging]="draggedWidget()?.ID === widget.ID"
+               [attr.data-widget-id]="widget.ID">
             <div class="p-6 flex flex-col h-full">
               <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-gray-300 flex items-center">
-                  <i [class]="'fa-solid ' + widget.icon + ' mr-3 text-orange-400'"></i>
-                  {{ widget.title }}
+                  <i [class]="'fa-solid ' + widget.ICON + ' mr-3 text-orange-400'"></i>
+                  {{ widget.TITLE }}
                 </h2>
                 @if (isAdminMode()) {
                   <i class="fa-solid fa-grip-vertical text-gray-500 cursor-move" 
@@ -42,16 +42,19 @@
                 }
               </div>
               <div class="flex-grow">
-                @if (isModuleWidget(widget.id)) {
-                  <app-module-widget [moduleId]="getModuleId(widget.id)"></app-module-widget>
+                @if (isModuleWidget(widget.ID)) {
+                  <app-module-widget [moduleId]="getModuleId(widget.ID)"></app-module-widget>
                 } @else {
-                  @switch (widget.id) {
+                  @switch (widget.ID) {
                     @case ('digital-outputs') { <app-digital-outputs /> }
                     @case ('digital-inputs') { <app-digital-inputs /> }
                     @case ('system-details') { <app-system-details /> }
                     @case ('storage-info') { <app-storage-info /> }
                     @case ('sram-info') { <app-sram-info /> }
                     @case ('analog-inputs') { <app-analog-inputs /> }
+                    @case ('system-info') { <app-system-info /> }
+                    @case ('light-controller') { <app-light-controller /> }
+                    @case ('servo-monitor') { <app-servo-monitor /> }
                   }
                 }
               </div>
@@ -62,20 +65,20 @@
 
       <!-- Column 2: Widgets -->
       <div class="flex flex-col gap-2 lg:gap-4 drop-zone"
-           [class.drag-over]="dragOverColumn() === 'column2'"
+           [class.drag-over]="dragOverColumn() === 'COLUMN2'"
            (dragover)="onDragOver($event)"
-           (dragenter)="onDragEnter('column2')"
+           (dragenter)="onDragEnter('COLUMN2')"
            (dragleave)="onDragLeave($event)"
-           (drop)="onDrop($event, 'column2')">
-        @for (widget of column2Widgets(); track widget.id) {
+           (drop)="onDrop($event, 'COLUMN2')">
+        @for (widget of column2Widgets(); track widget.ID) {
           <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg h-full widget-item"
-               [class.dragging]="draggedWidget()?.id === widget.id"
-               [attr.data-widget-id]="widget.id">
+               [class.dragging]="draggedWidget()?.ID === widget.ID"
+               [attr.data-widget-id]="widget.ID">
             <div class="p-6 flex flex-col h-full">
               <div class="flex items-center justify-between mb-6">
                 <h2 class="text-xl font-bold text-gray-300 flex items-center">
-                  <i [class]="'fa-solid ' + widget.icon + ' mr-3 text-orange-400'"></i>
-                  {{ widget.title }}
+                  <i [class]="'fa-solid ' + widget.ICON + ' mr-3 text-orange-400'"></i>
+                  {{ widget.TITLE }}
                 </h2>
                 @if (isAdminMode()) {
                   <i class="fa-solid fa-grip-vertical text-gray-500 cursor-move" 
@@ -85,16 +88,19 @@
                 }
               </div>
               <div class="flex-grow">
-                @if (isModuleWidget(widget.id)) {
-                  <app-module-widget [moduleId]="getModuleId(widget.id)"></app-module-widget>
+                @if (isModuleWidget(widget.ID)) {
+                  <app-module-widget [moduleId]="getModuleId(widget.ID)"></app-module-widget>
                 } @else {
-                  @switch (widget.id) {
+                  @switch (widget.ID) {
                     @case ('digital-outputs') { <app-digital-outputs /> }
                     @case ('digital-inputs') { <app-digital-inputs /> }
                     @case ('system-details') { <app-system-details /> }
                     @case ('storage-info') { <app-storage-info /> }
                     @case ('sram-info') { <app-sram-info /> }
                     @case ('analog-inputs') { <app-analog-inputs /> }
+                    @case ('system-info') { <app-system-info /> }
+                    @case ('light-controller') { <app-light-controller /> }
+                    @case ('servo-monitor') { <app-servo-monitor /> }
                   }
                 }
               </div>

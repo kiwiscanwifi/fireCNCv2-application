@@ -1,0 +1,13 @@
+<main class="flex-grow flex items-center justify-center">
+  <div class="text-center bg-gray-800/50 border-2 border-dashed border-gray-700 rounded-lg p-12">
+    <i class="fa-solid fa-arrow-right-long text-5xl text-gray-600 mb-4"></i>
+    <h1 class="text-xl font-bold text-gray-300">Settings Moved</h1>
+    <p class="text-gray-500 mt-2 max-w-sm">
+      Security settings have been moved. You can now manage the Admin Access Code from the main General Settings page.
+    </p>
+    <a routerLink="/settings/general" [queryParams]="{ panel: 'security' }"
+       class="mt-6 bg-orange-500 hover:bg-orange-600 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 shadow-md">
+      Go to General Settings
+    </a>
+  </div>
+</main>

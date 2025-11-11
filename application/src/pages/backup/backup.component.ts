@@ -34,10 +34,11 @@ export class BackupPageComponent {
       }
     });
 
-    // Auto-select the first backup if available
+    // Auto-select the first backup if available, or if the current selection is gone
     effect(() => {
       const backupList = this.backups();
-      if (backupList.length > 0 && !this.selectedBackup()) {
+      const currentSelection = this.selectedBackup();
+      if (backupList.length > 0 && (!currentSelection || !backupList.find(b => b.key === currentSelection.key))) {
         this.selectBackup(backupList[0]);
       }
     });
@@ -70,5 +71,31 @@ export class BackupPageComponent {
 
   selectBackup(backup: Backup): void {
     this.selectedBackup.set(backup);
+  }
+
+  createBackup(): void {
+    this.backupService.createBackup();
+  }
+
+  downloadBackup(): void {
+    const backup = this.selectedBackup();
+    if (!backup) {
+      return;
+    }
+    const content = this.backupService.getBackupContent(backup.key);
+    if (!content) {
+      console.error('Could not get content for backup', backup.key);
+      return;
+    }
+
+    const blob = new Blob([content], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `firecnc.conf.v${backup.version}.json`;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
   }
 }

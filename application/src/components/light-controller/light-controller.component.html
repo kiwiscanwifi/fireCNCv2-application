@@ -1,0 +1,38 @@
+<div class="space-y-4">
+  <!-- Power Control -->
+  <div class="flex items-center justify-between p-2 bg-gray-700/50 rounded-lg">
+    <div class="flex items-center">
+      <i class="fa-solid fa-power-off mr-3" [class]="ledsState().power ? 'text-green-400' : 'text-gray-500'"></i>
+      <span class="font-semibold text-gray-300">Power</span>
+    </div>
+    <button (click)="setPower(!ledsState().power)"
+            class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-800"
+            [class]="ledsState().power ? 'bg-orange-500' : 'bg-gray-600'">
+      <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
+            [class]="ledsState().power ? 'translate-x-5' : 'translate-x-0'">
+      </span>
+    </button>
+  </div>
+
+  <!-- Brightness Control -->
+  <div class="p-2 bg-gray-700/50 rounded-lg" [class.opacity-50]="!ledsState().power">
+    <div class="flex items-center space-x-4">
+      <input type="range" min="0" max="255" step="12.75" [value]="ledsState().brightness" (input)="setBrightness($event)"
+             [disabled]="!ledsState().power"
+             class="w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer accent-orange-500">
+      <span class="font-mono w-12 text-center text-orange-300">{{ masterBrightnessPercent() }}%</span>
+    </div>
+  </div>
+
+  <!-- Effects Control -->
+  <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+    @for(effect of ledEffects; track effect) {
+      <button (click)="setEffect(effect)"
+              type="button"
+              class="px-3 py-1.5 text-xs font-semibold rounded-md transition-colors duration-200 border"
+              [class]="ledsState().effect === effect ? 'bg-orange-500 border-orange-400 text-white' : 'bg-gray-700 hover:bg-gray-600 border-gray-600 text-gray-300'">
+        {{ effect }}
+      </button>
+    }
+  </div>
+</div>

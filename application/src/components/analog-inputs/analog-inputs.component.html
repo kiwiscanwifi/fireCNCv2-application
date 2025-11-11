@@ -11,10 +11,10 @@
 -->
 @if (visibleInputs().length > 0) {
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-6">
-    @for(input of visibleInputs(); track input.id) {
+    @for(input of visibleInputs(); track input.ID) {
       <div class="flex flex-col space-y-2">
         <div class="flex justify-between items-baseline">
-            <span class="font-semibold text-gray-400 text-sm">{{ input.name }}</span>
+            <span class="font-semibold text-gray-400 text-sm">{{ input.NAME }}</span>
             <span class="font-mono text-gray-300 text-sm">{{ input.value }}</span>
         </div>
         <div class="w-full bg-gray-700 rounded-full h-2.5">

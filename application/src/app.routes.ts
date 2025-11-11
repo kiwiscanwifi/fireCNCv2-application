@@ -22,6 +22,7 @@ export const routes: Routes = [
   { path: 'settings/expansion', loadComponent: () => import('./pages/expansion/expansion.component').then(m => m.ExpansionPageComponent), title: 'Expansion Settings | fireCNC' },
   { path: 'settings/expansion/create', loadComponent: () => import('./pages/create-module/create-module.component').then(m => m.CreateModulePageComponent), title: 'Create Expansion Module | fireCNC' },
   { path: 'settings/expansion/:moduleId/port/:portIndex/edit', loadComponent: () => import('./pages/edit-module-port/edit-module-port.component').then(m => m.EditModulePortComponent), title: 'Edit Module Port | fireCNC' },
+  { path: 'settings/security', loadComponent: () => import('./pages/security-settings-page/security-settings-page.component').then(m => m.SecuritySettingsPageComponent), title: 'Security Settings | fireCNC' },
   
   // System / Admin Section
   { path: 'system/shell', loadComponent: () => import('./pages/shell/shell.component').then(m => m.ShellComponent), title: 'Shell | fireCNC' },
@@ -32,6 +33,7 @@ export const routes: Routes = [
   { path: 'system/advanced/changelog-editor', loadComponent: () => import('./pages/changelog-editor/changelog-editor.component').then(m => m.ChangelogEditorComponent), title: 'Edit Changelog | fireCNC' },
   { path: 'system/advanced/reference-editor', loadComponent: () => import('./pages/reference-editor/reference-editor.component').then(m => m.ReferenceEditorComponent), title: 'Edit Logic Reference | fireCNC' },
   { path: 'system/advanced/backup', loadComponent: () => import('./pages/backup/backup.component').then(m => m.BackupPageComponent), title: 'Backup | fireCNC' },
+  { path: 'system/advanced/language-editor', loadComponent: () => import('./pages/language-editor/language-editor.component').then(m => m.LanguageEditorComponent), title: 'Language Editor | fireCNC' },
 
   // Information Section
   { path: 'information', redirectTo: 'information/landing', pathMatch: 'full' },
@@ -52,6 +54,7 @@ export const routes: Routes = [
   { path: 'information/routes/backend', loadComponent: () => import('./pages/backend-endpoints/backend-endpoints.component').then(m => m.BackendEndpointsComponent), title: 'Backend Endpoints | fireCNC' },
   { path: 'information/routes/filesystem', loadComponent: () => import('./pages/file-system-paths/file-system-paths.component').then(m => m.FileSystemPathsComponent), title: 'File System | fireCNC' },
   { path: 'information/recipe', loadComponent: () => import('./pages/recipe/recipe.component').then(m => m.RecipeComponent), title: 'Recipe | fireCNC' },
+  { path: 'information/dependencies', loadComponent: () => import('./pages/dependencies/dependencies.component').then(m => m.DependenciesComponent), title: 'Dependencies | fireCNC' },
 
   // Activity Section
   { path: 'activity', redirectTo: 'activity/landing', pathMatch: 'full' },

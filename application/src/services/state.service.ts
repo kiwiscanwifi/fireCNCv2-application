@@ -47,18 +47,16 @@ export interface AlexaDevice {
 
 
 // --- Re-exported Interfaces for global state ---
-export {
-  ConnectionStatus,
-  LogEntry, LogLevel,
-  SnmpTrapEntry,
-  FirmwareUpdateInfo,
-  DashboardLayout, DigitalOutputConfig, DigitalInputConfig, AnalogInputConfig,
-  SnmpConfig,
-  ServoPositions, ServoLimits, SramInfo, EepromInfo,
-  Module,
-  // FIX: Removed conflicting re-exports for Alexa types. They are already exported above.
-  ServoState, LedPixel
-};
+export type { ConnectionStatus } from './websocket.service';
+export type { LogEntry, LogLevel } from './system-log.service';
+export type { SnmpTrapEntry } from './snmp-trap-log.service';
+export type { FirmwareUpdateInfo } from './firmware-update.service';
+export type { DashboardLayout, DigitalOutputConfig, DigitalInputConfig, AnalogInputConfig } from './dashboard-settings.service';
+export type { SnmpConfig, SnmpProtocol } from './snmp-config.service';
+export type { ServoPositions, ServoLimits, SramInfo, EepromInfo } from './snmp.service';
+export type { Module } from './module.service';
+export type { ServoState, LedPixel } from './servo-control.service';
+
 
 // --- Config-related Interfaces ---
 export interface SshConfig {

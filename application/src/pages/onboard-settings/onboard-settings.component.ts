@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractCon
 import { DashboardSettingsService, DigitalOutputConfig, DigitalInputConfig } from '../../services/dashboard-settings.service';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { RouterLink } from '@angular/router';
 // FIX: Import ReactiveFormsModule
 import { ReactiveFormsModule } from '@angular/forms';
 import { ConfigManagementService } from '../../services/config-management.service'; // NEW
@@ -13,7 +12,7 @@ import { NotificationService } from '../../services/notification.service'; // NE
 
 @Component({
   selector: 'app-onboard-settings',
-  imports: [CommonModule, ReactiveFormsModule, RouterLink],
+  imports: [CommonModule, ReactiveFormsModule],
   templateUrl: './onboard-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -65,14 +64,14 @@ export class OnboardSettingsComponent implements OnDestroy {
     const currentLayout = this.dashboardSettingsService.layout(); // Get current dashboard layout
 
     // Find current widget titles from the dashboard layout for digital outputs
-    const outputsWidget = currentLayout.column1.find(w => w.id === 'digital-outputs') ||
-                          currentLayout.column2.find(w => w.id === 'digital-outputs');
-    const currentOutputsTitle = outputsWidget?.title || 'Digital Outputs (8-DO)'; // Fallback to default
+    const outputsWidget = currentLayout.COLUMN1.find(w => w.ID === 'digital-outputs') ||
+                          currentLayout.COLUMN2.find(w => w.ID === 'digital-outputs');
+    const currentOutputsTitle = outputsWidget?.TITLE || 'Digital Outputs (8-DO)'; // Fallback to default
 
     // Find current widget titles from the dashboard layout for digital inputs
-    const inputsWidget = currentLayout.column1.find(w => w.id === 'digital-inputs') ||
-                         currentLayout.column2.find(w => w.id === 'digital-inputs');
-    const currentInputsTitle = inputsWidget?.title || 'Digital Inputs (8-DI)'; // Fallback to default
+    const inputsWidget = currentLayout.COLUMN1.find(w => w.ID === 'digital-inputs') ||
+                         currentLayout.COLUMN2.find(w => w.ID === 'digital-inputs');
+    const currentInputsTitle = inputsWidget?.TITLE || 'Digital Inputs (8-DI)'; // Fallback to default
 
     // Patch the new form controls with the current widget titles
     this.digitalOutputsWidgetTitle.setValue(currentOutputsTitle, { emitEvent: false });
@@ -82,9 +81,9 @@ export class OnboardSettingsComponent implements OnDestroy {
     digitalOutputsFormArray.clear({ emitEvent: false }); // Clear existing controls
     outputs.forEach(output => {
       digitalOutputsFormArray.push(this.fb.group({
-        id: [output.id],
-        name: [output.name, Validators.required],
-        enabled: [output.enabled],
+        ID: [output.ID],
+        NAME: [output.NAME, Validators.required],
+        ENABLED: [output.ENABLED],
       }), { emitEvent: false });
     });
 
@@ -92,9 +91,9 @@ export class OnboardSettingsComponent implements OnDestroy {
     digitalInputsFormArray.clear({ emitEvent: false }); // Clear existing controls
     inputs.forEach(input => {
       digitalInputsFormArray.push(this.fb.group({
-        id: [input.id],
-        name: [input.name, Validators.required],
-        enabled: [input.enabled],
+        ID: [input.ID],
+        NAME: [input.NAME, Validators.required],
+        ENABLED: [input.ENABLED],
       }), { emitEvent: false });
     });
 
@@ -129,8 +128,8 @@ export class OnboardSettingsComponent implements OnDestroy {
       // Stage dashboard layout changes (for titles)
       let layout = JSON.parse(JSON.stringify(this.dashboardSettingsService.layout()));
       const updateTitle = (id: string, newTitle: string) => {
-        layout.column1.forEach((w: any) => { if (w.id === id) w.title = newTitle; });
-        layout.column2.forEach((w: any) => { if (w.id === id) w.title = newTitle; });
+        layout.COLUMN1.forEach((w: any) => { if (w.ID === id) w.TITLE = newTitle; });
+        layout.COLUMN2.forEach((w: any) => { if (w.ID === id) w.TITLE = newTitle; });
       };
       updateTitle('digital-outputs', formValue.digitalOutputsWidgetTitle);
       updateTitle('digital-inputs', formValue.digitalInputsWidgetTitle);
@@ -158,7 +157,7 @@ export class OnboardSettingsComponent implements OnDestroy {
   }
 
   toggleOutputEnabled(index: number): void {
-    const control = (this.digitalOutputs.at(index) as FormGroup).get('enabled');
+    const control = (this.digitalOutputs.at(index) as FormGroup).get('ENABLED');
     if (control) {
       control.setValue(!control.value);
       this.onboardSettingsForm.markAsDirty();
@@ -166,7 +165,7 @@ export class OnboardSettingsComponent implements OnDestroy {
   }
 
   toggleInputEnabled(index: number): void {
-    const control = (this.digitalInputs.at(index) as FormGroup).get('enabled');
+    const control = (this.digitalInputs.at(index) as FormGroup).get('ENABLED');
     if (control) {
       control.setValue(!control.value);
       this.onboardSettingsForm.markAsDirty();

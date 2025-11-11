@@ -4,8 +4,8 @@ import { DashboardSettingsService } from '../../services/dashboard-settings.serv
 import { SnmpService } from '../../services/snmp.service';
 
 interface VisibleAnalogInput {
-  id: number;
-  name: string;
+  ID: number;
+  NAME: string;
   value: number;
   percent: number;
 }
@@ -28,12 +28,12 @@ export class AnalogInputsComponent {
     const values = this.analogInputValues();
 
     return configs
-      .filter(config => config.enabled)
+      .filter(config => config.ENABLED)
       .map(config => ({
-        id: config.id,
-        name: config.name,
-        value: values[config.id] ?? 0,
-        percent: ((values[config.id] ?? 0) / 4095) * 100
+        ID: config.ID,
+        NAME: config.NAME,
+        value: values[config.ID] ?? 0,
+        percent: ((values[config.ID] ?? 0) / 4095) * 100
       }));
   });
 }

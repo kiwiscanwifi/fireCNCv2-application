@@ -11,9 +11,9 @@
 -->
 @if (visibleInputs().length > 0) {
   <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-6 gap-y-8">
-    @for(input of visibleInputs(); track input.id) {
+    @for(input of visibleInputs(); track input.ID) {
       <div class="flex flex-col items-center space-y-2">
-        <span class="font-semibold text-gray-400">{{ input.name }}</span>
+        <span class="font-semibold text-gray-400">{{ input.NAME }}</span>
         <div class="w-8 h-8 rounded-full flex items-center justify-center" [class]="input.state ? 'bg-green-500/20' : 'bg-gray-700'">
           <div class="w-4 h-4 rounded-full transition-colors duration-300" 
                [class]="input.state ? 'bg-green-400 shadow-[0_0_8px_#34d399]' : 'bg-gray-500'">

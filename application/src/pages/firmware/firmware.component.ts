@@ -61,8 +61,8 @@ export class FirmwareComponent {
     { name: 'Wire', version: '3.0.1', description: 'I2C communication for RTC and I/O expander (via Arduino Core).', url: 'https://www.arduino.cc/en/Reference/Wire' },
     { name: 'Adafruit NeoPixel', version: '1.12.4', description: 'Control of WS2815 addressable LED strips.', url: 'https://github.com/adafruit/Adafruit_NeoPixel' },
     { name: 'Espalexa', version: '2.9.1', description: 'Emulates Alexa devices on the ESP32.', url: 'https://github.com/Aircoookie/Espalexa' },
-    { name: 'ArduinoModbus', version: '1.2.1', description: 'For RS485 communication with servo drivers.', url: 'https://www.arduino.cc/reference/en/libraries/arduinomodbus/' },
-    { name: 'Adafruit TCA9554', version: '1.1.3', description: 'For the TCA9554 I/O Expander.', url: 'https://github.com/adafruit/Adafruit_TCA9554' },
+    { name: 'eModbus', version: '1.0.5', description: 'ESP32-compatible Modbus RTU/TCP library.', url: 'https://github.com/eModbus/eModbus' },
+    { name: 'Adafruit XCA9554', version: '1.1.3', description: 'For the XCA9554 I/O Expander.', url: 'https://github.com/adafruit/Adafruit_XCA9554' },
   ];
 
   baseFirmware: FirmwareComponentInfo[] = [

@@ -70,7 +70,7 @@ export class HardwarePageComponent {
           description: 'The chip that provides hard-wired Ethernet connectivity on the main board.'
         },
         {
-          name: 'TCA9554',
+          name: 'XCA9554',
           description: 'An I/O expander chip that controls the 8 digital outputs (relays).'
         },
         {

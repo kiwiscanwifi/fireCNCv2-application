@@ -9,6 +9,9 @@ import { DashboardSettingsService, DashboardLayout, DashboardWidget } from '../.
 import { AnalogInputsComponent } from '../../components/analog-inputs/analog-inputs.component';
 import { ModuleWidgetComponent } from '../../components/module-widget/module-widget.component';
 import { AdminService } from '../../services/admin.service'; // Import AdminService
+import { SystemInfoComponent } from '../../components/system-info/system-info.component';
+import { LightControllerComponent } from '../../components/light-controller/light-controller.component';
+import { ServoMonitorComponent } from '../../components/servo-monitor/servo-monitor.component';
 
 @Component({
   selector: 'app-dashboard',
@@ -21,6 +24,9 @@ import { AdminService } from '../../services/admin.service'; // Import AdminServ
     SramInfoComponent,
     AnalogInputsComponent,
     ModuleWidgetComponent,
+    SystemInfoComponent,
+    LightControllerComponent,
+    ServoMonitorComponent,
   ],
   templateUrl: './dashboard.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -49,15 +55,15 @@ export class DashboardComponent {
   protected adminService = inject(AdminService); // Inject AdminService
   private layout = this.dashboardSettingsService.layout;
 
-  column1Widgets = computed(() => this.layout().column1.filter(w => w.enabled));
-  column2Widgets = computed(() => this.layout().column2.filter(w => w.enabled));
+  column1Widgets = computed(() => this.layout().COLUMN1.filter(w => w.ENABLED));
+  column2Widgets = computed(() => this.layout().COLUMN2.filter(w => w.ENABLED));
 
   isDashboardEmpty = computed(() => this.column1Widgets().length === 0 && this.column2Widgets().length === 0);
   isAdminMode = this.adminService.isAdminMode; // Expose isAdminMode
 
   // --- Drag and Drop State ---
   draggedWidget: WritableSignal<DashboardWidget | null> = signal(null);
-  dragOverColumn: WritableSignal<'column1' | 'column2' | null> = signal(null);
+  dragOverColumn: WritableSignal<'COLUMN1' | 'COLUMN2' | null> = signal(null);
 
   isModuleWidget(widgetId: string): boolean {
     return widgetId.startsWith('module-');
@@ -76,7 +82,7 @@ export class DashboardComponent {
     this.draggedWidget.set(widget);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', widget.id);
+      event.dataTransfer.setData('text/plain', widget.ID);
     }
   }
 
@@ -94,7 +100,7 @@ export class DashboardComponent {
     event.preventDefault();
   }
 
-  onDragEnter(column: 'column1' | 'column2') {
+  onDragEnter(column: 'COLUMN1' | 'COLUMN2') {
     // Only allow drag enter if in admin mode
     if (!this.isAdminMode()) {
       return;
@@ -115,7 +121,7 @@ export class DashboardComponent {
     }
   }
 
-  onDrop(event: DragEvent, targetColumnName: 'column1' | 'column2') {
+  onDrop(event: DragEvent, targetColumnName: 'COLUMN1' | 'COLUMN2') {
     // Only allow drop if in admin mode
     if (!this.isAdminMode()) {
       event.preventDefault();
@@ -129,15 +135,15 @@ export class DashboardComponent {
 
     const newLayout = JSON.parse(JSON.stringify(this.layout())) as DashboardLayout;
 
-    newLayout.column1 = newLayout.column1.filter(w => w.id !== widgetToMove.id);
-    newLayout.column2 = newLayout.column2.filter(w => w.id !== widgetToMove.id);
+    newLayout.COLUMN1 = newLayout.COLUMN1.filter(w => w.ID !== widgetToMove.ID);
+    newLayout.COLUMN2 = newLayout.COLUMN2.filter(w => w.ID !== widgetToMove.ID);
 
     const targetList = newLayout[targetColumnName];
     const dropTargetEl = (event.target as HTMLElement).closest('[data-widget-id]');
     
     if (dropTargetEl) {
         const dropTargetId = dropTargetEl.getAttribute('data-widget-id');
-        const dropIndex = targetList.findIndex(w => w.id === dropTargetId);
+        const dropIndex = targetList.findIndex(w => w.ID === dropTargetId);
         if (dropIndex !== -1) {
             targetList.splice(dropIndex, 0, widgetToMove);
         } else {

@@ -30,11 +30,11 @@ export class DigitalOutputsComponent {
     const outputsConfig = this.digitalOutputsConfig();
     
     return outputsConfig
-      .filter(config => config.enabled)
+      .filter(config => config.ENABLED)
       .map(config => ({
-        id: config.id,
-        name: config.name,
-        state: outputsState[config.id]
+        ID: config.ID,
+        NAME: config.NAME,
+        state: outputsState[config.ID]
       }));
   });
 

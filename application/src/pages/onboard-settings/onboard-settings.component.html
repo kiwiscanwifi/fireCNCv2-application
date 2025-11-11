@@ -34,14 +34,14 @@
           <div formArrayName="digitalOutputs" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @for(outputControl of digitalOutputs.controls; track $index) {
               <div [formGroupName]="$index" class="p-3 bg-gray-900/50 rounded-lg border border-gray-700 flex items-center justify-between gap-4">
-                <span class="font-mono text-sm text-gray-500 shrink-0">DO{{ outputControl.get('id')?.value }}</span>
-                <input type="text" formControlName="name" placeholder="Output Name"
+                <span class="font-mono text-sm text-gray-500 shrink-0">DO{{ outputControl.get('ID')?.value }}</span>
+                <input type="text" formControlName="NAME" placeholder="Output Name"
                        class="bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-semibold w-full">
-                <button (click)="toggleOutputEnabled($index)" type="button" role="switch" [attr.aria-checked]="outputControl.get('enabled')?.value"
+                <button (click)="toggleOutputEnabled($index)" type="button" role="switch" [attr.aria-checked]="outputControl.get('ENABLED')?.value"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                        [class]="outputControl.get('enabled')?.value ? 'bg-orange-500' : 'bg-gray-600'">
+                        [class]="outputControl.get('ENABLED')?.value ? 'bg-orange-500' : 'bg-gray-600'">
                   <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                        [class]="outputControl.get('enabled')?.value ? 'translate-x-5' : 'translate-x-0'"></span>
+                        [class]="outputControl.get('ENABLED')?.value ? 'translate-x-5' : 'translate-x-0'"></span>
                 </button>
               </div>
             }
@@ -59,14 +59,14 @@
           <div formArrayName="digitalInputs" class="grid grid-cols-1 md:grid-cols-2 gap-4">
             @for(inputControl of digitalInputs.controls; track $index) {
               <div [formGroupName]="$index" class="p-3 bg-gray-900/50 rounded-lg border border-gray-700 flex items-center justify-between gap-3">
-                <span class="font-mono text-sm text-gray-500 shrink-0">DI{{ inputControl.get('id')?.value }} (GPIO{{ inputControl.get('id')?.value + 4 }})</span>
-                <input type="text" formControlName="name" placeholder="Input Name"
+                <span class="font-mono text-sm text-gray-500 shrink-0">DI{{ inputControl.get('ID')?.value }} (GPIO{{ inputControl.get('ID')?.value + 4 }})</span>
+                <input type="text" formControlName="NAME" placeholder="Input Name"
                        class="bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-semibold w-full">
-                <button (click)="toggleInputEnabled($index)" type="button" role="switch" [attr.aria-checked]="inputControl.get('enabled')?.value"
+                <button (click)="toggleInputEnabled($index)" type="button" role="switch" [attr.aria-checked]="inputControl.get('ENABLED')?.value"
                         class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                        [class]="inputControl.get('enabled')?.value ? 'bg-orange-500' : 'bg-gray-600'">
+                        [class]="inputControl.get('ENABLED')?.value ? 'bg-orange-500' : 'bg-gray-600'">
                   <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                        [class]="inputControl.get('enabled')?.value ? 'translate-x-5' : 'translate-x-0'"></span>
+                        [class]="inputControl.get('ENABLED')?.value ? 'translate-x-5' : 'translate-x-0'"></span>
                 </button>
               </div>
             }

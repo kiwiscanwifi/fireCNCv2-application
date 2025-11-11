@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, Signal, inject, signal, computed, OnInit, OnDestroy, AfterViewInit, WritableSignal, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { AbstractControl, ReactiveFormsModule, FormBuilder, FormGroup, Validators, ValidatorFn, FormArray, ValidationErrors } from '@angular/forms';
-import { ActivatedRoute, RouterLink } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 // FIX: Correctly import SshConfig and other types.
@@ -13,6 +13,8 @@ import { InternetConnectivityService } from '../../services/internet-connectivit
 import { AdminService } from '../../services/admin.service';
 import { NotificationService } from '../../services/notification.service'; // NEW
 import { AlexaService } from '../../services/alexa.service';
+import { LanguageService } from '../../services/language.service';
+import { TranslatePipe } from '../../pipes/translate.pipe';
 
 // Custom validator to check if access codes match or if confirm is blank when access is blank
 export const accessCodeMatchValidator: ValidatorFn = (control: AbstractControl): ValidationErrors | null => {
@@ -44,7 +46,7 @@ export const accessCodeMatchValidator: ValidatorFn = (control: AbstractControl):
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    RouterLink,
+    TranslatePipe,
   ],
   templateUrl: './settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -56,9 +58,11 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
   private internetConnectivityService = inject(InternetConnectivityService);
   protected adminService = inject(AdminService);
   private fb: FormBuilder = inject(FormBuilder);
+  // FIX: Inject `ActivatedRoute` instead of `Router`, which was not imported and was the incorrect type for this property.
   private route: ActivatedRoute = inject(ActivatedRoute);
   private notificationService = inject(NotificationService); // NEW
   private alexaService = inject(AlexaService);
+  protected languageService = inject(LanguageService);
   private destroy$ = new Subject<void>();
   
   urlPattern = /^(https?:\/\/[^\s$.?#].[^\s]*)$/;
@@ -84,6 +88,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     table: signal(false),
     leds: signal(false),
     alexa: signal(false),
+    language: signal(false),
   };
 
   allSectionsOpen = computed(() => {
@@ -485,5 +490,10 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       }
     }
     this.sections[sectionKey].set(!wasOpen);
+  }
+
+  setLanguage(event: Event): void {
+    const lang = (event.target as HTMLSelectElement).value;
+    this.languageService.setLanguage(lang);
   }
 }

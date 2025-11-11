@@ -1,0 +1,30 @@
+<!--
+  File: src/components/system-info/system-info.component.html
+  Project: fireCNC
+  Author: Mark Dyer
+  Location: Blenheim, New Zealand
+  Contact: intelliservenz@gmail.com
+
+  Description:
+  Template for the System Info component, displaying application version info.
+-->
+<div class="space-y-3 text-sm">
+  <div class="flex justify-between items-center">
+    <span class="font-semibold text-gray-400">App Version:</span>
+    <span class="font-mono text-gray-200">{{ appVersion }}</span>
+  </div>
+  <div class="flex justify-between items-center">
+    <span class="font-semibold text-gray-400">Release Date:</span>
+    <span class="font-mono text-gray-200">{{ appReleaseDate | date:'dd/MM/yy' }}</span>
+  </div>
+  <div class="pt-2 border-t border-gray-700/50">
+    <div class="flex justify-between items-center">
+      <span class="font-semibold text-gray-400">Platform:</span>
+      <span class="font-mono text-gray-200 text-right">{{ platform }}</span>
+    </div>
+  </div>
+  <div>
+    <span class="font-semibold text-gray-400">User Agent:</span>
+    <p class="font-mono text-xs text-gray-500 mt-1">{{ userAgent }}</p>
+  </div>
+</div>

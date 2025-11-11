@@ -15,6 +15,7 @@ import { StateService, SshConfig, SystemConfig, LedsConfig, AlexaConfig, ServosC
 import { InternetMonitoringConfig } from './config-file.service';
 import { SnmpConfig } from './snmp-config.service';
 import { DigitalOutputConfig, DigitalInputConfig, DashboardLayout } from './dashboard-settings.service';
+import { BackupService } from './backup.service';
 
 @Injectable({
   providedIn: 'root',
@@ -22,6 +23,7 @@ import { DigitalOutputConfig, DigitalInputConfig, DashboardLayout } from './dash
 export class ConfigManagementService {
   private configFileService = inject(ConfigFileService);
   private stateService = inject(StateService);
+  private backupService = inject(BackupService);
 
   private pendingConfig: any | null = null;
 
@@ -147,6 +149,11 @@ export class ConfigManagementService {
       this.pendingConfig.VERSION = currentVersion + 1;
 
       const success = await this.configFileService.saveConfig(JSON.stringify(this.pendingConfig, null, 2), showNotification);
+      
+      if (success) {
+        this.backupService.createBackup(false);
+      }
+
       return success;
     } finally {
       // Always clear the pending config after the commit attempt.

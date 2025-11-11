@@ -20,6 +20,8 @@ import { NotificationService, GlobalNotification } from './services/notification
 import { SettingsLandingComponent } from './pages/settings-landing/settings-landing.component';
 import { InformationLandingComponent } from './pages/information-landing/information-landing.component';
 import { ActivityLandingComponent } from './pages/activity-landing/activity-landing.component';
+import { LanguageService } from './services/language.service';
+import { TranslatePipe } from './pipes/translate.pipe';
 
 @Component({
   selector: 'app-root',
@@ -33,6 +35,7 @@ import { ActivityLandingComponent } from './pages/activity-landing/activity-land
     ConfirmationModalComponent,
     DatePipe,
     AccessCodeModalComponent,
+    TranslatePipe,
   ],
 })
 export class AppComponent implements OnDestroy {
@@ -48,6 +51,7 @@ export class AppComponent implements OnDestroy {
   protected router: Router = inject(Router);
   protected persistenceService = inject(PersistenceService);
   protected notificationService = inject(NotificationService);
+  protected languageService = inject(LanguageService);
 
   private readonly MOBILE_MENU_STATE_KEY = 'fireCNC_mobileMenuOpen';
 
@@ -358,9 +362,9 @@ export class AppComponent implements OnDestroy {
 
   getNotificationTitle(type: GlobalNotification['type']): string {
     switch (type) {
-      case 'error': return 'Validation Error!';
-      case 'success': return 'Success!';
-      case 'alexa': return 'Alexa Announcement';
+      case 'error': return this.languageService.translate('notification.error.title');
+      case 'success': return this.languageService.translate('notification.success.title');
+      case 'alexa': return this.languageService.translate('notification.alexa.title');
     }
   }
 }

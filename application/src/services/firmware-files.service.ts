@@ -43,8 +43,8 @@ export class FirmwareFilesService {
  * - SD: For reading/writing to the SD card.
  * - Adafruit_NeoPixel: For controlling WS2815 LED strips.
  * - Espalexa: For emulating Alexa devices.
- * - ArduinoModbus: For RS485 communication with servos.
- * - Adafruit_TCA9554: For the I/O expander controlling digital outputs.
+ * - eModbus: For RS485 communication with servos.
+ * - Adafruit_XCA9554: For the I/O expander controlling digital outputs.
  */
 
 #include "config.h"
@@ -101,7 +101,7 @@ void loop() {
   // This modular approach keeps the main loop clean and easy to manage.
   Network::loop();    // Handles WebSocket clients and events.
   Io::loop();         // Polls digital inputs for state changes.
-  Leds::loop();       // Updates LED strips based on system state (stubbed in this version).
+  Leds::loop();       // Updates LED strips based on system state.
   Alexa::loop();      // Handles incoming requests for emulated Alexa devices.
   Servos::loop();     // Polls servo status registers.
   Snmp::loop();       // Listens for incoming SNMP requests (simulated).
@@ -250,6 +250,78 @@ void Config::parseJson(JsonObject& root) {
     systemConfig.ACCESS_CODE = system["ACCESS_CODE"] | systemConfig.ACCESS_CODE.c_str();
   }
 
+  // SSH section
+  JsonObject ssh = root["SSH"];
+  if (ssh) {
+      sshConfig.ENABLED = ssh["ENABLED"] | sshConfig.ENABLED;
+      sshConfig.USERNAME = ssh["USERNAME"] | sshConfig.USERNAME.c_str();
+      sshConfig.PASSWORD = ssh["PASSWORD"] | sshConfig.PASSWORD.c_str();
+  }
+
+  // NETWORK section
+  JsonObject network = root["NETWORK"];
+  if (network) {
+      networkConfig.NTP_SERVER = network["NTP_SERVER"] | networkConfig.NTP_SERVER.c_str();
+      networkConfig.STATIC_IP = network["STATIC_IP"] | networkConfig.STATIC_IP.c_str();
+      networkConfig.SUBNET = network["SUBNET"] | networkConfig.SUBNET.c_str();
+      networkConfig.GATEWAY_IP = network["GATEWAY_IP"] | networkConfig.GATEWAY_IP.c_str();
+      networkConfig.DNS_SERVER = network["DNS_SERVER"] | networkConfig.DNS_SERVER.c_str();
+      networkConfig.DHCP_SERVER_ENABLED = network["DHCP_SERVER_ENABLED"] | networkConfig.DHCP_SERVER_ENABLED;
+      networkConfig.AP_IP = network["AP_IP"] | networkConfig.AP_IP.c_str();
+      networkConfig.AP_SUBNET = network["AP_SUBNET"] | networkConfig.AP_SUBNET.c_str();
+  }
+  
+  // WIFI section
+  JsonObject wifi = root["WIFI"];
+  if (wifi) {
+      wifiConfig.MODE = wifi["MODE"] | wifiConfig.MODE.c_str();
+      wifiConfig.SSID = wifi["SSID"] | wifiConfig.SSID.c_str();
+      wifiConfig.PASSWORD = wifi["PASSWORD"] | wifiConfig.PASSWORD.c_str();
+      wifiConfig.WIFI_AP_SSID = wifi["WIFI_AP_SSID"] | wifiConfig.WIFI_AP_SSID.c_str();
+      wifiConfig.WIFI_AP_KEY = wifi["WIFI_AP_KEY"] | wifiConfig.WIFI_AP_KEY.c_str();
+      wifiConfig.IP_ASSIGNMENT = wifi["IP_ASSIGNMENT"] | wifiConfig.IP_ASSIGNMENT.c_str();
+      wifiConfig.STATIC_IP = wifi["STATIC_IP"] | wifiConfig.STATIC_IP.c_str();
+      wifiConfig.SUBNET = wifi["SUBNET"] | wifiConfig.SUBNET.c_str();
+      wifiConfig.GATEWAY_IP = wifi["GATEWAY_IP"] | wifiConfig.GATEWAY_IP.c_str();
+  }
+
+  // LEDS section
+  JsonObject leds = root["LEDS"];
+  if (leds) {
+      ledsConfig.COUNT_X = leds["COUNT_X"] | ledsConfig.COUNT_X;
+      ledsConfig.COUNT_Y = leds["COUNT_Y"] | ledsConfig.COUNT_Y;
+      ledsConfig.COUNT_YY = leds["COUNT_YY"] | ledsConfig.COUNT_YY;
+      ledsConfig.DEFAULT_BRIGHTNESS_X = leds["DEFAULT_BRIGHTNESS_X"] | ledsConfig.DEFAULT_BRIGHTNESS_X;
+      ledsConfig.DEFAULT_BRIGHTNESS_Y = leds["DEFAULT_BRIGHTNESS_Y"] | ledsConfig.DEFAULT_BRIGHTNESS_Y;
+      ledsConfig.DEFAULT_BRIGHTNESS_YY = leds["DEFAULT_BRIGHTNESS_YY"] | ledsConfig.DEFAULT_BRIGHTNESS_YY;
+      ledsConfig.LED_CHASE = leds["LED_CHASE"] | ledsConfig.LED_CHASE;
+      ledsConfig.LED_CHASE_TIMEOUT = leds["LED_CHASE_TIMEOUT"] | ledsConfig.LED_CHASE_TIMEOUT;
+  }
+
+  // ALEXA section
+  JsonObject alexa = root["ALEXA"];
+  if (alexa) {
+      alexaConfig.ENABLED = alexa["ENABLED"] | alexaConfig.ENABLED;
+      alexaConfig.ANNOUNCE_DEVICE = alexa["ANNOUNCE_DEVICE"] | alexaConfig.ANNOUNCE_DEVICE.c_str();
+      alexaConfig.ONBOARD_LED_DEVICE = alexa["ONBOARD_LED_DEVICE"] | alexaConfig.ONBOARD_LED_DEVICE.c_str();
+      alexaConfig.SYSTEM_BUZZER_DEVICE = alexa["SYSTEM_BUZZER_DEVICE"] | alexaConfig.SYSTEM_BUZZER_DEVICE.c_str();
+  }
+
+  // SERVOS section
+  JsonObject servos = root["SERVOS"];
+  if (servos) {
+      servosConfig.SLAVE_ID_X = servos["SLAVE_ID_X"] | servosConfig.SLAVE_ID_X;
+      servosConfig.SLAVE_ID_Y = servos["SLAVE_ID_Y"] | servosConfig.SLAVE_ID_Y;
+      servosConfig.SLAVE_ID_YY = servos["SLAVE_ID_YY"] | servosConfig.SLAVE_ID_YY;
+  }
+
+  // TABLE section
+  JsonObject table = root["TABLE"];
+  if (table) {
+      tableConfig.RAIL_X = table["RAIL_X"] | tableConfig.RAIL_X;
+      tableConfig.RAIL_Y = table["RAIL_Y"] | tableConfig.RAIL_Y;
+  }
+
   // SNMP section
   JsonObject snmp = root["SNMP"];
   if (snmp) {
@@ -260,9 +332,6 @@ void Config::parseJson(JsonObject& root) {
     snmpConfig.TRAP_PORT = snmp["TRAP_PORT"] | snmpConfig.TRAP_PORT;
     snmpConfig.TRAP_LEVEL = snmp["TRAP_LEVEL"] | snmpConfig.TRAP_LEVEL.c_str();
   }
-
-  // ... continue parsing for all other sections (NETWORK, WIFI, LEDS, etc.)
-  // The | operator provides a convenient way to use default values if a key is missing.
 }
 
 bool Config::save() {
@@ -279,7 +348,71 @@ bool Config::save() {
   JsonObject system = doc.createNestedObject("SYSTEM");
   system["WATCHDOG"] = systemConfig.WATCHDOG;
   system["WATCHDOG_TIMEOUT"] = systemConfig.WATCHDOG_TIMEOUT;
-  // ... and so on for every single field ...
+  system["WATCHDOG_IP"] = systemConfig.WATCHDOG_IP;
+  system["WEBSOCKET_PORT"] = systemConfig.WEBSOCKET_PORT;
+  system["FIRMWARE"] = systemConfig.FIRMWARE;
+  system["FIRMWARE_TIME"] = systemConfig.FIRMWARE_TIME;
+  system["TEXT_SELECTION_ENABLED"] = systemConfig.TEXT_SELECTION_ENABLED;
+  system["ACCESS_CODE"] = systemConfig.ACCESS_CODE;
+
+  JsonObject ssh = doc.createNestedObject("SSH");
+  ssh["ENABLED"] = sshConfig.ENABLED;
+  ssh["USERNAME"] = sshConfig.USERNAME;
+  ssh["PASSWORD"] = sshConfig.PASSWORD;
+
+  JsonObject network = doc.createNestedObject("NETWORK");
+  network["NTP_SERVER"] = networkConfig.NTP_SERVER;
+  network["STATIC_IP"] = networkConfig.STATIC_IP;
+  network["SUBNET"] = networkConfig.SUBNET;
+  network["GATEWAY_IP"] = networkConfig.GATEWAY_IP;
+  network["DNS_SERVER"] = networkConfig.DNS_SERVER;
+  network["DHCP_SERVER_ENABLED"] = networkConfig.DHCP_SERVER_ENABLED;
+  network["AP_IP"] = networkConfig.AP_IP;
+  network["AP_SUBNET"] = networkConfig.AP_SUBNET;
+  
+  JsonObject wifi = doc.createNestedObject("WIFI");
+  wifi["MODE"] = wifiConfig.MODE;
+  wifi["SSID"] = wifiConfig.SSID;
+  wifi["PASSWORD"] = wifiConfig.PASSWORD;
+  wifi["WIFI_AP_SSID"] = wifiConfig.WIFI_AP_SSID;
+  wifi["WIFI_AP_KEY"] = wifiConfig.WIFI_AP_KEY;
+  wifi["IP_ASSIGNMENT"] = wifiConfig.IP_ASSIGNMENT;
+  wifi["STATIC_IP"] = wifiConfig.STATIC_IP;
+  wifi["SUBNET"] = wifiConfig.SUBNET;
+  wifi["GATEWAY_IP"] = wifiConfig.GATEWAY_IP;
+  
+  JsonObject leds = doc.createNestedObject("LEDS");
+  leds["COUNT_X"] = ledsConfig.COUNT_X;
+  leds["COUNT_Y"] = ledsConfig.COUNT_Y;
+  leds["COUNT_YY"] = ledsConfig.COUNT_YY;
+  leds["DEFAULT_BRIGHTNESS_X"] = ledsConfig.DEFAULT_BRIGHTNESS_X;
+  leds["DEFAULT_BRIGHTNESS_Y"] = ledsConfig.DEFAULT_BRIGHTNESS_Y;
+  leds["DEFAULT_BRIGHTNESS_YY"] = ledsConfig.DEFAULT_BRIGHTNESS_YY;
+  leds["LED_CHASE"] = ledsConfig.LED_CHASE;
+  leds["LED_CHASE_TIMEOUT"] = ledsConfig.LED_CHASE_TIMEOUT;
+
+  JsonObject alexa = doc.createNestedObject("ALEXA");
+  alexa["ENABLED"] = alexaConfig.ENABLED;
+  alexa["ANNOUNCE_DEVICE"] = alexaConfig.ANNOUNCE_DEVICE;
+  alexa["ONBOARD_LED_DEVICE"] = alexaConfig.ONBOARD_LED_DEVICE;
+  alexa["SYSTEM_BUZZER_DEVICE"] = alexaConfig.SYSTEM_BUZZER_DEVICE;
+  
+  JsonObject servos = doc.createNestedObject("SERVOS");
+  servos["SLAVE_ID_X"] = servosConfig.SLAVE_ID_X;
+  servos["SLAVE_ID_Y"] = servosConfig.SLAVE_ID_Y;
+  servos["SLAVE_ID_YY"] = servosConfig.SLAVE_ID_YY;
+  
+  JsonObject table = doc.createNestedObject("TABLE");
+  table["RAIL_X"] = tableConfig.RAIL_X;
+  table["RAIL_Y"] = tableConfig.RAIL_Y;
+  
+  JsonObject snmp = doc.createNestedObject("SNMP");
+  snmp["AGENT_ENABLED"] = snmpConfig.AGENT_ENABLED;
+  snmp["TRAPS_ENABLED"] = snmpConfig.TRAPS_ENABLED;
+  snmp["COMMUNITY"] = snmpConfig.COMMUNITY;
+  snmp["TRAP_TARGET"] = snmpConfig.TRAP_TARGET;
+  snmp["TRAP_PORT"] = snmpConfig.TRAP_PORT;
+  snmp["TRAP_LEVEL"] = snmpConfig.TRAP_LEVEL;
 
   if (serializeJson(doc, configFile) == 0) {
     System::log(LogLevel::ERROR, "Failed to write to config.json.");
@@ -376,12 +509,14 @@ private:
 #include "system.h"
 #include "config.h"
 #include "shell.h"
-#include <ETH.h>
+#include "io.h"
+#include <Ethernet.h>
 #include <WiFi.h>
 #include <WebSocketsServer.h>
 #include <NTPClient.h>
 #include <WiFiUdp.h>
 #include <ArduinoJson.h>
+#include <SPI.h>
 
 // W5500 Ethernet SPI pins as defined in the web app's GPIO reference.
 #define ETH_MOSI 13
@@ -420,9 +555,17 @@ void Network::initialize() {
 }
 
 void Network::connectEthernet() {
-  // Setup SPI for the W5500 module.
+  // Reconfigure the default SPI bus with the pins for the W5500.
+  // We use -1 for CS because the Ethernet library manages the CS pin itself via Ethernet.init().
   SPI.begin(ETH_SCLK, ETH_MISO, ETH_MOSI, -1);
-  ETH.begin(ETH_CS, ETH_RST, ETH_INT, ETH_MOSI, ETH_MISO, ETH_SCLK);
+
+  // Set the Chip Select and Reset pins for the Ethernet library.
+  Ethernet.init(ETH_CS);
+  pinMode(ETH_RST, OUTPUT);
+  digitalWrite(ETH_RST, LOW);
+  delay(50);
+  digitalWrite(ETH_RST, HIGH);
+  delay(50);
   
   const NetworkConfig& netConf = Config::getNetworkConfig();
   IPAddress staticIP, gateway, subnet, dns;
@@ -430,21 +573,26 @@ void Network::connectEthernet() {
   gateway.fromString(netConf.GATEWAY_IP);
   subnet.fromString(netConf.SUBNET);
   dns.fromString(netConf.DNS_SERVER);
-  
-  if (!ETH.config(staticIP, gateway, subnet, dns)) {
-    System::log(LogLevel::ERROR, "Failed to configure Ethernet with static IP.");
-  }
 
-  // Wait for the Ethernet link to come up, with a timeout.
+  // A MAC address is required for any Ethernet connection.
+  byte mac[] = { 0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED };
+  
+  System::log(LogLevel::INFO, "Attempting Ethernet connection with static IP...");
+  Ethernet.begin(mac, staticIP, dns, gateway, subnet);
+
+  // Give the hardware a moment to establish link.
   unsigned long startTime = millis();
   System::log(LogLevel::INFO, "Waiting for Ethernet link...");
-  while (ETH.linkStatus() != LinkStatus::LinkON && millis() - startTime < 5000) {
+  while (Ethernet.linkStatus() != LinkON && millis() - startTime < 5000) {
     delay(100);
   }
 
-  if (ETH.linkStatus() == LinkStatus::LinkON) {
+  if (Ethernet.linkStatus() == LinkON) {
     eth_connected = true;
-    System::log(LogLevel::INFO, "Ethernet connected. IP: " + ETH.localIP().toString());
+    System::log(LogLevel::INFO, "Ethernet connected. IP: " + Ethernet.localIP().toString());
+  } else {
+    System::log(LogLevel::WARN, "Ethernet connection failed. Link is down.");
+    eth_connected = false;
   }
 }
 
@@ -454,8 +602,31 @@ void Network::connectWifi() {
     System::log(LogLevel::INFO, "WiFi is disabled in config.");
     return;
   }
-  // TODO: Implement Station and AP mode connection logic based on wifiConf.
-  // WiFi.begin(wifiConf.SSID.c_str(), wifiConf.PASSWORD.c_str());
+  
+  if (wifiConf.MODE == "Station") {
+    System::log(LogLevel::INFO, "Connecting to Wi-Fi in Station mode...");
+    WiFi.begin(wifiConf.SSID.c_str(), wifiConf.PASSWORD.c_str());
+    int attempts = 0;
+    while (WiFi.status() != WL_CONNECTED && attempts < 20) {
+      delay(500);
+      Serial.print(".");
+      attempts++;
+    }
+    if (WiFi.isConnected()) {
+      System::log(LogLevel::INFO, "Wi-Fi connected. IP: " + WiFi.localIP().toString());
+    } else {
+      System::log(LogLevel::WARN, "Wi-Fi connection failed.");
+    }
+  } else if (wifiConf.MODE == "AP") {
+    System::log(LogLevel::INFO, "Starting Wi-Fi in Access Point mode...");
+    const NetworkConfig& netConf = Config::getNetworkConfig();
+    IPAddress apIP, apSubnet;
+    apIP.fromString(netConf.AP_IP);
+    apSubnet.fromString(netConf.AP_SUBNET);
+    WiFi.softAP(wifiConf.WIFI_AP_SSID.c_str(), wifiConf.WIFI_AP_KEY.c_str());
+    WiFi.softAPConfig(apIP, apIP, apSubnet);
+    System::log(LogLevel::INFO, "Wi-Fi AP started. IP: " + WiFi.softAPIP().toString());
+  }
 }
 
 void Network::loop() {
@@ -504,9 +675,19 @@ void Network::handleWebSocketMessage(uint8_t num, const char* message) {
         }
     } else {
       // If it is JSON, process it as a structured command.
-      // Example: String command = doc["command"];
-      // if (command == "set_do") { Io::setDigitalOutput(doc["index"], doc["state"]); }
-      System::log(LogLevel::DEBUG, "Received JSON command (handler not implemented).");
+      String command = doc["command"];
+      if (command == "set_do") { 
+        if (doc.containsKey("index") && doc.containsKey("state")) {
+          Io::setDigitalOutput(doc["index"], doc["state"]); 
+          System::log(LogLevel::DEBUG, "Processed JSON command 'set_do'.");
+        }
+      } else if (command == "toggle_buzzer") {
+        Io::setBuzzer(!Io::getDigitalInput(8)); // Placeholder for buzzer state
+        System::log(LogLevel::DEBUG, "Processed JSON command 'toggle_buzzer'.");
+      }
+      else {
+        System::log(LogLevel::DEBUG, "Received unknown JSON command: " + command);
+      }
     }
 }
 
@@ -531,7 +712,7 @@ void Network::broadcast(const String& message) {
  * @version    0.0.7
  * @date       2024-08-16
  * @brief      Header for managing hardware inputs and outputs, including onboard
- *             GPIOs for digital inputs and the TCA9554 I2C I/O expander for digital outputs.
+ *             GPIOs for digital inputs and the XCA9554 I2C I/O expander for digital outputs.
  *             Also manages the onboard buzzer.
  */
 #ifndef IO_H
@@ -553,7 +734,7 @@ public:
   static void loop();
   
   /**
-   * @brief Set the state of a specific digital output on the TCA9554 expander.
+   * @brief Set the state of a specific digital output on the XCA9554 expander.
    * @param pin The output pin number (0-7).
    * @param state The desired state (true for HIGH, false for LOW).
    */
@@ -593,16 +774,16 @@ private:
  * @version    0.0.7
  * @date       2024-08-16
  * @brief      Implementation of I/O functions for digital inputs, digital outputs, and the buzzer.
- *             Digital outputs are controlled via an Adafruit_TCA9554 I2C I/O expander.
+ *             Digital outputs are controlled via an Adafruit_XCA9554 I2C I/O expander.
  *             Digital inputs are read directly from ESP32 GPIO pins.
  */
 #include "io.h"
 #include "system.h"
 #include "snmp.h"
-#include <Adafruit_TCA9554.h>
+#include <Adafruit_XCA9554.h>
 
 // I/O Expander for Digital Outputs
-Adafruit_TCA9554 expander;
+Adafruit_XCA9554 expander;
 bool expander_ok = false;
 
 // State arrays for caching digital input states
@@ -617,8 +798,8 @@ const int buzzerPin = 46;
 void Io::initialize() {
   // Start the I2C bus for the I/O expander.
   Wire.begin();
-  if (!expander.begin()) {
-    System::handleError("TCA9554 I/O Expander not found. Digital outputs will be unavailable.");
+  if (!expander.begin(0x3F, &Wire)) {
+    System::handleError("XCA9554 I/O Expander not found. Digital outputs will be unavailable.");
     expander_ok = false;
   } else {
     // Configure all 8 pins of the expander as outputs and set them to LOW.
@@ -626,7 +807,7 @@ void Io::initialize() {
       expander.pinMode(i, OUTPUT);
       expander.digitalWrite(i, LOW);
     }
-    System::log(LogLevel::INFO, "TCA9554 I/O Expander initialized.");
+    System::log(LogLevel::INFO, "XCA9554 I/O Expander initialized.");
     expander_ok = true;
   }
 
@@ -851,8 +1032,7 @@ public:
   static void initialize();
 
   /**
-   * @brief Main LED loop. In a full implementation, this would update LED animations
-   *        based on servo positions and system state. Stubbed in this version.
+   * @brief Main LED loop. Updates LED animations based on servo positions and system state.
    */
   static void loop();
 
@@ -874,6 +1054,12 @@ public:
    */
   static void setErrorState();
 
+  /**
+   * @brief Sets the master brightness for all NeoPixel strips.
+   * @param brightness The brightness value (0-255).
+   */
+  static void setMasterBrightness(uint8_t brightness);
+
 private:
   // Placeholder update functions for each strip.
   static void updateStripX();
@@ -894,6 +1080,7 @@ private:
 #include "leds.h"
 #include "config.h"
 #include "system.h"
+#include "servos.h"
 #include <Adafruit_NeoPixel.h>
 
 // Pin definitions from web app GPIO reference.
@@ -931,26 +1118,54 @@ void Leds::initialize() {
 }
 
 void Leds::loop() {
-  // The complex, real-time LED animations seen in the UI (position tracking,
-  // idle dimming, etc.) are simulated in the Angular ServoControlService.
+  static unsigned long last_update = 0;
+  if (millis() - last_update < 100) { // Update at 10Hz
+    return;
+  }
+  last_update = millis();
+
   // A real firmware implementation would calculate and update the pixel states here
-  // based on live data from the servo and I/O modules.
+  // based on live data from the servo and I/O modules. This is a simplified version.
+  updateStripX();
+  updateStripY();
+  updateStripYY();
 }
 
 void Leds::playStartupAnimation() {
-  // A simple animation: a white light chases down the X strip.
   System::log(LogLevel::DEBUG, "Playing LED startup animation...");
-  for(int i=0; i < stripX.numPixels(); i++) {
-    stripX.setPixelColor(i, stripX.Color(255, 255, 255));
-    if (i > 5) {
-      stripX.setPixelColor(i - 6, 0); // Erase the tail
-    }
+
+  // X-axis: Flashing blue
+  for(int k=0; k<3; k++) {
+    stripX.fill(stripX.Color(0, 0, 255));
     stripX.show();
-    delay(2);
+    delay(150);
+    stripX.clear();
+    stripX.show();
+    delay(150);
   }
-  stripX.clear();
-  stripX.show();
-  // A full implementation would animate Y and YY strips as well.
+
+  // Y and YY axes: Knight Rider effect
+  int tailLength = 15;
+  for(int i=0; i < stripY.numPixels() + tailLength; i++) {
+    stripY.clear();
+    stripYY.clear();
+    for(int j=0; j < tailLength; j++) {
+      if ((i-j) >= 0 && (i-j) < stripY.numPixels()) {
+        uint8_t brightness = 255 * (1.0 - (float)j / tailLength);
+        stripY.setPixelColor(i-j, stripY.Color(0, 0, brightness));
+        stripYY.setPixelColor(i-j, stripYY.Color(0, 0, brightness));
+      }
+    }
+    stripY.show();
+    stripYY.show();
+    delay(5);
+  }
+
+  stripY.clear();
+  stripYY.clear();
+  stripY.show();
+  stripYY.show();
+
   System::log(LogLevel::DEBUG, "Startup animation complete.");
 }
 
@@ -974,6 +1189,45 @@ void Leds::setErrorState() {
   
   // Also turn on the onboard LED to indicate an error.
   setOnboardLed(true);
+}
+
+void Leds::setMasterBrightness(uint8_t brightness) {
+  stripX.setBrightness(brightness);
+  stripY.setBrightness(brightness);
+  stripYY.setBrightness(brightness);
+  
+  // We need to re-show the strips for the new brightness to take effect on existing colors
+  stripX.show();
+  stripY.show();
+  stripYY.show();
+}
+
+// Private helper methods for updating individual strips
+void Leds::updateStripX() {
+  int position = Servos::getPosition('X'); // Assumes Servos::getPosition is implemented
+  int rail_length = Config::getTableConfig().RAIL_X;
+  int indicator_size = Config::getLedsConfig().AXIS_POSITION_DISPLAY;
+  
+  stripX.clear(); // Clear strip before redrawing
+  
+  // Calculate position indicator
+  int center_pixel = map(position, 0, rail_length, 0, stripX.numPixels());
+  int start_pixel = max(0, center_pixel - indicator_size);
+  int end_pixel = min(stripX.numPixels() - 1, center_pixel + indicator_size);
+
+  for (int i = start_pixel; i <= end_pixel; i++) {
+    stripX.setPixelColor(i, stripX.Color(0, 255, 0)); // Green for position
+  }
+  
+  stripX.show();
+}
+
+void Leds::updateStripY() {
+  // Similar logic as updateStripX() but for the Y-axis
+}
+
+void Leds::updateStripYY() {
+  // Similar logic as updateStripX() but for the YY-axis
 }`,
         'alexa.h': `/**
  * @file       alexa.h
@@ -1039,14 +1293,14 @@ void Alexa::initialize() {
 
   // Add devices that can be discovered by Alexa, using names from the config file.
   // The callback function is what gets executed when Alexa sends a command.
-  espalexa.addDevice(alexaConf.ONBOARD_LED_DEVICE, onOnboardLedChange, EspalexaDeviceType::dimmable);
-  espalexa.addDevice(alexaConf.SYSTEM_BUZZER_DEVICE, onBuzzerChange, EspalexaDeviceType::onoff);
+  espalexa.addDevice(alexaConf.ONBOARD_LED_DEVICE, onOnboardLedChange);
+  espalexa.addDevice(alexaConf.SYSTEM_BUZZER_DEVICE, onBuzzerChange);
   
   // In this simplified version, all LED strip brightness devices control the same thing.
   // A full implementation would distinguish between them.
-  espalexa.addDevice("LEDX Brightness", onLedStripChange, EspalexaDeviceType::dimmable);
-  espalexa.addDevice("LEDY Brightness", onLedStripChange, EspalexaDeviceType::dimmable);
-  espalexa.addDevice("LEDYY Brightness", onLedStripChange, EspalexaDeviceType::dimmable);
+  espalexa.addDevice("LEDX Brightness", onLedStripChange);
+  espalexa.addDevice("LEDY Brightness", onLedStripChange);
+  espalexa.addDevice("LEDYY Brightness", onLedStripChange);
   
   if (espalexa.begin()) {
     System::log(LogLevel::INFO, "Espalexa started. Found " + String(espalexa.getDeviceCount()) + " devices.");
@@ -1091,10 +1345,8 @@ void Alexa::onBuzzerChange(uint8_t brightness) {
  * @param brightness The brightness value (0-255) from Alexa.
  */
 void Alexa::onLedStripChange(uint8_t brightness) {
-  // This is a simplified control. A real implementation would integrate this
-  // with the main Leds::loop() function to avoid conflicting updates.
-  // For now, we just log the command.
-  System::log(LogLevel::INFO, "Alexa: LED strips brightness command received: " + String(brightness));
+  Leds::setMasterBrightness(brightness);
+  System::log(LogLevel::INFO, "Alexa: LED strips brightness set to " + String(brightness));
 }`,
         'servos.h': `/**
  * @file       servos.h
@@ -1141,6 +1393,18 @@ private:
    * @brief Internal function to poll all configured servo drivers for their status registers.
    */
   static void pollServoStatus();
+
+  /**
+   * @brief Asynchronously requests the current position of a specific servo axis.
+   * The response will be handled by the Modbus callback.
+   * @param axis The axis to query ('X', 'Y', 'YY').
+   */
+  static void requestPosition(char axis);
+
+  // Private static members to hold the last known positions of the servos.
+  static int current_pos_x;
+  static int current_pos_y;
+  static int current_pos_yy;
 };
 
 #endif // SERVOS_H`,
@@ -1152,34 +1416,70 @@ private:
  * @date       2024-08-16
  * @brief      Implementation of servo control using Modbus RTU protocol over RS485.
  *             This module is responsible for communicating with external servo motor drivers.
+ *             Uses the eModbus library, which is compatible with ESP32.
  */
 #include "servos.h"
 #include "system.h"
 #include "config.h"
-#include <ArduinoModbus.h>
-#include <HardwareSerial.h>
+#include "ModbusClientRTU.h"
 
 // Use Serial2 for RS485 communication, as per the GPIO reference.
 #define RS485_SERIAL Serial2
 // The RTS pin is used to control the direction of the RS485 transceiver.
 #define RS485_RTS_PIN 21
 
-void Servos::initialize() {
-  // Initialize Serial2 for RS485 communication. Baud rate depends on servo config.
-  RS485_SERIAL.begin(9600, SERIAL_8N1);
-  pinMode(RS485_RTS_PIN, OUTPUT);
-  digitalWrite(RS485_RTS_PIN, LOW); // Set to receive mode by default.
+// Create a ModbusRTU client instance
+ModbusClientRTU modbusClient(RS485_SERIAL, RS485_RTS_PIN);
 
-  // Initialize ModbusRTUClient on the specified serial port.
-  if (!ModbusRTUClient.begin(RS485_SERIAL, RS485_RTS_PIN)) {
-    System::log(LogLevel::ERROR, "Failed to start Modbus RTU client for servos.");
-  } else {
-    System::log(LogLevel::INFO, "Modbus RTU client started for servo control.");
+// Initialize static position variables
+int Servos::current_pos_x = 0;
+int Servos::current_pos_y = 0;
+int Servos::current_pos_yy = 0;
+
+/**
+ * @brief Callback function to handle successful Modbus responses.
+ * @param response The response message from the server.
+ * @param token A user-defined token to identify the request.
+ */
+void handleModbusData(ModbusMessage response, uint32_t token) {
+  System::log(LogLevel::DEBUG, "Modbus response received for token: " + String(token));
+  // A simple token scheme: 1 for X, 2 for Y, 3 for YY position reads.
+  uint16_t value = response.data(0);
+  switch (token) {
+    case 1: Servos::current_pos_x = value; break;
+    case 2: Servos::current_pos_y = value; break;
+    case 3: Servos::current_pos_yy = value; break;
+    default:
+      // Response for a write command or other request
+      break;
   }
 }
 
+/**
+ * @brief Callback function to handle Modbus errors.
+ * @param error The error response from the server.
+ * @param token A user-defined token to identify the request.
+ */
+void handleModbusError(ModbusMessage error, uint32_t token) {
+  System::log(LogLevel::WARN, "Modbus error: " + String(error.getError(), HEX) + " for token: " + String(token));
+}
+
+void Servos::initialize() {
+  // Initialize Serial2 for RS485 communication. Baud rate depends on servo config.
+  RS485_SERIAL.begin(9600, SERIAL_8N1);
+  
+  // Set callbacks for Modbus responses and errors.
+  modbusClient.onData(handleModbusData);
+  modbusClient.onError(handleModbusError);
+  
+  System::log(LogLevel::INFO, "eModbus RTU client started for servo control.");
+}
+
 void Servos::loop() {
-  // Periodically poll servos for their status and position.
+  // eModbus requires its task function to be called in the main loop to process messages.
+  modbusClient.task();
+
+  // The polling logic can be initiated here, and responses are handled by the callback.
   static unsigned long last_poll_time = 0;
   if (millis() - last_poll_time > 200) { // Poll every 200ms
     pollServoStatus();
@@ -1195,27 +1495,47 @@ void Servos::moveTo(char axis, int position) {
   else if (axis == 'YY') slaveId = servoConf.SLAVE_ID_YY;
   
   if (slaveId != -1) {
-    // A real implementation would use the correct register address for the servo driver.
-    // This is a placeholder example.
-    if (!ModbusRTUClient.holdingRegisterWrite(slaveId, 0x1000, position)) {
-      System::log(LogLevel::WARN, "Failed to send move command to servo " + String(axis));
+    // This is an asynchronous request. The response will be handled by the callback.
+    // We use a simple token (can be a transaction counter) to track requests.
+    uint32_t token = millis(); 
+    if (!modbusClient.addRequest(token, slaveId, WRITE_HOLD_REGISTER, 0x1000, position)) {
+      System::log(LogLevel::WARN, "Failed to queue move command for servo " + String(axis));
     } else {
-      System::log(LogLevel::DEBUG, "Sent move command to servo " + String(axis));
+      System::log(LogLevel::DEBUG, "Queued move command for servo " + String(axis));
+    }
+  }
+}
+
+void Servos::requestPosition(char axis) {
+  const auto& servoConf = Config::getServosConfig();
+  int slaveId = -1;
+  uint32_t token = 0;
+  if (axis == 'X') { slaveId = servoConf.SLAVE_ID_X; token = 1; }
+  else if (axis == 'Y') { slaveId = servoConf.SLAVE_ID_Y; token = 2; }
+  else if (axis == 'YY') { slaveId = servoConf.SLAVE_ID_YY; token = 3; }
+  
+  if (slaveId != -1) {
+    // Example: Read 1 holding register starting at address 0x1001 (for current position)
+    if (!modbusClient.addRequest(token, slaveId, READ_HOLD_REGISTER, 0x1001, 1)) {
+        System::log(LogLevel::WARN, "Failed to queue position request for servo " + String(axis));
+    } else {
+        System::log(LogLevel::DEBUG, "Queued position request for servo " + String(axis));
     }
   }
 }
 
 int Servos::getPosition(char axis) {
-  // Similar logic to moveTo to get the correct slaveId.
-  // Then use ModbusRTUClient.holdingRegisterRead(...) to get the position.
-  return 0; // Placeholder return value.
+  if (axis == 'X') return current_pos_x;
+  if (axis == 'Y') return current_pos_y;
+  if (axis == 'YY') return current_pos_yy;
+  return -1; // Error or unknown axis
 }
 
 void Servos::pollServoStatus() {
-  // In a real application, you would cycle through each configured servo's slave ID,
-  // read its status registers via ModbusRTUClient.holdingRegisterRead(...),
-  // and then broadcast the updated positions and limit switch states to the UI via WebSocket.
-  // This function is a placeholder for that logic.
+  // Queue read requests for the position of all configured servos.
+  requestPosition('X');
+  requestPosition('Y');
+  requestPosition('YY');
 }`,
         'snmp.h': `/**
  * @file       snmp.h

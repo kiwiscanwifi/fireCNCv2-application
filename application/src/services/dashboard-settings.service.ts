@@ -6,66 +6,69 @@ import { StateService } from './state.service';
 import { ConfigManagementService } from './config-management.service';
 
 export interface DashboardWidget {
-  id: 'digital-outputs' | 'digital-inputs' | 'system-details' | 'storage-info' | 'sram-info' | 'analog-inputs' | string;
-  name: string;
-  enabled: boolean;
-  icon: string;
-  title: string;
+  ID: 'digital-outputs' | 'digital-inputs' | 'system-details' | 'storage-info' | 'sram-info' | 'analog-inputs' | 'system-info' | 'light-controller' | 'servo-monitor' | string;
+  NAME: string;
+  ENABLED: boolean;
+  ICON: string;
+  TITLE: string;
 }
 
 export interface DashboardLayout {
-  column1: DashboardWidget[];
-  column2: DashboardWidget[];
+  COLUMN1: DashboardWidget[];
+  COLUMN2: DashboardWidget[];
 }
 
 export interface DigitalOutputConfig {
-  id: number;
-  name: string;
-  enabled: boolean;
+  ID: number;
+  NAME: string;
+  ENABLED: boolean;
 }
 
 export interface DigitalInputConfig {
-  id: number;
-  name: string;
-  enabled: boolean;
+  ID: number;
+  NAME: string;
+  ENABLED: boolean;
 }
 
 export interface AnalogInputConfig {
-  id: number;
-  name: string;
-  enabled: boolean;
+  ID: number;
+  NAME: string;
+  ENABLED: boolean;
 }
 
 // FIX: Exported the constants so they can be imported by ConfigFileService
 export const DEFAULT_LAYOUT: DashboardLayout = {
-  column1: [
-    { id: 'digital-outputs', name: 'Digital Outputs', enabled: true, icon: 'fa-toggle-on', title: 'Digital Outputs (8-DO)' },
-    { id: 'digital-inputs', name: 'Digital Inputs', enabled: true, icon: 'fa-eye', title: 'Digital Inputs (8-DI)' },
+  COLUMN1: [
+    { ID: 'digital-outputs', NAME: 'Digital Outputs', ENABLED: true, ICON: 'fa-toggle-on', TITLE: 'Digital Outputs (8-DO)' },
+    { ID: 'digital-inputs', NAME: 'Digital Inputs', ENABLED: true, ICON: 'fa-eye', TITLE: 'Digital Inputs (8-DI)' },
+    { ID: 'light-controller', NAME: 'Light Controller', ENABLED: false, ICON: 'fa-lightbulb', TITLE: 'Light Controller' },
   ],
-  column2: [
-    { id: 'system-details', name: 'System Details', enabled: true, icon: 'fa-microchip', title: 'System Details' },
-    { id: 'storage-info', name: 'Storage Info', enabled: true, icon: 'fa-database', title: 'Storage' },
-    { id: 'sram-info', name: 'Memory Info', enabled: true, icon: 'fa-memory', title: 'Memory' },
-    { id: 'analog-inputs', name: 'Analog Inputs', enabled: false, icon: 'fa-wave-square', title: 'Waveshare RS485 Analog Input' },
+  COLUMN2: [
+    { ID: 'system-details', NAME: 'System Details', ENABLED: true, ICON: 'fa-microchip', TITLE: 'System Details' },
+    { ID: 'storage-info', NAME: 'Storage Info', ENABLED: true, ICON: 'fa-database', TITLE: 'Storage' },
+    { ID: 'sram-info', NAME: 'Memory Info', ENABLED: true, ICON: 'fa-memory', TITLE: 'Memory' },
+    { ID: 'analog-inputs', NAME: 'Analog Inputs', ENABLED: false, ICON: 'fa-wave-square', TITLE: 'Waveshare RS485 Analog Input' },
+    { ID: 'servo-monitor', NAME: 'Servo Monitor', ENABLED: false, ICON: 'fa-robot', TITLE: 'Servo Monitor' },
+    { ID: 'system-info', NAME: 'Application Info', ENABLED: false, ICON: 'fa-circle-info', TITLE: 'Application Info' },
   ],
 };
 
 export const DEFAULT_DIGITAL_OUTPUTS: DigitalOutputConfig[] = Array.from({ length: 8 }, (_, i) => ({
-  id: i,
-  name: `DO ${i}`,
-  enabled: true,
+  ID: i,
+  NAME: `DO ${i}`,
+  ENABLED: true,
 }));
 
 export const DEFAULT_DIGITAL_INPUTS: DigitalInputConfig[] = Array.from({ length: 8 }, (_, i) => ({
-  id: i,
-  name: `DI ${i}`,
-  enabled: true,
+  ID: i,
+  NAME: `DI ${i}`,
+  ENABLED: true,
 }));
 
 export const DEFAULT_ANALOG_INPUTS: AnalogInputConfig[] = Array.from({ length: 4 }, (_, i) => ({
-  id: i,
-  name: `EXAI${i}`,
-  enabled: true,
+  ID: i,
+  NAME: `EXAI${i}`,
+  ENABLED: true,
 }));
 
 
@@ -167,13 +170,13 @@ export class DashboardSettingsService {
    * Toggles the enabled state of a widget and stages a save.
    * @param widgetId The ID of the widget to toggle.
    */
-  toggleWidget(widgetId: DashboardWidget['id']) {
+  toggleWidget(widgetId: DashboardWidget['ID']) {
     const newLayout = JSON.parse(JSON.stringify(this.layout())); // Deep copy
     let widgetFound = false;
-    for (const col of [newLayout.column1, newLayout.column2]) {
-      const widget = col.find((w: DashboardWidget) => w.id === widgetId);
+    for (const col of [newLayout.COLUMN1, newLayout.COLUMN2]) {
+      const widget = col.find((w: DashboardWidget) => w.ID === widgetId);
       if (widget) {
-        widget.enabled = !widget.enabled;
+        widget.ENABLED = !widget.ENABLED;
         widgetFound = true;
         break;
       }
@@ -185,18 +188,18 @@ export class DashboardSettingsService {
 
   addModuleWidget(module: Module): void {
     const newWidget: DashboardWidget = {
-      id: `module-${module.id}`,
-      name: module.moduleName,
-      enabled: true,
-      icon: 'fa-puzzle-piece',
-      title: module.moduleName,
+      ID: `module-${module.id}`,
+      NAME: module.moduleName,
+      ENABLED: true,
+      ICON: 'fa-puzzle-piece',
+      TITLE: module.moduleName,
     };
     
     const currentLayout = this.layout();
     // Add to the end of column 1
     const newLayout: DashboardLayout = {
       ...currentLayout,
-      column1: [...currentLayout.column1, newWidget],
+      COLUMN1: [...currentLayout.COLUMN1, newWidget],
     };
 
     this.updateLayout(newLayout);
@@ -206,8 +209,8 @@ export class DashboardSettingsService {
     const widgetIdToRemove = `module-${moduleId}`;
     const currentLayout = this.layout();
     const newLayout: DashboardLayout = {
-      column1: currentLayout.column1.filter(w => w.id !== widgetIdToRemove),
-      column2: currentLayout.column2.filter(w => w.id !== widgetIdToRemove),
+      COLUMN1: currentLayout.COLUMN1.filter(w => w.ID !== widgetIdToRemove),
+      COLUMN2: currentLayout.COLUMN2.filter(w => w.ID !== widgetIdToRemove),
     };
     this.updateLayout(newLayout);
   }

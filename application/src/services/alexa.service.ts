@@ -18,7 +18,7 @@ import { InternetConnectivityService } from './internet-connectivity.service';
 import { StateService, AlexaDevice, AlexaAnnouncement, AlexaDeviceType } from './state.service';
 
 // FIX: Re-export types for consumers of AlexaService
-export { AlexaDevice, AlexaAnnouncement };
+export type { AlexaDevice, AlexaAnnouncement };
 
 @Injectable({
   providedIn: 'root',

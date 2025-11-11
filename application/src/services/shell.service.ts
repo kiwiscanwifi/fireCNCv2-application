@@ -5,7 +5,6 @@ import { SnmpTrapLogService } from './snmp-trap-log.service';
 import { SystemLogService } from './system-log.service';
 import { ArduinoService, LedEffect } from './arduino.service';
 import { ReferenceFileService } from './reference-file.service';
-import { NotesService } from './notes.service';
 import { ModuleService } from './module.service';
 
 interface FsNode {
@@ -25,7 +24,6 @@ export class ShellService {
   private systemLogService = inject(SystemLogService);
   private arduinoService = inject(ArduinoService);
   private referenceFileService = inject(ReferenceFileService);
-  private notesService = inject(NotesService);
   private moduleService = inject(ModuleService);
 
   private fs: Record<string, FsNode> = {};
@@ -112,11 +110,6 @@ export class ShellService {
       '/data/pages/reference.txt',
       () => this.referenceFileService.referenceContent(),
       (newContent) => this.referenceFileService.saveReference(newContent)
-    );
-    createFile(
-      '/home/user/notes.txt',
-      () => this.notesService.notesContent(),
-      (newContent) => this.notesService.saveNotes(newContent)
     );
 
     // Initial module files (these are currently immutable via shell)

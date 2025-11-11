@@ -9,7 +9,7 @@
  * Manages the discovery and state of hardware expansion modules.
  */
 import { Injectable, signal, WritableSignal, inject } from '@angular/core';
-import { DashboardSettingsService } from './dashboard-settings.service';
+import { DashboardSettingsService, DashboardWidget, DashboardLayout } from './dashboard-settings.service';
 
 export interface Port {
   name: string;
@@ -189,7 +189,7 @@ export class ModuleService {
       this.installedModules.update(current => [...current, newModule]);
 
       if (newModule.displayOnDashboard) {
-        this.dashboardSettingsService.addModuleWidget(newModule);
+        this.addModuleWidget(newModule);
       }
     } catch (e) {
       console.error(`Error installing module from ${fileName}:`, e);
@@ -202,7 +202,7 @@ export class ModuleService {
     this.installedModules.update(current => current.filter(m => m.id !== moduleId));
 
     if (moduleToUninstall && moduleToUninstall.displayOnDashboard) {
-      this.dashboardSettingsService.removeModuleWidget(moduleToUninstall.id);
+      this.removeModuleWidget(moduleToUninstall.id);
     }
   }
 
@@ -246,5 +246,34 @@ export class ModuleService {
         this.lastSaveError.set(`Failed to update module file: ${moduleToUpdate.fileName}`);
       }
     }
+  }
+
+  addModuleWidget(module: Module): void {
+    const newWidget: DashboardWidget = {
+      ID: `module-${module.id}`,
+      NAME: module.moduleName,
+      ENABLED: true,
+      ICON: 'fa-puzzle-piece',
+      TITLE: module.moduleName,
+    };
+    
+    const currentLayout = this.dashboardSettingsService.layout();
+    // Add to the end of column 1
+    const newLayout: DashboardLayout = {
+      ...currentLayout,
+      COLUMN1: [...currentLayout.COLUMN1, newWidget],
+    };
+
+    this.dashboardSettingsService.updateLayout(newLayout);
+  }
+
+  removeModuleWidget(moduleId: string): void {
+    const widgetIdToRemove = `module-${moduleId}`;
+    const currentLayout = this.dashboardSettingsService.layout();
+    const newLayout: DashboardLayout = {
+      COLUMN1: currentLayout.COLUMN1.filter(w => w.ID !== widgetIdToRemove),
+      COLUMN2: currentLayout.COLUMN2.filter(w => w.ID !== widgetIdToRemove),
+    };
+    this.dashboardSettingsService.updateLayout(newLayout);
   }
 }

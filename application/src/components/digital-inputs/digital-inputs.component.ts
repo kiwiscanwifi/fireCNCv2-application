@@ -31,12 +31,12 @@ export class DigitalInputsComponent {
     const gpios = [4, 5, 6, 7, 8, 9, 10, 11];
 
     return inputsConfig
-      .filter(config => config.enabled)
+      .filter(config => config.ENABLED)
       .map(config => ({
-        id: config.id,
-        name: config.name,
-        state: inputsState[config.id],
-        gpio: gpios[config.id]
+        ID: config.ID,
+        NAME: config.NAME,
+        state: inputsState[config.ID],
+        gpio: gpios[config.ID]
       }));
   });
 }

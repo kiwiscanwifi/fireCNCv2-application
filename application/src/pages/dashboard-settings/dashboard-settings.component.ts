@@ -28,7 +28,7 @@ import { ArduinoService } from '../../services/arduino.service'; // NEW: Import 
 export class DashboardSettingsComponent {
   dashboardSettingsService = inject(DashboardSettingsService);
   private configFileService = inject(ConfigFileService); // NEW: Inject ConfigFileService
-  private arduinoService = inject(ArduinoService); // NEW: Inject ArduinoService
+  private arduinoService = inject(ArduinoService); // NEW: Import ArduinoService
 
   layout = this.dashboardSettingsService.layout;
   
@@ -37,11 +37,11 @@ export class DashboardSettingsComponent {
 
   // State for managing drag operations
   draggedWidget: WritableSignal<DashboardWidget | null> = signal(null);
-  dragOverColumn: WritableSignal<'column1' | 'column2' | null> = signal(null);
+  dragOverColumn: WritableSignal<'COLUMN1' | 'COLUMN2' | null> = signal(null);
 
   // --- Widget Actions ---
 
-  toggleWidget(widgetId: DashboardWidget['id']) {
+  toggleWidget(widgetId: DashboardWidget['ID']) {
     this.dashboardSettingsService.toggleWidget(widgetId);
   }
 
@@ -52,12 +52,12 @@ export class DashboardSettingsComponent {
   // --- Analog Input Actions ---
   updateAnalogInputName(id: number, event: Event) {
     const newName = (event.target as HTMLInputElement).value;
-    const newConfig = this.analogInputsConfig().map(o => o.id === id ? { ...o, name: newName } : o);
+    const newConfig = this.analogInputsConfig().map(o => o.ID === id ? { ...o, NAME: newName } : o);
     this.dashboardSettingsService.updateAnalogInputsConfig(newConfig);
   }
 
   toggleAnalogInputEnabled(id: number) {
-    const newConfig = this.analogInputsConfig().map(o => o.id === id ? { ...o, enabled: !o.enabled } : o);
+    const newConfig = this.analogInputsConfig().map(o => o.ID === id ? { ...o, ENABLED: !o.ENABLED } : o);
     this.dashboardSettingsService.updateAnalogInputsConfig(newConfig);
   }
 
@@ -67,7 +67,7 @@ export class DashboardSettingsComponent {
     this.draggedWidget.set(widget);
     if (event.dataTransfer) {
       event.dataTransfer.effectAllowed = 'move';
-      event.dataTransfer.setData('text/plain', widget.id);
+      event.dataTransfer.setData('text/plain', widget.ID);
     }
   }
 
@@ -80,7 +80,7 @@ export class DashboardSettingsComponent {
     event.preventDefault(); // This is crucial for the drop event to fire
   }
 
-  onDragEnter(column: 'column1' | 'column2') {
+  onDragEnter(column: 'COLUMN1' | 'COLUMN2') {
     if (this.draggedWidget()) {
       this.dragOverColumn.set(column);
     }
@@ -94,7 +94,7 @@ export class DashboardSettingsComponent {
     }
   }
 
-  onDrop(event: DragEvent, targetColumnName: 'column1' | 'column2') {
+  onDrop(event: DragEvent, targetColumnName: 'COLUMN1' | 'COLUMN2') {
     event.preventDefault();
     const widgetToMove = this.draggedWidget();
     if (!widgetToMove) {
@@ -104,8 +104,8 @@ export class DashboardSettingsComponent {
     const newLayout = JSON.parse(JSON.stringify(this.layout())) as DashboardLayout;
 
     // Remove widget from its original position in either column
-    newLayout.column1 = newLayout.column1.filter(w => w.id !== widgetToMove.id);
-    newLayout.column2 = newLayout.column2.filter(w => w.id !== widgetToMove.id);
+    newLayout.COLUMN1 = newLayout.COLUMN1.filter(w => w.ID !== widgetToMove.ID);
+    newLayout.COLUMN2 = newLayout.COLUMN2.filter(w => w.ID !== widgetToMove.ID);
 
     // Find where to insert it
     const targetList = newLayout[targetColumnName];
@@ -113,7 +113,7 @@ export class DashboardSettingsComponent {
     
     if (dropTargetEl) {
         const dropTargetId = dropTargetEl.getAttribute('data-widget-id');
-        const dropIndex = targetList.findIndex(w => w.id === dropTargetId);
+        const dropIndex = targetList.findIndex(w => w.ID === dropTargetId);
         if (dropIndex !== -1) {
             // Insert before the element we dropped on
             targetList.splice(dropIndex, 0, widgetToMove);

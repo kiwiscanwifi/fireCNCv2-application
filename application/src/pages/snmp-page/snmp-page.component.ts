@@ -2,11 +2,11 @@ import { ChangeDetectionStrategy, Component, Signal, signal, computed, inject, W
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { SnmpService, SramInfo, EepromInfo } from '../../services/snmp.service';
-import { ArduinoService, SdCardInfo, HealthStats, LedsConfig, LedsState, SnmpConfig } from '../../services/arduino.service';
+import { ArduinoService, SdCardInfo, HealthStats, LedsConfig, LedsState, SnmpConfig, DigitalOutputConfig, DigitalInputConfig } from '../../services/arduino.service';
 import { SnmpConfigService } from '../../services/snmp-config.service';
 import { ServoControlService } from '../../services/servo-control.service';
 import { ServoPositions, ServoLimits } from '../../services/snmp.service';
-import { DashboardSettingsService } from '../../services/dashboard-settings.service';
+import { DashboardSettingsService, AnalogInputConfig } from '../../services/dashboard-settings.service';
 import { ModuleService } from '../../services/module.service';
 
 @Component({
@@ -61,34 +61,42 @@ export class SnmpPageComponent {
   private copiedOidTimeout: any;
 
   private digitalOutputsState: Signal<boolean[]> = this.arduinoService.digitalOutputs;
-  private digitalOutputsConfig = this.arduinoService.digitalOutputsConfig;
+  private digitalOutputsConfig: Signal<DigitalOutputConfig[]> = this.arduinoService.digitalOutputsConfig;
 
   visibleDigitalOutputs = computed(() => {
     const outputsState = this.digitalOutputsState();
     const outputsConfig = this.digitalOutputsConfig();
     
     return outputsConfig
-      .filter(config => config.enabled)
+      // FIX: Correct property access from .enabled to .ENABLED
+      .filter(config => config.ENABLED)
       .map(config => ({
-        id: config.id,
-        name: config.name,
-        state: outputsState[config.id]
+        // FIX: Correct property access from .id to .ID
+        id: config.ID,
+        // FIX: Correct property access from .name to .NAME
+        name: config.NAME,
+        // FIX: Correct property access from .id to .ID
+        state: outputsState[config.ID]
       }));
   });
 
   private digitalInputsState: Signal<boolean[]> = this.arduinoService.digitalInputs;
-  private digitalInputsConfig = this.arduinoService.digitalInputsConfig;
+  private digitalInputsConfig: Signal<DigitalInputConfig[]> = this.arduinoService.digitalInputsConfig;
   
   visibleDigitalInputs = computed(() => {
     const inputsState = this.digitalInputsState();
     const inputsConfig = this.digitalInputsConfig();
     
     return inputsConfig
-      .filter(config => config.enabled)
+      // FIX: Correct property access from .enabled to .ENABLED
+      .filter(config => config.ENABLED)
       .map(config => ({
-        id: config.id,
-        name: config.name,
-        state: inputsState[config.id]
+        // FIX: Correct property access from .id to .ID
+        id: config.ID,
+        // FIX: Correct property access from .name to .NAME
+        name: config.NAME,
+        // FIX: Correct property access from .id to .ID
+        state: inputsState[config.ID]
       }));
   });
 
@@ -111,7 +119,7 @@ export class SnmpPageComponent {
   }));
   
   // Analog Input signals
-  private analogInputsConfig = this.dashboardSettingsService.analogInputsConfig;
+  private analogInputsConfig: Signal<AnalogInputConfig[]> = this.dashboardSettingsService.analogInputsConfig;
   // FIX: Source analog input values from the snmpService
   private analogInputValues = this.snmpService.analogInputs;
 
@@ -120,12 +128,17 @@ export class SnmpPageComponent {
     const values = this.analogInputValues();
 
     return configs
-      .filter(config => config.enabled)
+      // FIX: Correct property access from .enabled to .ENABLED
+      .filter(config => config.ENABLED)
       .map(config => ({
-        id: config.id,
-        name: config.name,
-        value: values[config.id] ?? 0,
-        percent: ((values[config.id] ?? 0) / 4095) * 100
+        // FIX: Correct property access from .id to .ID
+        id: config.ID,
+        // FIX: Correct property access from .name to .NAME
+        name: config.NAME,
+        // FIX: Correct property access from .id to .ID
+        value: values[config.ID] ?? 0,
+        // FIX: Correct property access from .id to .ID
+        percent: ((values[config.ID] ?? 0) / 4095) * 100
       }));
   });
 

@@ -27,66 +27,66 @@
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
         <!-- Column 1 -->
         <div class="p-4 rounded-lg bg-gray-800/50 space-y-4 drop-zone"
-             [class.drag-over]="dragOverColumn() === 'column1'"
+             [class.drag-over]="dragOverColumn() === 'COLUMN1'"
              (dragover)="onDragOver($event)"
-             (dragenter)="onDragEnter('column1')"
+             (dragenter)="onDragEnter('COLUMN1')"
              (dragleave)="onDragLeave($event)"
-             (drop)="onDrop($event, 'column1')">
+             (drop)="onDrop($event, 'COLUMN1')">
           <h3 class="font-bold text-gray-300 text-lg text-center mb-2">Left</h3>
-          @for(widget of layout().column1; track widget.id) {
+          @for(widget of layout().COLUMN1; track widget.ID) {
             <div class="p-4 bg-gray-900/50 rounded-lg border border-gray-700 flex items-center justify-between widget-item"
-                 [class.dragging]="draggedWidget()?.id === widget.id"
-                 [attr.data-widget-id]="widget.id">
+                 [class.dragging]="draggedWidget()?.ID === widget.ID"
+                 [attr.data-widget-id]="widget.ID">
               <div class="flex items-center">
                 <i class="fa-solid fa-grip-vertical text-gray-500 cursor-move mr-4" 
                    draggable="true"
                    (dragstart)="onDragStart($event, widget)"
                    (dragend)="onDragEnd()"></i>
-                <span class="font-semibold text-gray-300">{{ widget.name }}</span>
+                <span class="font-semibold text-gray-300">{{ widget.NAME }}</span>
               </div>
-              <button (click)="toggleWidget(widget.id)" type="button" role="switch" [attr.aria-checked]="widget.enabled"
+              <button (click)="toggleWidget(widget.ID)" type="button" role="switch" [attr.aria-checked]="widget.ENABLED"
                       draggable="false"
                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                      [class]="widget.enabled ? 'bg-orange-500' : 'bg-gray-600'">
+                      [class]="widget.ENABLED ? 'bg-orange-500' : 'bg-gray-600'">
                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                       [class]="widget.enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+                       [class]="widget.ENABLED ? 'translate-x-5' : 'translate-x-0'"></span>
               </button>
             </div>
           }
-          @if (layout().column1.length === 0) {
+          @if (layout().COLUMN1.length === 0) {
               <div class="text-center text-gray-500 p-8 pointer-events-none">Drop widgets here</div>
           }
         </div>
 
         <!-- Column 2 -->
         <div class="p-4 rounded-lg bg-gray-800/50 space-y-4 drop-zone"
-             [class.drag-over]="dragOverColumn() === 'column2'"
+             [class.drag-over]="dragOverColumn() === 'COLUMN2'"
              (dragover)="onDragOver($event)"
-             (dragenter)="onDragEnter('column2')"
+             (dragenter)="onDragEnter('COLUMN2')"
              (dragleave)="onDragLeave($event)"
-             (drop)="onDrop($event, 'column2')">
+             (drop)="onDrop($event, 'COLUMN2')">
           <h3 class="font-bold text-gray-300 text-lg text-center mb-2">Right</h3>
-          @for(widget of layout().column2; track widget.id) {
+          @for(widget of layout().COLUMN2; track widget.ID) {
             <div class="p-4 bg-gray-900/50 rounded-lg border border-gray-700 flex items-center justify-between widget-item"
-                 [class.dragging]="draggedWidget()?.id === widget.id"
-                 [attr.data-widget-id]="widget.id">
+                 [class.dragging]="draggedWidget()?.ID === widget.ID"
+                 [attr.data-widget-id]="widget.ID">
               <div class="flex items-center">
                 <i class="fa-solid fa-grip-vertical text-gray-500 cursor-move mr-4" 
                    draggable="true"
                    (dragstart)="onDragStart($event, widget)"
                    (dragend)="onDragEnd()"></i>
-                <span class="font-semibold text-gray-300">{{ widget.name }}</span>
+                <span class="font-semibold text-gray-300">{{ widget.NAME }}</span>
               </div>
-              <button (click)="toggleWidget(widget.id)" type="button" role="switch" [attr.aria-checked]="widget.enabled"
+              <button (click)="toggleWidget(widget.ID)" type="button" role="switch" [attr.aria-checked]="widget.ENABLED"
                       draggable="false"
                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                      [class]="widget.enabled ? 'bg-orange-500' : 'bg-gray-600'">
+                      [class]="widget.ENABLED ? 'bg-orange-500' : 'bg-gray-600'">
                  <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                       [class]="widget.enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+                       [class]="widget.ENABLED ? 'translate-x-5' : 'translate-x-0'"></span>
               </button>
             </div>
           }
-          @if (layout().column2.length === 0) {
+          @if (layout().COLUMN2.length === 0) {
               <div class="text-center text-gray-500 p-8 pointer-events-none">Drop widgets here</div>
           }
         </div>
@@ -99,16 +99,16 @@
             Waveshare RS485 Analog Input
         </h3>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          @for(input of analogInputsConfig(); track input.id) {
+          @for(input of analogInputsConfig(); track input.ID) {
             <div class="p-3 bg-gray-900/50 rounded-lg border border-gray-700 flex items-center justify-between gap-3">
-              <span class="font-mono text-sm text-gray-500 shrink-0">EXAI{{ input.id }}</span>
-              <input type="text" [value]="input.name" (blur)="updateAnalogInputName(input.id, $event)"
+              <span class="font-mono text-sm text-gray-500 shrink-0">EXAI{{ input.ID }}</span>
+              <input type="text" [value]="input.NAME" (blur)="updateAnalogInputName(input.ID, $event)"
                      class="bg-gray-700 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-semibold w-full">
-              <button (click)="toggleAnalogInputEnabled(input.id)" type="button" role="switch" [attr.aria-checked]="input.enabled"
+              <button (click)="toggleAnalogInputEnabled(input.ID)" type="button" role="switch" [attr.aria-checked]="input.ENABLED"
                       class="relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 focus:ring-offset-gray-900"
-                      [class]="input.enabled ? 'bg-orange-500' : 'bg-gray-600'">
+                      [class]="input.ENABLED ? 'bg-orange-500' : 'bg-gray-600'">
                 <span class="pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out"
-                      [class]="input.enabled ? 'translate-x-5' : 'translate-x-0'"></span>
+                      [class]="input.ENABLED ? 'translate-x-5' : 'translate-x-0'"></span>
               </button>
             </div>
           }

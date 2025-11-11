@@ -1,0 +1,66 @@
+<div class="space-y-4">
+  <!-- X Axis -->
+  <div>
+    <div class="flex justify-between items-baseline text-sm mb-1">
+      <span class="font-semibold text-gray-400">X Axis (Gantry)</span>
+      <span class="font-mono text-gray-300">{{ servoX().position.toFixed(1) }} / {{ tableConfig().RAIL_X }} mm</span>
+    </div>
+    <div class="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
+      <div class="bg-blue-500 h-full" [style.width.%]="servoXPercent()"></div>
+      @if (servoX().limitMin) {
+        <div class="absolute left-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+      @if (servoX().limitMax) {
+        <div class="absolute right-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+    </div>
+  </div>
+  <!-- Y Axis -->
+  <div>
+    <div class="flex justify-between items-baseline text-sm mb-1">
+      <span class="font-semibold text-gray-400">Y Axis (Left)</span>
+      <span class="font-mono text-gray-300">{{ servoY().position.toFixed(1) }} / {{ tableConfig().RAIL_Y }} mm</span>
+    </div>
+    <div class="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
+      <div class="bg-green-500 h-full" [style.width.%]="servoYPercent()"></div>
+      @if (servoY().limitMin) {
+        <div class="absolute left-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+      @if (servoY().limitMax) {
+        <div class="absolute right-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+    </div>
+  </div>
+  <!-- YY Axis -->
+  <div>
+    <div class="flex justify-between items-baseline text-sm mb-1">
+      <span class="font-semibold text-gray-400">YY Axis (Right)</span>
+      <span class="font-mono text-gray-300">{{ servoYY().position.toFixed(1) }} / {{ tableConfig().RAIL_Y }} mm</span>
+    </div>
+    <div class="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
+      <div class="bg-teal-500 h-full" [style.width.%]="servoYYPercent()"></div>
+       @if (servoYY().limitMin) {
+        <div class="absolute left-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+      @if (servoYY().limitMax) {
+        <div class="absolute right-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+    </div>
+  </div>
+  <!-- Z Axis -->
+  <div>
+    <div class="flex justify-between items-baseline text-sm mb-1">
+      <span class="font-semibold text-gray-400">Z Axis (Spindle)</span>
+      <span class="font-mono text-gray-300">{{ servoZ().position.toFixed(1) }} / {{ tableConfig().RAIL_Z }} mm</span>
+    </div>
+    <div class="w-full bg-gray-700 rounded-full h-4 relative overflow-hidden border border-gray-600">
+      <div class="bg-purple-500 h-full" [style.width.%]="servoZPercent()"></div>
+      @if (servoZ().limitMin) {
+        <div class="absolute left-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+      @if (servoZ().limitMax) {
+        <div class="absolute right-0 top-0 h-full w-4 bg-red-500 animate-pulse"></div>
+      }
+    </div>
+  </div>
+</div>

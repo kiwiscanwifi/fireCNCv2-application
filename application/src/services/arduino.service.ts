@@ -23,7 +23,8 @@ import { ConnectionStatus } from './websocket.service';
 // REMOVED: import { InternetStatus } from './internet-connectivity.service';
 
 // Re-exporting types for consumers of ArduinoService
-export { SshConfig, LedState, LedsState, LedEffect, WifiConfig, NetworkConfig, LedsConfig, TableConfig, AlexaConfig, ServosConfig, SystemConfig, StorageMonitoringConfig, SystemInfo, SdCardInfo, HealthStats, WifiStatus, DigitalOutputConfig, DigitalInputConfig, ConnectionStatus, InternetStatus, SnmpConfig };
+export type { SshConfig, LedState, LedsState, LedEffect, WifiConfig, NetworkConfig, LedsConfig, TableConfig, AlexaConfig, ServosConfig, SystemConfig, StorageMonitoringConfig, SystemInfo, SdCardInfo, HealthStats, WifiStatus, DigitalOutputConfig, DigitalInputConfig, SnmpConfig, InternetStatus } from './state.service';
+export type { ConnectionStatus } from './websocket.service';
 
 
 @Injectable({
