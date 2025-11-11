@@ -1,5 +1,5 @@
 # fireCNC
-![fireCNC](Images/fireCNC-github-banner.jpg)
+![fireCNC](/Images/fireCNC-github-banner.jpg)
 
 # fireCNC 
 After experiencing a kitchen fire, I decided to rebuild my kitchen with the precision that CNC technology can provide. My hand tool skills are lacking and I struggle to cut a straight line with a hand saw, so I knew I needed a more accurate approach.
