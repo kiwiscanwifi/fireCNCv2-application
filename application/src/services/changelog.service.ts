@@ -25,6 +25,15 @@ export interface ChangelogEntry {
 
 const initialChangelogData: ChangelogEntry[] = [
   {
+    version: '1.0.7',
+    date: '2024-08-17',
+    changes: [
+      { type: 'Feature', description: 'Created a new landing page for the System section, providing a hub for system-related pages and actions.' },
+      { type: 'Improvement', description: 'Updated main navigation links (Settings, Information, Activity, and System) to navigate directly to their respective landing pages on click, improving user experience.' },
+      { type: 'Chore', description: 'Incremented application version to 1.0.7.' },
+    ]
+  },
+  {
     version: '1.0.6',
     date: '2024-08-16',
     changes: [

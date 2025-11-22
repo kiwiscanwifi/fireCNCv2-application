@@ -47,22 +47,26 @@ export class NetworkPageComponent implements OnInit, OnDestroy {
     // React to changes in WiFi Mode
     networkGroup.get('MODE')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(mode => this.updateWifiFields(mode, networkGroup));
+      // FIX: Cast 'mode' to the expected type to resolve the 'unknown' type error.
+      .subscribe(mode => this.updateWifiFields(mode as ('AP' | 'Station' | 'Disabled'), networkGroup));
 
     // React to changes in Station IP Assignment
     networkGroup.get('IP_ASSIGNMENT')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(assignment => this.updateStationIpAssignmentFields(assignment, networkGroup));
+      // FIX: Cast 'assignment' to the expected type to resolve the 'unknown' type error.
+      .subscribe(assignment => this.updateStationIpAssignmentFields(assignment as ('DHCP' | 'Static'), networkGroup));
 
     // React to changes in AP DHCP Server Enabled
     networkGroup.get('DHCP_SERVER_ENABLED')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(enabled => this.updateDhcpFields(enabled, networkGroup));
+      // FIX: Cast 'enabled' to boolean to resolve the 'unknown' type error.
+      .subscribe(enabled => this.updateDhcpFields(enabled as boolean, networkGroup));
 
     // NEW: React to changes in TRAPS_ENABLED to dynamically validate TRAP_TARGET
     snmpGroup.get('TRAPS_ENABLED')?.valueChanges
       .pipe(takeUntil(this.destroy$))
-      .subscribe(enabled => this.updateTrapTargetValidation(enabled, snmpGroup));
+      // FIX: Cast 'enabled' to boolean to resolve the 'unknown' type error.
+      .subscribe(enabled => this.updateTrapTargetValidation(enabled as boolean, snmpGroup));
 
     // Initial update based on current form values
     this.updateWifiFields(networkGroup.get('MODE')?.value, networkGroup);

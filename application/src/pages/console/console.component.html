@@ -11,18 +11,22 @@
       </button>
     </div>
     
-    <div #logContainer class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-gray-400 overflow-y-auto min-h-0">
-      @for(log of logs(); track $index) {
-        <p class="whitespace-pre-wrap text-lime-400">
-          <span>{{ log }}</span>
-        </p>
-      } @empty {
+    @if (logs().length > 0) {
+      <div #logContainer class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-gray-400 min-h-0 overflow-y-auto">
+        @for (log of logs(); track $index) {
+          <p class="whitespace-pre-wrap text-lime-400">
+            <span>{{ log }}</span>
+          </p>
+        }
+      </div>
+    } @else {
+      <div class="flex-grow bg-black/50 rounded p-3 font-mono text-sm text-gray-400 overflow-y-auto min-h-0">
         @if (webSocketService.connectionStatus() === 'connecting') {
            <p class="text-gray-500">Connecting to device log...</p>
         } @else {
            <p class="text-gray-500">Awaiting device logs...</p>
         }
-      }
-    </div>
+      </div>
+    }
   </div>
 </main>

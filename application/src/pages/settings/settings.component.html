@@ -388,32 +388,61 @@
             }
           </div>
           
-          <!-- Servo Settings Card -->
-          <div formGroupName="servos" class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
-            <button (click)="toggleSection('servo')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
-              <h2 class="text-xl font-bold text-gray-300 flex items-center">
-                <i class="fa-solid fa-robot mr-3 text-orange-400"></i>
-                Servo Settings
-              </h2>
-              <i class="fa-solid transition-transform duration-300" [class]="sections.servo() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
-            </button>
-            @if (sections.servo()) {
-              <div class="p-4 border-t border-gray-700 space-y-3">
-                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
-                  <label for="slaveIdX" class="font-semibold text-gray-300">Slave ID X</label>
-                  <input id="slaveIdX" formControlName="SLAVE_ID_X" type="number" class="bg-gray-700 border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+          <!-- Servo and RS485 Settings Cards -->
+          <div formGroupName="servos" class="space-y-4">
+            <!-- Servo Settings Card -->
+            <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+              <button (click)="toggleSection('servo')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+                <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                  <i class="fa-solid fa-robot mr-3 text-orange-400"></i>
+                  Servo Settings
+                </h2>
+                <i class="fa-solid transition-transform duration-300" [class]="sections.servo() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+              </button>
+              @if (sections.servo()) {
+                <div class="p-4 border-t border-gray-700 space-y-3">
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="slaveIdX" class="font-semibold text-gray-300">Slave ID X</label>
+                    <input id="slaveIdX" formControlName="SLAVE_ID_X" type="number" class="bg-gray-700 border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="slaveIdY" class="font-semibold text-gray-300">Slave ID Y</label>
+                    <input id="slaveIdY" formControlName="SLAVE_ID_Y" type="number" class="bg-gray-700 border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="slaveIdYY" class="font-semibold text-gray-300">Slave ID YY</label>
+                    <input id="slaveIdYY" formControlName="SLAVE_ID_YY" type="number" class="bg-gray-700 border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                  </div>
+                  <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
+                    <label for="slaveIdZ" class="font-semibold text-gray-300">Slave ID Z</label>
+                    <input id="slaveIdZ" formControlName="SLAVE_ID_Z" type="number" class="bg-gray-700 border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+                  </div>
                 </div>
-                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
-                  <label for="slaveIdY" class="font-semibold text-gray-300">Slave ID Y</label>
-                  <input id="slaveIdY" formControlName="SLAVE_ID_Y" type="number" class="bg-gray-700 border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
+              }
+            </div>
+            <!-- RS485 Settings Card -->
+            <div class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
+              <button (click)="toggleSection('rs485')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">
+                <h2 class="text-xl font-bold text-gray-300 flex items-center">
+                  <i class="fa-solid fa-tty mr-3 text-orange-400"></i>
+                  RS485 Settings
+                </h2>
+                <i class="fa-solid transition-transform duration-300" [class]="sections.rs485() ? 'fa-chevron-up' : 'fa-chevron-down'"></i>
+              </button>
+              @if (sections.rs485()) {
+                <div class="p-4 border-t border-gray-700 space-y-3">
+                  <div class="p-2 bg-gray-900/50 rounded-lg">
+                    <label for="modbusTimeout" class="font-semibold text-gray-300 mb-2 block">Modbus Timeout (ms)</label>
+                    <div class="flex items-center space-x-4">
+                      <input id="modbusTimeout" type="range" formControlName="MODBUS_TIMEOUT" min="100" max="2000" step="50" class="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer accent-orange-500">
+                      <span class="font-mono text-orange-300 w-20 text-center">{{ mainSettingsForm.get('servos.MODBUS_TIMEOUT')?.value }}ms</span>
+                    </div>
+                  </div>
                 </div>
-                <div class="flex items-center justify-between p-2 bg-gray-900/50 rounded-lg">
-                  <label for="slaveIdYY" class="font-semibold text-gray-300">Slave ID YY</label>
-                  <input id="slaveIdYY" formControlName="SLAVE_ID_YY" type="number" class="bg-gray-700 border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-orange-500 focus:border-orange-500 block p-2 font-mono text-right w-24">
-                </div>
-              </div>
-            }
+              }
+            </div>
           </div>
+          
           <!-- Table Settings Card -->
           <div formGroupName="table" class="bg-gray-800/50 border border-gray-700 rounded-lg shadow-lg overflow-hidden">
             <button (click)="toggleSection('table')" type="button" class="w-full text-left p-3 flex justify-between items-center bg-gray-900/50 hover:bg-gray-900/80 transition-colors duration-200">

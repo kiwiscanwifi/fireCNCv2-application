@@ -87,7 +87,7 @@
   font-family: monospace;
   font-size: 0.9rem;
   background-color: transparent !important; /* Integrate with parent bg */
-  height: 100% !important; /* Forces CodeMirror to take full height */
+  height: 100% !important;
 }
 
 .CodeMirror-gutters {

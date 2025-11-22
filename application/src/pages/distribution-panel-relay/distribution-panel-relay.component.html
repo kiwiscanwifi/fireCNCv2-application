@@ -1,0 +1,39 @@
+<main class="flex-grow">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+    <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-tachograph-digital mr-3 text-orange-400"></i>
+        Distribution Panel Relay Module
+    </h2>
+    <a routerLink="/information/hardware" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+      Back
+    </a>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+    <!-- Left Column: Diagram -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-image mr-3 text-orange-400"></i>
+        Module Diagram
+      </h2>
+      <div class="bg-gray-900/50 p-4 rounded-md border border-gray-700">
+         <img ngSrc="https://ae01.alicdn.com/kf/S31922dd8c1714150821cde950f8c37d0c.jpg_960x960.jpg" 
+             width="800" 
+             height="800" 
+             priority
+             alt="Distribution Panel Relay Module diagram"
+             class="rounded-md w-full h-auto bg-white p-2">
+      </div>
+    </div>
+
+    <!-- Right Column: Notes -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-book-open mr-3 text-orange-400"></i>
+        Module Notes
+      </h2>
+      <div class="text-gray-300 markdown-content" [innerHTML]="parseMarkdown(moduleNotes())"></div>
+    </div>
+    
+  </div>
+</main>

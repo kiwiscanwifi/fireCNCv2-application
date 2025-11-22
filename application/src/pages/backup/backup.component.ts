@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, signal, WritableSignal, ElementRef, viewChild, afterNextRender, inject, effect, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, signal, WritableSignal, ElementRef, viewChild, afterNextRender, inject, effect, computed, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { BackupService, Backup } from '../../services/backup.service';
@@ -10,12 +10,16 @@ declare var CodeMirror: any;
   imports: [CommonModule, RouterLink],
   templateUrl: './backup.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    'class': 'flex flex-col flex-grow'
+  }
 })
-export class BackupPageComponent {
+export class BackupPageComponent implements OnDestroy {
   private backupService = inject(BackupService);
 
   backups = this.backupService.backups;
   selectedBackup: WritableSignal<Backup | null> = signal(null);
+  isFullScreen: WritableSignal<boolean> = signal(false);
 
   editorHost = viewChild<ElementRef<HTMLDivElement>>('editorHost');
   private editor: WritableSignal<any | null> = signal(null);
@@ -49,8 +53,25 @@ export class BackupPageComponent {
       const content = this.selectedBackupContent();
       if (editor && editor.getValue() !== content) {
         editor.setValue(content);
+        // Refresh the editor to ensure it resizes correctly.
+        setTimeout(() => editor.refresh(), 10);
       }
     });
+
+    // Add effect to refresh codemirror when entering/exiting fullscreen
+    effect(() => {
+      this.isFullScreen(); // depend on the signal
+      const editor = this.editor();
+      if (editor) {
+        // Use a timeout to ensure refresh happens after DOM has resized
+        setTimeout(() => editor.refresh(), 100);
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Ensure we exit fullscreen mode if user navigates away
+    this.isFullScreen.set(false);
   }
 
   private initializeCodeMirror(host: ElementRef<HTMLDivElement>): void {
@@ -64,6 +85,8 @@ export class BackupPageComponent {
       });
       editorInstance.setValue(this.selectedBackupContent());
       this.editor.set(editorInstance);
+      // Refresh the editor after a short delay to ensure it sizes correctly.
+      setTimeout(() => editorInstance.refresh(), 10);
     } catch (e) {
       console.error("Failed to initialize CodeMirror:", e);
     }
@@ -97,5 +120,9 @@ export class BackupPageComponent {
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+  }
+
+  toggleFullScreen(): void {
+    this.isFullScreen.update(v => !v);
   }
 }

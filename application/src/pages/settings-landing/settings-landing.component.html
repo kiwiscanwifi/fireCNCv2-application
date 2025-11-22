@@ -11,7 +11,7 @@
   </div>
 
   <!-- Content card below the header -->
-  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6 shadow-lg h-full">
+  <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-4 sm:p-6 shadow-lg">
     <div class="space-y-3">
       @for (link of settingsLinks; track link.path) {
         @if (!link.adminOnly || isAdminMode()) {

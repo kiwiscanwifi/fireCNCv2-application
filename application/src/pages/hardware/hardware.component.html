@@ -4,7 +4,7 @@
     <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
       <h2 class="text-xl font-bold text-gray-200 flex items-center">
         <i class="fa-solid fa-microchip mr-3 text-orange-400"></i>
-        Hardware Modules
+        Hardware
       </h2>
       <a routerLink="/information" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition-colors duration-200 md:hidden">
         Back
@@ -13,79 +13,128 @@
   </div>
   <p class="text-gray-400 text-sm mb-6">Select a hardware module below to view its detailed pinout and reference information.</p>
 
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-    <!-- Waveshare ESP32 Card -->
-    <a routerLink="/information/hardware/esp32-s3-poe" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
-      <div class="flex items-center mb-3">
-        <i class="fa-solid fa-desktop mr-4 text-3xl text-orange-400"></i>
-        <div>
-          <h3 class="font-bold text-gray-200 text-lg">Waveshare ESP32</h3>
-          <p class="text-sm text-gray-400">Main Controller Board</p>
-        </div>
+  <div class="space-y-8">
+    <!-- Main Controller Section -->
+    <section>
+      <h3 class="font-bold text-gray-300 text-base flex items-center mb-3">
+        <i class="fa-solid fa-desktop mr-3 w-5 text-center text-orange-400"></i>
+        <span>Main Controller Board</span>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a routerLink="/information/hardware/esp32-s3-poe" class="md:col-span-2 block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+          <div class="flex items-center mb-3">
+            <i class="fa-solid fa-desktop mr-4 text-3xl text-orange-400"></i>
+            <div>
+              <h3 class="font-bold text-gray-200 text-lg">Waveshare ESP32</h3>
+              <p class="text-sm text-gray-400">Main Controller Board</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 group-hover:text-gray-400">View GPIO reference, schematics, and notes for the primary ESP32-S3 board.</p>
+        </a>
       </div>
-      <p class="text-sm text-gray-500 group-hover:text-gray-400">View GPIO reference, schematics, and notes for the primary ESP32-S3 board.</p>
-    </a>
+    </section>
 
-    <!-- Waveshare RS485 to Ethernet Card -->
-    <a routerLink="/information/hardware/rs485-to-ethernet" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
-      <div class="flex items-center mb-3">
-        <i class="fa-solid fa-network-wired mr-4 text-3xl text-orange-400"></i>
-        <div>
-          <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 to Ethernet</h3>
-          <p class="text-sm text-gray-400">Serial to Ethernet Adapter</p>
-        </div>
-      </div>
-      <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount RS485 to Ethernet serial server module.</p>
-    </a>
-
-    <!-- Waveshare RS485 HUB Card -->
-    <a routerLink="/information/hardware/rs485-hub" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
-      <div class="flex items-center mb-3">
-        <i class="fa-solid fa-sitemap mr-4 text-3xl text-orange-400"></i>
-        <div>
-          <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 HUB</h3>
-          <p class="text-sm text-gray-400">Industrial 4-Ch RS485 Hub</p>
-        </div>
-      </div>
-      <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount 4-channel RS485 hub with signal isolation.</p>
-    </a>
-
-    <!-- NEW: Waveshare Modbus RTU Analog Input 8ch Card -->
-    <a routerLink="/information/hardware/waveshare-rs485-io-analog" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
-      <div class="flex items-center mb-3">
-        <i class="fa-solid fa-wave-square mr-4 text-3xl text-orange-400"></i>
-        <div>
-          <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 IO Analog</h3>
-          <p class="text-sm text-gray-400">8-Channel Analog Input Module</p>
-        </div>
-      </div>
-      <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the 8-channel analog input module with RS485 Modbus RTU.</p>
-    </a>
-  </div>
-
-  <!-- NEW: Hardware Summary Section -->
-  <div class="mt-8 bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
-    <h2 class="text-xl font-bold text-gray-200 flex items-center mb-4">
-      <i class="fa-solid fa-cubes-stacked mr-3 text-orange-400"></i>
-      Hardware Components Summary
-    </h2>
-    <div class="space-y-6">
-      @for (category of hardwareSummary; track category.title) {
-        <section>
-          <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
-            <i [class]="category.icon" class="mr-3 w-5 text-center text-orange-400"></i>
-            <span>{{ category.title }}</span>
-          </h3>
-          <div class="pl-8 space-y-3">
-            @for (component of category.components; track component.name) {
+    <!-- Key Integrated Components Section -->
+    @if (hardwareSummary[0]; as keyComponentsCat) {
+      <section>
+        <h3 class="font-bold text-gray-300 text-base mb-3 flex items-center">
+          <i [class]="keyComponentsCat.icon" class="mr-3 w-5 text-center text-orange-400"></i>
+          <span>{{ keyComponentsCat.title }}</span>
+        </h3>
+        <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+            @for (component of keyComponentsCat.components; track component.name) {
               <div class="bg-gray-900/50 p-3 rounded-lg border border-gray-700">
                 <h4 class="font-semibold text-gray-200">{{ component.name }}</h4>
                 <p class="text-sm text-gray-400 mt-1">{{ component.description }}</p>
               </div>
             }
           </div>
-        </section>
-      }
-    </div>
+        </div>
+      </section>
+    }
+
+    <!-- Power Supply/Management Section -->
+    <section>
+      <h3 class="font-bold text-gray-300 text-base flex items-center mb-3">
+        <i class="fa-solid fa-bolt mr-3 w-5 text-center text-orange-400"></i>
+        <span>Power Supply/Management</span>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a routerLink="/information/hardware/power-supply-idealplusing" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+          <div class="flex items-center mb-3">
+            <i class="fa-solid fa-bolt mr-4 text-3xl text-orange-400"></i>
+            <div>
+              <h3 class="font-bold text-gray-200 text-lg">Idealplusing IDP-240-24</h3>
+              <p class="text-sm text-gray-400">240W 24V Din Rail Power Supply</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the 240W 24V industrial Din Rail power supply.</p>
+        </a>
+        <a routerLink="/information/hardware/distribution-panel-relay" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+          <div class="flex items-center mb-3">
+            <i class="fa-solid fa-tachograph-digital mr-4 text-3xl text-orange-400"></i>
+            <div>
+              <h3 class="font-bold text-gray-200 text-lg">Distribution Panel Relay Module</h3>
+              <p class="text-sm text-gray-400">RT-RXG11D24-04M-F DC24V</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the 4-channel DIN rail power distribution relay module.</p>
+        </a>
+      </div>
+    </section>
+
+    <!-- Expansion Modules & Peripherals Section -->
+    <section>
+      <h3 class="font-bold text-gray-300 text-base flex items-center mb-3">
+        <i class="fa-solid fa-puzzle-piece mr-3 w-5 text-center text-orange-400"></i>
+        <span>Expansion Modules & Peripherals</span>
+      </h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <a routerLink="/information/hardware/rs485-to-ethernet" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+          <div class="flex items-center mb-3">
+            <i class="fa-solid fa-network-wired mr-4 text-3xl text-orange-400"></i>
+            <div>
+              <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 to Ethernet</h3>
+              <p class="text-sm text-gray-400">Serial to Ethernet Adapter</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount RS485 to Ethernet serial server module.</p>
+        </a>
+
+        <a routerLink="/information/hardware/rs485-hub" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+          <div class="flex items-center mb-3">
+            <i class="fa-solid fa-sitemap mr-4 text-3xl text-orange-400"></i>
+            <div>
+              <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 HUB</h3>
+              <p class="text-sm text-gray-400">Industrial 4-Ch RS485 Hub</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the industrial rail-mount 4-channel RS485 hub with signal isolation.</p>
+        </a>
+
+        <a routerLink="/information/hardware/waveshare-rs485-io-analog" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+          <div class="flex items-center mb-3">
+            <i class="fa-solid fa-wave-square mr-4 text-3xl text-orange-400"></i>
+            <div>
+              <h3 class="font-bold text-gray-200 text-lg">Waveshare RS485 IO Analog</h3>
+              <p class="text-sm text-gray-400">8-Channel Analog Input Module</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the 8-channel analog input module with RS485 Modbus RTU.</p>
+        </a>
+
+        <a routerLink="/information/hardware/sp902e-repeater" class="block bg-gray-900/50 p-6 rounded-lg border border-gray-700 hover:border-orange-500/50 hover:bg-gray-800/60 transition-all duration-200 group">
+          <div class="flex items-center mb-3">
+            <i class="fa-solid fa-rss mr-4 text-3xl text-orange-400"></i>
+            <div>
+              <h3 class="font-bold text-gray-200 text-lg">SP902E SPI Signal Repeater</h3>
+              <p class="text-sm text-gray-400">2-Channel SPI Amplifier</p>
+            </div>
+          </div>
+          <p class="text-sm text-gray-500 group-hover:text-gray-400">View details for the SPI signal repeater used for extending addressable LED strips.</p>
+        </a>
+      </div>
+    </section>
   </div>
 </main>

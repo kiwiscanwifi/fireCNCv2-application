@@ -63,16 +63,16 @@
             }
             <!-- Settings Dropdown -->
             <div class="relative pb-1" routerLinkActive #rla="routerLinkActive" (mouseenter)="openDropdown('settings')" (mouseleave)="closeDropdown('settings')">
-              <button
+              <a routerLink="/settings/landing"
                   (click)="toggleDropdown('settings')"
-                  class="hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
+                  class="cursor-pointer hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
                   [class.text-orange-400]="rla.isActive"
                   [class.text-gray-300]="!rla.isActive"
                   [class.border-orange-400]="rla.isActive"
                   [class.border-transparent]="!rla.isActive">
                 <i class="fa-solid fa-sliders w-5 text-center"></i><span class="hidden lg:inline ml-2">{{ 'nav.settings' | translate }}</span>
                 <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
-              </button>
+              </a>
               <div class="absolute left-0 top-full w-56 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20" [class.hidden]="!isSettingsDropdownOpen()">
                 <a routerLink="/settings/general" (click)="closeAllDropdowns()"
                    routerLinkActive="text-orange-400 bg-gray-700"
@@ -125,11 +125,17 @@
               </div>
             </div>
             <!-- System Dropdown -->
-            <div class="relative pb-1" (mouseenter)="openDropdown('system')" (mouseleave)="closeDropdown('system')">
-              <button (click)="toggleDropdown('system')" class="text-gray-300 hover:text-orange-400 border-b-2 border-transparent hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none">
+            <div class="relative pb-1" routerLinkActive #rlaSystem="routerLinkActive" (mouseenter)="openDropdown('system')" (mouseleave)="closeDropdown('system')">
+              <a routerLink="/system/landing"
+                  (click)="toggleDropdown('system')"
+                  class="cursor-pointer hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
+                  [class.text-orange-400]="rlaSystem.isActive"
+                  [class.text-gray-300]="!rlaSystem.isActive"
+                  [class.border-orange-400]="rlaSystem.isActive"
+                  [class.border-transparent]="!rlaSystem.isActive">
                 <i class="fa-solid fa-gears w-5 text-center"></i><span class="hidden lg:inline ml-2">{{ 'nav.system' | translate }}</span>
                 <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
-              </button>
+              </a>
               <div class="absolute left-0 top-full w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20" [class.hidden]="!isSystemDropdownOpen()">
                 @if (isAdminMode()) {
                   <a routerLink="/system/shell" (click)="closeAllDropdowns()" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
@@ -153,16 +159,16 @@
         <div class="flex items-center space-x-4">
           <!-- Information Dropdown -->
           <div class="relative group hidden md:flex pb-1" routerLinkActive #rlaInfo="routerLinkActive" (mouseenter)="openDropdown('information')" (mouseleave)="closeDropdown('information')">
-            <button
+            <a routerLink="/information/landing"
                 (click)="toggleDropdown('information')"
-                class="hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
+                class="cursor-pointer hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
                 [class.text-orange-400]="rlaInfo.isActive"
                 [class.text-gray-300]="!rlaInfo.isActive"
                 [class.border-orange-400]="rlaInfo.isActive"
                 [class.border-transparent]="!rlaInfo.isActive">
               <i class="fa-solid fa-circle-info w-5 text-center"></i><span class="hidden lg:inline ml-2">{{ 'nav.information' | translate }}</span>
               <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
-            </button>
+            </a>
             <div class="absolute left-0 top-full w-64 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20" [class.hidden]="!isInformationDropdownOpen()">
               <a routerLink="/information/about" (click)="closeAllDropdowns()" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
                 <i class="fa-solid fa-circle-info w-6 text-center"></i>
@@ -197,16 +203,16 @@
           </div>
           <!-- Activity Dropdown -->
           <div class="relative group hidden md:flex pb-1" routerLinkActive #rlaActivity="routerLinkActive" (mouseenter)="openDropdown('activity')" (mouseleave)="closeDropdown('activity')">
-            <button
+            <a routerLink="/activity/landing"
                 (click)="toggleDropdown('activity')"
-                class="hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
+                class="cursor-pointer hover:text-orange-400 border-b-2 hover:border-orange-400 transition-colors duration-200 px-1 py-2 text-sm font-medium flex items-center focus:outline-none"
                 [class.text-orange-400]="rlaActivity.isActive"
                 [class.text-gray-300]="!rlaActivity.isActive"
                 [class.border-orange-400]="rlaActivity.isActive"
                 [class.border-transparent]="!rlaActivity.isActive">
                 <i class="fa-solid fa-chart-area w-5 text-center"></i><span class="hidden lg:inline ml-2">{{ 'nav.activity' | translate }}</span>
                 <i class="fa-solid fa-chevron-down text-xs ml-2"></i>
-            </button>
+            </a>
             <div class="absolute left-0 top-full w-48 bg-gray-800 border border-gray-700 rounded-md shadow-lg py-1 z-20" [class.hidden]="!isActivityDropdownOpen()">
               <a routerLink="/activity/console" (click)="closeAllDropdowns()" class="block w-full text-left px-4 py-2 text-sm text-gray-300 hover:bg-gray-700 hover:text-orange-400 cursor-pointer flex items-center">
                 <i class="fa-solid fa-greater-than w-6 text-center"></i>
@@ -397,8 +403,9 @@
   }
 
   <div class="flex-grow overflow-y-auto flex flex-col px-0 sm:px-6 lg:px-8 pt-2 sm:pt-3 lg:pt-4 pb-2 sm:pb-3 lg:pb-4">
-
-    <router-outlet></router-outlet>
+    <div class="flex-grow flex flex-col">
+      <router-outlet></router-outlet>
+    </div>
 
     <!-- Reboot Confirmation Modal -->
     @if (showRebootConfirmation()) {
@@ -412,7 +419,7 @@
       </app-confirmation-modal>
     }
 
-    <footer class="mt-auto pt-2 text-xs text-gray-500">
+    <footer class="pt-2 text-xs text-gray-500">
       <div class="border-t border-gray-700 pt-2 flex justify-between items-center">
         <div class="flex items-center">
           <!-- Admin Mode Indicator -->

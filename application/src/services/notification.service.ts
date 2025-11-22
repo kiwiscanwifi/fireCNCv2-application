@@ -30,13 +30,13 @@ export class NotificationService {
     // Programmatically remove the notification after the duration has passed using a two-stage process.
     if (duration > 0 && duration > this.FADE_OUT_DURATION) {
       // Stage 1: After the main duration (minus animation time), trigger the fade-out
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.notifications.update(current => 
           current.map(n => n.id === id ? { ...n, fadingOut: true } : n)
         );
 
         // Stage 2: After the fade-out animation completes, remove the element
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.clearById(id);
         }, this.FADE_OUT_DURATION);
 
@@ -65,7 +65,7 @@ export class NotificationService {
     this.notifications.update(current => 
       current.map(n => n.id === notification.id ? { ...n, fadingOut: true } : n)
     );
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.clearById(notification.id);
     }, this.FADE_OUT_DURATION);
   }
@@ -83,7 +83,7 @@ export class NotificationService {
       current.map(n => ({ ...n, fadingOut: true }))
     );
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       this.clearAll();
     }, this.FADE_OUT_DURATION);
   }

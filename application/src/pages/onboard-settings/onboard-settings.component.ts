@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, signal, WritableSignal, effect } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, OnDestroy, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, FormArray, FormControl, Validators, AbstractControl } from '@angular/forms';
 import { DashboardSettingsService, DigitalOutputConfig, DigitalInputConfig } from '../../services/dashboard-settings.service';
@@ -16,7 +16,7 @@ import { NotificationService } from '../../services/notification.service'; // NE
   templateUrl: './onboard-settings.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OnboardSettingsComponent implements OnDestroy {
+export class OnboardSettingsComponent implements OnInit, OnDestroy {
   // FIX: Explicitly type `fb` as `FormBuilder` to resolve 'Property does not exist on type unknown' errors.
   private fb: FormBuilder = inject(FormBuilder);
   private dashboardSettingsService = inject(DashboardSettingsService);
@@ -39,18 +39,11 @@ export class OnboardSettingsComponent implements OnDestroy {
       digitalOutputs: this.fb.array([]),
       digitalInputs: this.fb.array([]),
     });
+  }
 
-    // Populate the form with current settings on init
+  ngOnInit(): void {
+    // Populate the form with current settings on component initialization.
     this.populateForm();
-
-    // Use an effect to react to changes in the ArduinoService signals and repopulate the form.
-    // This correctly handles WritableSignal updates without using .pipe().subscribe().
-    effect(() => {
-      this.arduinoService.digitalOutputsConfig(); // Depend on the signal
-      this.arduinoService.digitalInputsConfig(); // Depend on the signal
-      this.dashboardSettingsService.layout(); // Depend on the layout to get widget titles
-      this.populateForm();
-    });
   }
 
   ngOnDestroy(): void {

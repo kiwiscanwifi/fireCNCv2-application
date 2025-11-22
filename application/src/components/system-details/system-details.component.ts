@@ -1,6 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, Signal, inject, signal, WritableSignal } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ArduinoService, SystemInfo, WifiConfig, WifiStatus, NetworkConfig } from '../../services/arduino.service';
+import { ArduinoService, SystemInfo, WifiConfig, WifiStatus, NetworkConfig, LedsState } from '../../services/arduino.service';
 import { SnmpConfigService } from '../../services/snmp-config.service';
 import { AlexaService } from '../../services/alexa.service';
 import { WebSocketService, ConnectionStatus } from '../../services/websocket.service';
@@ -21,6 +21,23 @@ export class SystemDetailsComponent {
   isAgentEnabled: Signal<boolean> = computed(() => this.snmpConfigService.config().AGENT_ENABLED);
   isTrapsEnabled: Signal<boolean> = computed(() => this.snmpConfigService.config().TRAPS_ENABLED);
   isAlexaEnabled: Signal<boolean> = this.alexaService.isAlexaEnabled;
+
+  // NEW: LED lighting status
+  ledsState: Signal<LedsState> = this.arduinoService.ledsState;
+  ledLightingStatus = computed(() => {
+    const state = this.ledsState();
+    if (!state.power) {
+      return {
+        text: 'Disabled',
+        colorClass: 'text-gray-500'
+      };
+    }
+    const percent = Math.round(state.brightness / 2.55);
+    return {
+      text: `${percent}%`,
+      colorClass: 'text-green-400'
+    };
+  });
 
   // Expose WiFi related signals
   wifiConfig: Signal<WifiConfig> = this.arduinoService.wifiConfig;
@@ -92,4 +109,13 @@ export class SystemDetailsComponent {
         suffix: ''
     };
   });
+
+  // NEW: Helper method to format the Wi-Fi status text
+  getWifiStatusText(status: 'connected' | 'disconnected' | 'disabled'): string {
+    switch (status) {
+      case 'connected': return 'Connected';
+      case 'disconnected': return 'Disconnected';
+      case 'disabled': return 'Disabled';
+    }
+  }
 }

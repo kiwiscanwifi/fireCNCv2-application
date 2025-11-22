@@ -10,6 +10,6 @@
  */
 export const versions = {
   FIRMWARE_VERSION: '0.0.7',
-  APP_VERSION: '1.0.6',
-  APP_RELEASE_DATE: '2024-08-16'
+  APP_VERSION: '1.0.7',
+  APP_RELEASE_DATE: '2024-08-17'
 };

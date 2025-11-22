@@ -187,7 +187,7 @@ export class AlexaService {
                 this.arduinoService.rebootDevice();
 
                 // After a short delay, reset the state to OFF to act as a momentary switch
-                setTimeout(() => {
+                window.setTimeout(() => {
                     this.devices.update(d => d.map(dev => dev.key === 'shutdown' ? {...dev, state: {...dev.state, on: false}} : dev));
                 }, 200);
             }
@@ -199,7 +199,7 @@ export class AlexaService {
 
                 this.arduinoService.updateLedsState({ effect: 'Chase', power: true });
                  // After a short delay, reset the state to OFF to act as a momentary switch
-                 setTimeout(() => {
+                 window.setTimeout(() => {
                     this.devices.update(d => d.map(dev => dev.key === 'chase_effect' ? {...dev, state: {...dev.state, on: false}} : dev));
                 }, 200);
             }

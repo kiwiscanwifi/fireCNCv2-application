@@ -11,22 +11,10 @@
  */
 import { Injectable, signal, WritableSignal } from '@angular/core';
 
-@Injectable({
-  providedIn: 'root',
-})
-export class FirmwareFilesService {
-  private fileData: Map<string, WritableSignal<string>> = new Map();
-  
-  files: WritableSignal<string[]> = signal([]);
-  lastSaveError: WritableSignal<string | null> = signal(null); // NEW: Signal to hold the last save error
-
-  constructor() {
-    this.initializeFirmwareFiles();
-  }
-  
-  private initializeFirmwareFiles() {
-    const fileContents: Record<string, string> = {
-        'fireCNC.ino': `/**
+// Private static constant to hold the raw firmware source data.
+// This simulates a data source that is not loaded into memory (as signals) at startup.
+const FIRMWARE_SOURCE_DATA: Record<string, string> = {
+    'fireCNC.ino': `/**
  * @file       fireCNC.ino
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -107,7 +95,7 @@ void loop() {
   Snmp::loop();       // Listens for incoming SNMP requests (simulated).
   System::loop();     // Resets the watchdog timer.
 }`,
-        'config.h': `/**
+    'config.h': `/**
  * @file       config.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -179,7 +167,7 @@ private:
 };
 
 #endif // CONFIG_H`,
-        'config.cpp': `/**
+    'config.cpp': `/**
  * @file       config.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -435,7 +423,7 @@ const AlexaConfig& Config::getAlexaConfig() { return alexaConfig; }
 const ServosConfig& Config::getServosConfig() { return servosConfig; }
 const TableConfig& Config::getTableConfig() { return tableConfig; }
 const SnmpConfig& Config::getSnmpConfig() { return snmpConfig; }`,
-        'network.h': `/**
+    'network.h': `/**
  * @file       network.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -495,7 +483,7 @@ private:
 };
 
 #endif // NETWORK_H`,
-        'network.cpp': `/**
+    'network.cpp': `/**
  * @file       network.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -528,6 +516,8 @@ private:
 
 // Global flag to track Ethernet connection status.
 static bool eth_connected = false;
+// Global flag to track initial NTP sync.
+static bool ntp_synced = false;
 
 // WebSocket server instance. Port is set during initialization.
 WebSocketsServer webSocket(80); 
@@ -631,7 +621,16 @@ void Network::connectWifi() {
 
 void Network::loop() {
   webSocket.loop();
-  timeClient.update(); // Polls NTP server.
+  
+  // Update NTP client. This is non-blocking.
+  timeClient.update();
+
+  // Check if we have synced for the first time. The getEpochTime() will return a non-zero
+  // value once a valid time has been received.
+  if (!ntp_synced && timeClient.getEpochTime() > 0) {
+      ntp_synced = true;
+      System::log(LogLevel::INFO, "NTP time synchronized: " + timeClient.getFormattedTime());
+  }
 }
 
 void Network::startWebSocketServer() {
@@ -682,7 +681,7 @@ void Network::handleWebSocketMessage(uint8_t num, const char* message) {
           System::log(LogLevel::DEBUG, "Processed JSON command 'set_do'.");
         }
       } else if (command == "toggle_buzzer") {
-        Io::setBuzzer(!Io::getDigitalInput(8)); // Placeholder for buzzer state
+        Io::setBuzzer(!Io::getBuzzerState());
         System::log(LogLevel::DEBUG, "Processed JSON command 'toggle_buzzer'.");
       }
       else {
@@ -692,20 +691,16 @@ void Network::handleWebSocketMessage(uint8_t num, const char* message) {
 }
 
 void Network::syncNtp() {
-  System::log(LogLevel::INFO, "Syncing time with NTP server: " + Config::getNetworkConfig().NTP_SERVER);
+  System::log(LogLevel::INFO, "Attempting to sync time with NTP server: " + Config::getNetworkConfig().NTP_SERVER);
   timeClient.setPoolServerName(Config::getNetworkConfig().NTP_SERVER.c_str());
   timeClient.begin();
-  if(timeClient.forceUpdate()) {
-    System::log(LogLevel::INFO, "NTP time synchronized: " + timeClient.getFormattedTime());
-  } else {
-    System::log(LogLevel::WARN, "Failed to synchronize NTP time.");
-  }
+  // The blocking forceUpdate() call is removed. The update() call in loop() will now handle synchronization asynchronously.
 }
 
 void Network::broadcast(const String& message) {
     webSocket.broadcastTXT(message);
 }`,
-        'io.h': `/**
+    'io.h': `/**
  * @file       io.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -753,6 +748,12 @@ public:
    */
   static void setBuzzer(bool state);
 
+  /**
+   * @brief Gets the current state of the buzzer.
+   * @return true if the buzzer is on, false otherwise.
+   */
+  static bool getBuzzerState();
+
 private:
   /**
    * @brief Reads the state of all 8 digital input GPIOs and updates the internal cache.
@@ -764,10 +765,12 @@ private:
    * If a change is detected, it logs the event and sends an SNMP trap.
    */
   static void checkInputChanges();
+
+  static bool buzzer_state;
 };
 
 #endif // IO_H`,
-        'io.cpp': `/**
+    'io.cpp': `/**
  * @file       io.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -795,6 +798,9 @@ const int inputPins[8] = {4, 5, 6, 7, 8, 9, 10, 11};
 // Onboard buzzer pin.
 const int buzzerPin = 46;
 
+// Internal state for the buzzer
+bool Io::buzzer_state = false;
+
 void Io::initialize() {
   // Start the I2C bus for the I/O expander.
   Wire.begin();
@@ -819,6 +825,7 @@ void Io::initialize() {
   
   pinMode(buzzerPin, OUTPUT);
   digitalWrite(buzzerPin, LOW);
+  buzzer_state = false;
 
   // Perform an initial read of inputs to populate the state arrays.
   readAllInputs();
@@ -873,9 +880,14 @@ bool Io::getDigitalInput(uint8_t pin) {
 }
 
 void Io::setBuzzer(bool state) {
+  buzzer_state = state;
   digitalWrite(buzzerPin, state ? HIGH : LOW);
+}
+
+bool Io::getBuzzerState() {
+  return buzzer_state;
 }`,
-        'system.h': `/**
+    'system.h': `/**
  * @file       system.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -938,7 +950,7 @@ private:
 };
 
 #endif // SYSTEM_H`,
-        'system.cpp': `/**
+    'system.cpp': `/**
  * @file       system.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1010,7 +1022,7 @@ void System::rebootDevice() {
   delay(100); // Allow a moment for the log message to be sent over WebSocket.
   ESP.restart();
 }`,
-        'leds.h': `/**
+    'leds.h': `/**
  * @file       leds.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1068,7 +1080,7 @@ private:
 };
 
 #endif // LEDS_H`,
-        'leds.cpp': `/**
+    'leds.cpp': `/**
  * @file       leds.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1229,7 +1241,7 @@ void Leds::updateStripY() {
 void Leds::updateStripYY() {
   // Similar logic as updateStripX() but for the YY-axis
 }`,
-        'alexa.h': `/**
+    'alexa.h': `/**
  * @file       alexa.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1266,7 +1278,7 @@ private:
 };
 
 #endif // ALEXA_H`,
-        'alexa.cpp': `/**
+    'alexa.cpp': `/**
  * @file       alexa.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1348,7 +1360,7 @@ void Alexa::onLedStripChange(uint8_t brightness) {
   Leds::setMasterBrightness(brightness);
   System::log(LogLevel::INFO, "Alexa: LED strips brightness set to " + String(brightness));
 }`,
-        'servos.h': `/**
+    'servos.h': `/**
  * @file       servos.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1408,7 +1420,7 @@ private:
 };
 
 #endif // SERVOS_H`,
-        'servos.cpp': `/**
+    'servos.cpp': `/**
  * @file       servos.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1537,7 +1549,7 @@ void Servos::pollServoStatus() {
   requestPosition('Y');
   requestPosition('YY');
 }`,
-        'snmp.h': `/**
+    'snmp.h': `/**
  * @file       snmp.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1572,7 +1584,7 @@ public:
 };
 
 #endif // SNMP_H`,
-        'snmp.cpp': `/**
+    'snmp.cpp': `/**
  * @file       snmp.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1640,7 +1652,7 @@ void Snmp::sendTrap(const char* message) {
   
   System::log(LogLevel::DEBUG, "Sent SNMP Trap (Simulated) to " + snmpConf.TRAP_TARGET);
 }`,
-        'shell.h': `/**
+    'shell.h': `/**
  * @file       shell.h
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1665,7 +1677,7 @@ public:
 };
 
 #endif // SHELL_H`,
-        'shell.cpp': `/**
+    'shell.cpp': `/**
  * @file       shell.cpp
  * @project    fireCNC
  * @author     Mark Dyer (Reverse-engineered from Angular App)
@@ -1759,14 +1771,27 @@ String Shell::processCommand(String command) {
 
   return "fireCNC: command not found: " + cmd;
 }`,
-    };
-    
-    for (const [path, content] of Object.entries(fileContents)) {
-        this.fileData.set(path, signal(content));
-    }
+};
+
+@Injectable({
+  providedIn: 'root',
+})
+export class FirmwareFilesService {
+  private fileData: Map<string, WritableSignal<string>> = new Map();
+  
+  files: WritableSignal<string[]> = signal([]);
+  lastSaveError: WritableSignal<string | null> = signal(null); // NEW: Signal to hold the last save error
+
+  constructor() {
+    this.initializeFirmwareFiles();
+  }
+  
+  private initializeFirmwareFiles() {
+    // Only initialize the list of files, not their content.
+    const fileKeys = Object.keys(FIRMWARE_SOURCE_DATA);
     
     // Sort files to have .ino first, then headers, then cpp files
-    this.files.set(Object.keys(fileContents).sort((a, b) => {
+    this.files.set(fileKeys.sort((a, b) => {
         if (a.endsWith('.ino')) return -1;
         if (b.endsWith('.ino')) return 1;
         if (a.endsWith('.h') && !b.endsWith('.h')) return -1;
@@ -1776,12 +1801,27 @@ String Shell::processCommand(String command) {
   }
 
   getFileContent(path: string): WritableSignal<string> | undefined {
-    return this.fileData.get(path);
+    // Check if the content is already loaded in our map.
+    if (this.fileData.has(path)) {
+      return this.fileData.get(path);
+    }
+
+    // If not loaded, fetch it from the source, create a signal, store it, and return it.
+    const rawContent = FIRMWARE_SOURCE_DATA[path];
+    if (rawContent !== undefined) {
+      const contentSignal = signal(rawContent);
+      this.fileData.set(path, contentSignal);
+      return contentSignal;
+    }
+
+    // If the path doesn't exist in our source data, return undefined.
+    return undefined;
   }
 
   updateFileContent(path: string, newContent: string): boolean {
     this.lastSaveError.set(null); // Clear previous errors
-    const fileSignal = this.fileData.get(path);
+    // Get the signal. This will also lazy-load it if it's not already in memory.
+    const fileSignal = this.getFileContent(path);
     if (!fileSignal) {
       this.lastSaveError.set(`File not found: ${path}`);
       return false;

@@ -97,7 +97,7 @@ export class SystemStateService implements OnDestroy {
         
         this.onboardLed.set({ color, flashing: true, brightness: 255 });
         
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.onboardLed.update(s => ({ ...s, flashing: false }));
         }, 3000);
       } else if (status === 'disconnected') {
@@ -172,7 +172,7 @@ export class SystemStateService implements OnDestroy {
       this.webSocketService.simulateConnect(); 
     });
 
-    setTimeout(() => this.simulateSdInitialization(), 1000);
+    window.setTimeout(() => this.simulateSdInitialization(), 1000);
   }
 
   ngOnDestroy(): void {
@@ -193,7 +193,7 @@ export class SystemStateService implements OnDestroy {
     const config = this.stateService.watchdogConfig();
     if (config.FAILURE_SD_REBOOT) {
       console.log(`Scheduling reboot in ${config.FAILURE_SD_REBOOT_TIMEOUT} seconds due to SD card failure.`);
-      setTimeout(() => {
+      window.setTimeout(() => {
         this.rebootDevice('SD Card Failure');
       }, config.FAILURE_SD_REBOOT_TIMEOUT * 1000);
     }
@@ -210,7 +210,7 @@ export class SystemStateService implements OnDestroy {
     this.webSocketService.setRestarting();
     if (this.uptimeInterval !== null) clearInterval(this.uptimeInterval);
 
-    setTimeout(() => {
+    window.setTimeout(() => {
         console.log(`Simulating device reboot (Reason: ${reason}): resetting state and reconnecting.`);
         this.isShuttingDown.set(false);
         this.uptimeSeconds = 0;
@@ -226,7 +226,7 @@ export class SystemStateService implements OnDestroy {
     this.snmpConfigService.sendTrap('Shutdown Initiated via GPIO pin.');
     this.isShuttingDown.set(true);
     
-    setTimeout(() => {
+    window.setTimeout(() => {
         console.log('Simulating device reboot from shutdown pin.');
         this.rebootDevice('Shutdown Pin');
     }, 5500);

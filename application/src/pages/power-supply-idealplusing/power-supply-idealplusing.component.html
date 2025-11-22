@@ -1,0 +1,144 @@
+<main class="flex-grow">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center mb-6 gap-4">
+    <h2 class="text-xl font-bold text-gray-200 flex items-center">
+        <i class="fa-solid fa-bolt mr-3 text-orange-400"></i>
+        Idealplusing IDP-240-24
+    </h2>
+    <a routerLink="/information/hardware" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-6 rounded-lg transition-colors duration-200 flex items-center justify-center">
+      Back
+    </a>
+  </div>
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
+
+    <!-- Left Column: Diagram -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-image mr-3 text-orange-400"></i>
+        Module Diagram
+      </h2>
+      <div class="bg-gray-900/50 p-4 rounded-md border border-gray-700">
+         <img ngSrc="https://idealplusing.com/uploads/images/20220805/1-220P5152342.jpg" 
+             width="800" 
+             height="800" 
+             priority
+             alt="Idealplusing IDP-240-24 Power Supply diagram"
+             class="rounded-md w-full h-auto bg-white p-2">
+      </div>
+    </div>
+
+    <!-- Right Column: Notes -->
+    <div class="bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg h-full">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-book-open mr-3 text-orange-400"></i>
+        Module Notes
+      </h2>
+      <div class="text-gray-300 markdown-content" [innerHTML]="parseMarkdown(moduleNotes())"></div>
+    </div>
+
+    <!-- Full Width: Specifications Table -->
+    <div class="lg:col-span-2 bg-gray-800/50 border border-gray-700 rounded-lg p-6 shadow-lg">
+      <h2 class="text-xl font-bold text-gray-300 mb-4 flex items-center">
+        <i class="fa-solid fa-table-list mr-3 text-orange-400"></i>
+        Electrical Specifications
+      </h2>
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm text-left text-gray-400">
+          <tbody class="divide-y divide-gray-700">
+            <!-- OUTPUT -->
+            <tr class="bg-gray-900/50">
+              <th scope="row" colspan="2" class="px-4 py-3 font-bold text-gray-200 uppercase">Output</th>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold w-1/3">DC Voltage</td>
+              <td class="px-4 py-2 font-mono">24V</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Rated Current</td>
+              <td class="px-4 py-2 font-mono">10A</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Rated Power</td>
+              <td class="px-4 py-2 font-mono">240W</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Ripple & Noise (max.)</td>
+              <td class="px-4 py-2 font-mono">150mVp-p</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Voltage Adj. Range</td>
+              <td class="px-4 py-2 font-mono">24 ~ 28V</td>
+            </tr>
+             <tr>
+              <td class="px-4 py-2 font-semibold">Setup, Rise Time</td>
+              <td class="px-4 py-2 font-mono">1500ms, 80ms / 230VAC at full load</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Hold Up Time (Typ.)</td>
+              <td class="px-4 py-2 font-mono">20ms / 230VAC at full load</td>
+            </tr>
+
+            <!-- INPUT -->
+            <tr class="bg-gray-900/50">
+              <th scope="row" colspan="2" class="px-4 py-3 font-bold text-gray-200 uppercase">Input</th>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Voltage Range</td>
+              <td class="px-4 py-2 font-mono">90 ~ 264VAC</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Frequency Range</td>
+              <td class="px-4 py-2 font-mono">47 ~ 63Hz</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Efficiency (Typ.)</td>
+              <td class="px-4 py-2 font-mono">91%</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">AC Current (Typ.)</td>
+              <td class="px-4 py-2 font-mono">1.3A / 230VAC</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Inrush Current (Typ.)</td>
+              <td class="px-4 py-2 font-mono">COLD START 40A / 230VAC</td>
+            </tr>
+             <tr>
+              <td class="px-4 py-2 font-semibold">Leakage Current</td>
+              <td class="px-4 py-2 font-mono">&lt;1mA / 240VAC</td>
+            </tr>
+
+            <!-- PROTECTION -->
+            <tr class="bg-gray-900/50">
+              <th scope="row" colspan="2" class="px-4 py-3 font-bold text-gray-200 uppercase">Protection</th>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Overload</td>
+              <td class="px-4 py-2 font-mono">105 ~ 130% rated output power. Constant current limiting, auto-recovery.</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Over Voltage</td>
+              <td class="px-4 py-2 font-mono">29 ~ 33V. Shut down o/p voltage, re-power on to recover.</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Over Temperature</td>
+              <td class="px-4 py-2 font-mono">Shut down o/p voltage, recovers automatically after temperature goes down.</td>
+            </tr>
+
+             <!-- ENVIRONMENT -->
+            <tr class="bg-gray-900/50">
+              <th scope="row" colspan="2" class="px-4 py-3 font-bold text-gray-200 uppercase">Environment</th>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Working Temperature</td>
+              <td class="px-4 py-2 font-mono">-30 ~ +70°C</td>
+            </tr>
+            <tr>
+              <td class="px-4 py-2 font-semibold">Working Humidity</td>
+              <td class="px-4 py-2 font-mono">20 ~ 90% RH non-condensing</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+    
+  </div>
+</main>

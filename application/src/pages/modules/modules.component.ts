@@ -9,6 +9,9 @@ declare var CodeMirror: any; // Let TypeScript know about the global CodeMirror 
   imports: [CommonModule],
   templateUrl: './modules.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    'class': 'flex flex-col flex-grow'
+  }
 })
 export class ModulesPageComponent implements OnInit {
   private moduleService = inject(ModuleService);
@@ -45,6 +48,8 @@ export class ModulesPageComponent implements OnInit {
           this.editor.setValue(content);
           this.editor.markClean();
           this.isDirty.set(false);
+          // Refresh the editor to ensure it resizes correctly.
+          setTimeout(() => this.editor.refresh(), 10);
         }
       }
     });
@@ -80,6 +85,8 @@ export class ModulesPageComponent implements OnInit {
         this.editor.markClean();
         this.isDirty.set(false);
       }
+      // Refresh the editor after a short delay to ensure it sizes correctly.
+      setTimeout(() => this.editor.refresh(), 10);
     } catch (e) {
       console.error("Failed to initialize CodeMirror:", e);
     }

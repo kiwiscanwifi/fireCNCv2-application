@@ -31,6 +31,15 @@ export class MarkdownService {
   parse(content: string): SafeHtml {
     if (!content) return this.sanitizer.bypassSecurityTrustHtml('');
 
+    const iconMap: Record<string, string> = {
+      'Initialization & Network Logic': 'fa-solid fa-power-off',
+      'System Stability & Watchdogs': 'fa-solid fa-dog',
+      'Visuals & Motion Control': 'fa-solid fa-robot',
+      'Monitoring & SNMP Integration': 'fa-solid fa-broadcast-tower',
+      'Power Management & Safety': 'fa-solid fa-shield-alt',
+      'Security & Admin Access': 'fa-solid fa-user-shield',
+    };
+
     const lines = content.split('\n');
     let html = '';
     let inUl = false;
@@ -56,7 +65,10 @@ export class MarkdownService {
         if (line.startsWith('### ')) {
             flushParagraph();
             closeLists();
-            html += `<h3>${this.inlineParse(line.substring(4))}</h3>`;
+            const title = line.substring(4).trim();
+            const iconClass = iconMap[title];
+            const iconHtml = iconClass ? `<i class="${iconClass} mr-3 text-orange-400"></i>` : '';
+            html += `<h3 class="flex items-center text-xl font-bold text-gray-200 mt-6 mb-2">${iconHtml}<span>${this.inlineParse(title)}</span></h3>`;
             continue;
         }
 

@@ -137,7 +137,7 @@ export class AppComponent implements OnDestroy {
   isSystemDropdownOpen = signal(false);
   isInformationDropdownOpen = signal(false);
   isActivityDropdownOpen = signal(false);
-  private dropdownCloseTimeout: any;
+  private dropdownCloseTimeout: number | undefined;
 
   constructor() {
     const storedMenuState = this.persistenceService.getItem<boolean>(this.MOBILE_MENU_STATE_KEY);
@@ -189,7 +189,7 @@ export class AppComponent implements OnDestroy {
     this.activityInterval = window.setInterval(() => {
       if (Math.random() > 0.6) {
         this.ethernetActivity.set(true);
-        setTimeout(() => this.ethernetActivity.set(false), 100 + Math.random() * 50);
+        window.setTimeout(() => this.ethernetActivity.set(false), 100 + Math.random() * 50);
       }
     }, 300);
   }
@@ -237,7 +237,7 @@ export class AppComponent implements OnDestroy {
 
     this.arduinoService.updateOnboardLedState({ color: '#800080', flashing: true, brightness: 255 });
 
-    setTimeout(() => {
+    window.setTimeout(() => {
       const currentState = this.onboardLed();
       if (currentState.color === '#800080' && currentState.flashing) {
         this.arduinoService.updateOnboardLedState(originalState);
@@ -279,7 +279,7 @@ export class AppComponent implements OnDestroy {
   dismissFirmwareUpdate(version: string): void {
     // Trigger fade-out animation before dismissing
     this.firmwareUpdateService.applyFadeOutSignal.set(true);
-    setTimeout(() => {
+    window.setTimeout(() => {
         this.firmwareUpdateService.dismissVersion(version);
     }, 300); // Corresponds to animation duration in style.css
   }
@@ -333,7 +333,7 @@ export class AppComponent implements OnDestroy {
   }
   
   closeDropdown(menu: 'settings' | 'system' | 'information' | 'activity'): void {
-    this.dropdownCloseTimeout = setTimeout(() => {
+    this.dropdownCloseTimeout = window.setTimeout(() => {
       const targetSignal = this.getDropdownSignal(menu);
       if (targetSignal) {
         targetSignal.set(false);

@@ -12,7 +12,7 @@ import { SystemLogService, LogEntry, LogLevel } from '../../services/system-log.
 export class SystemLogComponent {
   private systemLogService = inject(SystemLogService);
   logs: Signal<LogEntry[]> = this.systemLogService.logEntries;
-  logContainer = viewChild.required<ElementRef<HTMLDivElement>>('logContainer');
+  logContainer = viewChild.required<ElementRef>('logContainer');
 
   logLevels: LogLevel[] = ['ERROR', 'WARN', 'INFO', 'DEBUG'];
   

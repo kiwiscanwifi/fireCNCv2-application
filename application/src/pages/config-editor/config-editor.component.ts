@@ -21,6 +21,9 @@ declare var CodeMirror: any;
   imports: [CommonModule],
   templateUrl: './config-editor.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    'class': 'flex flex-col flex-grow'
+  }
 })
 export class ConfigEditorComponent {
   protected configFileService = inject(ConfigFileService);
@@ -51,6 +54,8 @@ export class ConfigEditorComponent {
         // Also ensure dirty state is reset, similar to other editors
         editor.markClean();
         this.isDirty.set(false);
+        // Refresh the editor to ensure it resizes correctly.
+        setTimeout(() => editor.refresh(), 10);
       }
     });
   }
@@ -73,6 +78,8 @@ export class ConfigEditorComponent {
       });
       
       this.editor.set(editorInstance);
+      // Refresh the editor after a short delay to ensure it sizes correctly.
+      setTimeout(() => editorInstance.refresh(), 10);
     } catch (e) {
       console.error("Failed to initialize CodeMirror:", e);
     }
@@ -106,7 +113,7 @@ export class ConfigEditorComponent {
       
     editor.setValue(content);
     // Use a timeout to ensure the refresh happens after the DOM is fully settled.
-    setTimeout(() => editor.refresh(), 10);
+    window.setTimeout(() => editor.refresh(), 10);
     this.isDirty.set(false);
     this.errorMessage.set(null);
   }

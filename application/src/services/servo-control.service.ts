@@ -24,7 +24,7 @@ export class ServoControlService implements OnDestroy {
   private webSocketService = inject(WebSocketService);
   private snmpService = inject(SnmpService);
 
-  private simulationInterval: any;
+  private simulationInterval: number | undefined;
 
   // Servo states
   servoX: WritableSignal<ServoState>;
@@ -49,7 +49,7 @@ export class ServoControlService implements OnDestroy {
 
   // Shutdown and Chase effects state
   private shutdownStartTime = signal<number | null>(null);
-  private chaseInterval: any;
+  private chaseInterval: number | undefined;
   private chaseActive = signal(false);
   private chaseStartTime = signal<number | null>(null);
   private readonly CHASE_DURATION = 4000; // 4 seconds for a chase pass
@@ -101,7 +101,7 @@ export class ServoControlService implements OnDestroy {
     effect(() => {
       const status = this.webSocketService.connectionStatus();
       if (status === 'connected') {
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.systemState.set('post_startup_white');
         }, 10000);
       } else if (status === 'restarting' || status === 'connecting') {
@@ -123,11 +123,11 @@ export class ServoControlService implements OnDestroy {
       const config = this.arduinoService.ledsConfig();
       clearInterval(this.chaseInterval);
       if (config.LED_CHASE) {
-        this.chaseInterval = setInterval(() => {
+        this.chaseInterval = window.setInterval(() => {
           if (!this.chaseActive()) { // Prevent overlap
             this.chaseActive.set(true);
             this.chaseStartTime.set(Date.now());
-            setTimeout(() => {
+            window.setTimeout(() => {
               this.chaseActive.set(false);
               this.chaseStartTime.set(null);
             }, this.CHASE_DURATION);
@@ -160,7 +160,7 @@ export class ServoControlService implements OnDestroy {
   }
 
   private startSimulation(): void {
-    this.simulationInterval = setInterval(() => {
+    this.simulationInterval = window.setInterval(() => {
       // Update animation states
       this.updateKnightRider();
       this.flashState = !this.flashState;

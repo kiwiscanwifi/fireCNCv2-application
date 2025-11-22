@@ -1,5 +1,5 @@
-<main class="flex-grow grid grid-rows-[auto_1fr] gap-4 select-text">
-  <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4">
+<main class="flex-grow flex flex-col gap-4 select-text">
+  <div class="flex flex-col sm:flex-row justify-between sm:items-center gap-4" [class.hidden]="isFullScreen()">
     <h3 class="text-xl font-bold text-gray-300 flex items-center">
       <i class="fa-solid fa-folder-open mr-3 text-orange-400"></i>
       Configuration Backups
@@ -20,12 +20,12 @@
       </button>
     </div>
   </div>
-  <div class="grid grid-cols-1 md:grid-cols-4 gap-6 min-h-0">
+  <div class="flex-grow flex flex-col md:flex-row gap-6 min-h-0">
     <!-- Backup List -->
-    <div class="md:col-span-1 bg-gray-800/50 border border-gray-700 rounded-lg p-4 shadow-lg overflow-y-auto">
+    <div class="md:w-1/4 bg-gray-800/50 border border-gray-700 rounded-lg p-4 shadow-lg overflow-y-auto flex flex-col" [class.hidden]="isFullScreen()">
       <h4 class="font-bold text-gray-300 mb-2">Available Versions</h4>
       @if (backups().length > 0) {
-        <ul>
+        <ul class="flex-grow">
           @for (backup of backups(); track backup.key) {
             <li>
               <button (click)="selectBackup(backup)"
@@ -41,9 +41,25 @@
       }
     </div>
     <!-- Config Viewer -->
-    <div class="md:col-span-3 bg-gray-900 border border-gray-700 rounded-lg shadow-lg flex flex-col overflow-hidden">
+    <div class="bg-gray-900 border border-gray-700 shadow-lg flex flex-col overflow-hidden"
+         [class.md:w-3/4]="!isFullScreen()"
+         [class.w-full]="isFullScreen()"
+         [class.h-full]="isFullScreen()"
+         [class.fixed]="isFullScreen()"
+         [class.inset-0]="isFullScreen()"
+         [class.z-50]="isFullScreen()"
+         [class.rounded-lg]="!isFullScreen()">
       @if (selectedBackup(); as backup) {
-        <div class="p-4 border-b border-gray-700 text-gray-400 font-mono bg-gray-800/50">/etc/firecnc.conf (v{{ backup.version }})</div>
+        <div class="p-4 border-b border-gray-700 text-gray-400 font-mono bg-gray-800/50 flex justify-between items-center">
+          <span>/etc/firecnc.conf (v{{ backup.version }})</span>
+          <button (click)="toggleFullScreen()" title="Toggle Fullscreen" class="text-gray-400 hover:text-white px-2 py-1 rounded hover:bg-gray-700">
+            @if (isFullScreen()) {
+              <i class="fa-solid fa-compress"></i>
+            } @else {
+              <i class="fa-solid fa-expand"></i>
+            }
+          </button>
+        </div>
         <div class="flex-grow relative">
           <div #editorHost class="absolute inset-0">
             <!-- CodeMirror will be attached here -->

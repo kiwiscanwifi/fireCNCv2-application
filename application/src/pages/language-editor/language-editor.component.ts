@@ -9,6 +9,9 @@ declare var CodeMirror: any;
   imports: [CommonModule],
   templateUrl: './language-editor.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    'class': 'flex flex-col flex-grow'
+  }
 })
 export class LanguageEditorComponent implements OnInit {
   private languageFileService = inject(LanguageFileService);
@@ -38,6 +41,8 @@ export class LanguageEditorComponent implements OnInit {
           editor.setValue(content);
           editor.markClean();
           this.isDirty.set(false);
+          // Refresh the editor to ensure it resizes correctly.
+          setTimeout(() => editor.refresh(), 10);
         }
       }
     });
@@ -62,6 +67,8 @@ export class LanguageEditorComponent implements OnInit {
       editorInstance.on('change', () => {
         this.isDirty.set(true);
       });
+      // Refresh the editor after a short delay to ensure it sizes correctly.
+      setTimeout(() => editorInstance.refresh(), 10);
     } catch (e) {
       console.error("Failed to initialize CodeMirror:", e);
     }

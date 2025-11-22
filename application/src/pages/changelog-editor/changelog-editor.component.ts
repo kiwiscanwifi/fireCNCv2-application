@@ -21,6 +21,9 @@ declare var CodeMirror: any;
   imports: [CommonModule],
   templateUrl: './changelog-editor.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  host: {
+    'class': 'flex flex-col flex-grow'
+  }
 })
 export class ChangelogEditorComponent {
   private changelogService = inject(ChangelogService);
@@ -46,6 +49,8 @@ export class ChangelogEditorComponent {
         editor.setValue(content);
         editor.markClean();
         this.isDirty.set(false);
+        // Refresh the editor to ensure it resizes correctly.
+        setTimeout(() => editor.refresh(), 10);
       }
     });
   }
@@ -69,6 +74,8 @@ export class ChangelogEditorComponent {
       });
       
       this.editor.set(editorInstance);
+      // Refresh the editor after a short delay to ensure it sizes correctly.
+      setTimeout(() => editorInstance.refresh(), 10);
     } catch (e) {
       console.error("Failed to initialize CodeMirror:", e);
     }
@@ -102,7 +109,7 @@ export class ChangelogEditorComponent {
       
     editor.setValue(content);
     // Use a timeout to ensure the refresh happens after the DOM is fully settled.
-    setTimeout(() => editor.refresh(), 10);
+    window.setTimeout(() => editor.refresh(), 10);
     this.isDirty.set(false);
     this.errorMessage.set(null);
   }

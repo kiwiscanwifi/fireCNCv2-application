@@ -29,9 +29,17 @@
         </div>
         @if(wifiConfig().MODE === 'Station') {
           <div class="flex justify-between">
-            <span class="font-semibold text-gray-500 pl-7">Assignment:</span>
-            <span class="font-mono text-gray-300">{{ wifiConfig().IP_ASSIGNMENT }}</span>
+            <span class="font-semibold text-gray-500 pl-7">Status:</span>
+            <span class="font-mono" [class]="wifiStatus().status === 'connected' ? 'text-green-400' : 'text-gray-500'">
+              {{ getWifiStatusText(wifiStatus().status) }}
+            </span>
           </div>
+          @if (wifiStatus().status === 'connected') {
+            <div class="flex justify-between">
+              <span class="font-semibold text-gray-500 pl-7">Assignment:</span>
+              <span class="font-mono text-gray-300">{{ wifiConfig().IP_ASSIGNMENT }}</span>
+            </div>
+          }
         }
       }
 
@@ -60,6 +68,12 @@
         <span class="font-semibold text-gray-400">Alexa Integration:</span>
         <span class="font-mono" [class]="isAlexaEnabled() ? 'text-green-400' : 'text-gray-500'">
           {{ isAlexaEnabled() ? 'Enabled' : 'Disabled' }}
+        </span>
+      </div>
+      <div class="flex justify-between">
+        <span class="font-semibold text-gray-400">LED Lighting:</span>
+        <span class="font-mono" [class]="ledLightingStatus().colorClass">
+          {{ ledLightingStatus().text }}
         </span>
       </div>
 

@@ -22,7 +22,7 @@ import { WebSocketService } from '../../services/websocket.service';
 export class ConsoleComponent {
   webSocketService = inject(WebSocketService);
   logs: Signal<string[]> = this.webSocketService.logMessages;
-  logContainer = viewChild.required<ElementRef<HTMLDivElement>>('logContainer');
+  logContainer = viewChild.required<ElementRef>('logContainer');
 
   constructor() {
     // Auto-scroll to the bottom when new logs arrive

@@ -42,7 +42,7 @@ export class SnmpService implements OnDestroy {
   private persistenceService = inject(PersistenceService);
   private snmpConfigService = inject(SnmpConfigService);
   
-  private updateInterval: any;
+  private updateInterval: number | null = null;
   private storageAlerts: { [key: string]: boolean } = {
     sdCard: false,
     localStorage: false,
@@ -206,7 +206,7 @@ export class SnmpService implements OnDestroy {
       // Blink onboard LED
       const originalLedState = this.arduinoService.onboardLed();
       this.arduinoService.onboardLed.set({ color: '#FF0000', flashing: true, brightness: 255 });
-      setTimeout(() => {
+      window.setTimeout(() => {
         // Only restore if it hasn't been changed by something else
         if (this.arduinoService.onboardLed().color === '#FF0000') {
             this.arduinoService.onboardLed.set(originalLedState);
@@ -222,7 +222,7 @@ export class SnmpService implements OnDestroy {
     if (this.updateInterval) {
       return; // Interval is already running
     }
-    this.updateInterval = setInterval(() => {
+    this.updateInterval = window.setInterval(() => {
       // Simulate ADC voltage fluctuation
       this.adcVoltage.update(v => parseFloat((v + (Math.random() - 0.5) * 0.02).toFixed(3)));
 

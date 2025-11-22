@@ -42,9 +42,9 @@ export class FirmwareUpdateService implements OnDestroy { // Implement OnDestroy
   // NEW: Signal to control the CSS fade-out animation for the banner
   applyFadeOutSignal: WritableSignal<boolean> = signal(false);
 
-  private checkInterval: any;
+  private checkInterval: number | undefined;
   // NEW: Timeout for auto-dismissal logic
-  private autoDismissTimeout: any;
+  private autoDismissTimeout: number | undefined;
 
   constructor() {
     // Initialize dismissed versions from persistence
@@ -59,7 +59,7 @@ export class FirmwareUpdateService implements OnDestroy { // Implement OnDestroy
 
       // Always clear the previous interval when the config changes
       clearInterval(this.checkInterval);
-      this.checkInterval = null;
+      this.checkInterval = undefined;
       this.clearDismissalTimers(); // Clear dismissal timers on config change
 
       if (isEnabled) {
@@ -69,7 +69,7 @@ export class FirmwareUpdateService implements OnDestroy { // Implement OnDestroy
         // Set up a new interval if the time is greater than 0
         if (checkMinutes > 0) {
           const checkMillis = checkMinutes * 60 * 1000;
-          this.checkInterval = setInterval(() => {
+          this.checkInterval = window.setInterval(() => {
             this.checkForUpdate();
           }, checkMillis);
         }
@@ -91,7 +91,7 @@ export class FirmwareUpdateService implements OnDestroy { // Implement OnDestroy
   // NEW: Helper to clear all active dismissal timers
   clearDismissalTimers(): void {
     clearTimeout(this.autoDismissTimeout);
-    this.autoDismissTimeout = null;
+    this.autoDismissTimeout = undefined;
     this.applyFadeOutSignal.set(false); // Reset fade-out state
   }
 
@@ -129,10 +129,10 @@ export class FirmwareUpdateService implements OnDestroy { // Implement OnDestroy
           this.clearDismissalTimers(); // Ensure any previous auto-dismissal is cleared
           this.applyFadeOutSignal.set(false); // Ensure it's not fading out initially
 
-          this.autoDismissTimeout = setTimeout(() => {
+          this.autoDismissTimeout = window.setTimeout(() => {
               this.applyFadeOutSignal.set(true); // Trigger fade-out animation
               // After fade-out animation duration, perform the actual dismissal
-              setTimeout(() => {
+              window.setTimeout(() => {
                   this.dismissVersion(remoteUpdateVersion); // Dismiss this version
                   this.applyFadeOutSignal.set(false); // Reset for next time
               }, 300); // Assuming 0.3s fadeOutBanner duration from style.css

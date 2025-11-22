@@ -58,7 +58,7 @@ export class SnmpPageComponent {
 
   // NEW: Signals for copied OID feedback
   copiedOid: WritableSignal<string | null> = signal(null);
-  private copiedOidTimeout: any;
+  private copiedOidTimeout: number | undefined;
 
   private digitalOutputsState: Signal<boolean[]> = this.arduinoService.digitalOutputs;
   private digitalOutputsConfig: Signal<DigitalOutputConfig[]> = this.arduinoService.digitalOutputsConfig;
@@ -167,7 +167,7 @@ export class SnmpPageComponent {
       await navigator.clipboard.writeText(oid);
       this.copiedOid.set(oid);
       clearTimeout(this.copiedOidTimeout);
-      this.copiedOidTimeout = setTimeout(() => {
+      this.copiedOidTimeout = window.setTimeout(() => {
         this.copiedOid.set(null);
       }, 2000); 
     } catch (err) {

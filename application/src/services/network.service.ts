@@ -45,9 +45,9 @@ export class NetworkService implements OnDestroy {
 
     effect(() => {
       if (this.webSocketService.connectionStatus() === 'connected') {
-        setTimeout(() => {
+        window.setTimeout(() => {
           this.linuxCncConnectionStatus.set('connecting');
-          setTimeout(() => {
+          window.setTimeout(() => {
             this.linuxCncConnectionStatus.set('connected');
             this.linuxCncLastConnectedTimestamp.set(Date.now());
             this.linuxCncLastFailedTimestamp.set(null);
@@ -68,7 +68,7 @@ export class NetworkService implements OnDestroy {
   private startWifiSimulation(): void {
     if (this.wifiSimulationInterval !== null) return;
     
-    setTimeout(() => {
+    window.setTimeout(() => {
       const wifiConf = this.stateService.wifiConfig();
       let status: WifiStatus;
 

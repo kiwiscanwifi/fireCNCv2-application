@@ -23,7 +23,7 @@ export class SnmpTrapsComponent {
   private snmpTrapLogService = inject(SnmpTrapLogService);
   traps: Signal<SnmpTrapEntry[]> = this.snmpTrapLogService.trapLogEntries;
   reversedTraps = computed(() => this.traps().slice().reverse());
-  logContainer = viewChild.required<ElementRef<HTMLDivElement>>('logContainer');
+  logContainer = viewChild.required<ElementRef>('logContainer');
 
   constructor() {
     // Auto-scroll to the top when new traps arrive

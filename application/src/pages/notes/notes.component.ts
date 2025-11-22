@@ -24,7 +24,8 @@ export class NotesComponent {
       distinctUntilChanged(),
       takeUntil(this.destroy$)
     ).subscribe(content => {
-      this.notesService.saveNotes(content);
+      // FIX: Cast the 'unknown' type from valueChanges to 'string' to match the service method signature.
+      this.notesService.saveNotes(content as string);
     });
 
     afterNextRender(() => {

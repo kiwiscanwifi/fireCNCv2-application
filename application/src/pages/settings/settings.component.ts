@@ -89,6 +89,7 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
     leds: signal(false),
     alexa: signal(false),
     language: signal(false),
+    rs485: signal(false), // Reinstating a section for RS485 settings
   };
 
   allSectionsOpen = computed(() => {
@@ -270,6 +271,8 @@ export class SettingsPageComponent implements OnInit, OnDestroy {
       SLAVE_ID_X: [servosConf.SLAVE_ID_X],
       SLAVE_ID_Y: [servosConf.SLAVE_ID_Y],
       SLAVE_ID_YY: [servosConf.SLAVE_ID_YY],
+      SLAVE_ID_Z: [servosConf.SLAVE_ID_Z],
+      MODBUS_TIMEOUT: [servosConf.MODBUS_TIMEOUT, [Validators.required, Validators.min(100), Validators.max(2000)]],
     });
   }
 

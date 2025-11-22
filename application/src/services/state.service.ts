@@ -166,6 +166,7 @@ export interface ServosConfig {
   SLAVE_ID_Y: number;
   SLAVE_ID_YY: number;
   SLAVE_ID_Z: number;
+  MODBUS_TIMEOUT: number;
 }
 
 export interface TableConfig {

@@ -220,7 +220,7 @@ export class ConfigFileService {
             { key: 'power_on', description: 'Device Power On', enabled: true }
           ]
         },
-        SERVOS: { SLAVE_ID_X: 3, SLAVE_ID_Y: 1, SLAVE_ID_YY: 2, SLAVE_ID_Z: 4 },
+        SERVOS: { SLAVE_ID_X: 3, SLAVE_ID_Y: 1, SLAVE_ID_YY: 2, SLAVE_ID_Z: 4, MODBUS_TIMEOUT: 1000 },
         TABLE: { RAIL_X: 2000, RAIL_Y: 3000, RAIL_Z: 200 },
         STORAGE_MONITORING: { SD_CARD_THRESHOLD: 80, LOCAL_STORAGE_THRESHOLD: 80, SRAM_THRESHOLD: 80, EEPROM_THRESHOLD: 80 },
         DASHBOARD_LAYOUT: DEFAULT_LAYOUT,
